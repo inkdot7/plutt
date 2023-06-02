@@ -1,0 +1,424 @@
+plutt
+=====
+
+What's the idea?
+----------------
+
+Say we have an event stream from a detector outfitted with eg scintillator
+paddles or silicon segments, and they are read out on both ends. Let's say we
+have another such detector rotated by 90 degrees. How hard can/should it be to
+draw one vs the other in a Y vs X plot?
+
+Expanding on this, what if we quickly want to correlate two experimental
+signals that were never correlated before in human history?
+
+The ROOT prompt, as powerful as it is, has its limitations, for example when
+dealing with zero-suppressed or multi-hit arrays.
+
+And that's where this little thing comes in.
+
+Here's some human-readable pseudo-code for the first example:
+	- get array for left side -> "left"
+	- get array for right side -> "right"
+	- match channels between "left" and "right" -> "left2" and "right2"
+	- plot "right2" vs "left2" -> graphical plot!
+
+Typical pseudo-C++&ROOT could be:
+	// Init.
+	h1 = new TH1F(name, title, bins_x, min_x, max_x, ...);
+	left_handle = Input.GetHandle("left-side");
+	right_handle = Input.GetHandle("right-side");
+
+	// For each event.
+	auto left = Input.GetData(left_handle);
+	auto right = Input.GetData(right_handle);
+	int l_i, r_i;
+	for (r_i = l_i = 0; l_i < left->size && r_i < right->size;) {
+		if (left[l_i]->channel == right[r_i]->channel) {
+			h1->Fill(right[r_i]->value, left[l_i]->value);
+		} else if (l < r) ++l_i;
+		} else ++r_i;
+	}
+And we copy-paste all of that for every detector, refactor, add calibration
+and complicate the logic states, build, debug, ignore warnings, fight with git
+or copy between each other or forget the code ever existed... This is a huge
+time-sink while expensive beam is vehemently showering our experimental setup.
+
+Now, even if plutt will provide something like the pseudo-code, don't forget
+that computers don't have brains! Don't put yours on the shelf just yet,
+there's a couple of things to go through!
+
+Some user commands
+------------------
+
+Scroll-wheel in a plot:
+	Zoom around the pointer in X and Y.
+
+Scroll-wheel on an axis:
+	Zoom around the pointer in either X or Y.
+
+Click-drag-release pointer in a plot:
+	The selected area will be zoomed in, unless it's smaller than 5x5
+	pixels which is typically a mis-click.
+
+Click-drag-release pointer on an axis:
+	The selected range will be zoomed in, again with a 5 pixel limit.
+
+Pressing 'c':
+	- Starts cut creation mode.
+	- Click in the graph to add a vertex to the cut polygon.
+	- Press 'Enter' to write the cut polygon to file, see the cmd-line
+	  for written filename.
+	- Press 'Backspace' to remove the last point.
+	- Press 'Escape' to abort the cut.
+
+Pressing 'u':
+	- Unzoom X and Y completely.
+
+Pressing 'x'/'y':
+	- Starts X/Y projection view, at most one per plot.
+	- 'w' in the original plot to increment the projection width.
+	- 's' to decrement.
+	- It's possible to zoom the projected plot, but the other features of
+	  the main window plots are disabled.
+
+Let's define the data
+---------------------
+
+This program started as a plotting interface to the mapped signals in ucesb
+unpackers. The typical ucesb arrays:
+
+	data SCALAR;
+
+	int  SUPP;
+	data SUPPI [0..SUPP-1];
+	data SUPPv [0..SUPP-1];
+
+	int  MHITM;
+	data MHITMI [0..MHITM-1];
+	data MHITME [0..MHITM-1];
+	int  MHIT;
+	data MHITv [0..MHIT-1];
+
+are all transformed into multi-hit arrays (the last type) which simplifies
+data-flow code a lot. If detector data are mapped from electronics channels to
+"reasonable" detector channels, most detector events can be described this
+way.
+
+There are some operations we like to do over, and over, and over, for all
+detectors as was described in the introduction, and this little program tries
+to fulfill these oprations like this:
+
+	-) Plot scalar spectrum:
+		TH1I hist...
+		hist.Fill(SCALAR);
+		-> hist("This be my scalar", SCALAR);
+	-) Plot channel multiplicity:
+		TH1I hist...
+		hist.Fill(SUPP);
+		-> hist("Sup?", SUPP)
+	-) Plot fired channels in log scale:
+		canvas->cd(0)->SetLogy();
+		for (i = 0; i < SUPP; ++i)
+			hist.Fill(SUPPI[i]);
+		-> hist("Channel map", SUPP.I, logy)
+	-) Plot energy against channel with 1000 energy bins:
+		TH2I hist...
+		for (i = 0; i < SUPP; ++i)
+			hist.Fill(SUPPI[i], SUPPv[i]);
+		-> hist2d("Energy vs ch", SUPP.v, SUPP.I, binsy=1000)
+	-) Plot multi-hit energies against channels:
+		i = 0;
+		for (j = 0; j < SUPPM; ++j) {
+			ch = SUPPMI[j];
+			end = SUPPME[j];
+			for (; i < end; ++i)
+				hist->Fill(ch, SUPPv[i]);
+		}
+		-> hist2d("Energy vs ch", MHIT.v, MHIT.I)
+	-) Match two sides of a single-hit detector and draw geom mean energy:
+		// Too much brain-wrangling code...
+		-> e1, e2 = match_index(SUPP_S1E, SUPP_S2E)
+		e = mean_geom(e1, e2)
+		hist2d("Energy vs ch", e.v, e.I)
+	-) Same with multi-hit mapping:
+		// Even more unbearable code :o
+		-> e1, e2 = match_index(MHIT_S1E, MHIT_S2E)
+		e = mean_geom(e1, e2)
+		hist2d("Energy vs ch", e.v, e.I)
+	-) X-vs-X of two detectors:
+		-> e11, e12 = match_index(DET1_S1E, DET1_S2E)
+		e1 = max(mean_geom(e11, e12))
+		e21, e22 = match_index(DET2_S1E, DET2_S2E)
+		e2 = max(mean_geom(e21, e22))
+		hist2d("x2 vs x1" e2.I, e1.I)
+	-) ToF between two detectors:
+		-> a1,a2 = match_index(START_S1T, START_S2T)
+		a = mean_arith(a1.v, a2.v)
+		b1,b2 = match_index(STOP_S1T, STOP_S2T)
+		b = mean_arith(b1.v, b2.v)
+		hist("ToF", sub_mod(b, a, 1000), logy)
+
+Note that custom mappings can replace 'v' with anything, this program allows a
+few other suffixes to be used instead, eg 'E'.
+
+What's the grammar/syntax?
+--------------------------
+
+The internal data structure is all multi-hit arrays:
+
+	scalar =
+		I = [0]
+		E = [1]
+		v = value
+	zero suppressed list =
+		I = [ch_1, ..., ch_n]
+		E = [1, ..., n]
+		v = [val_1, ..., val_n]
+	multi-hit list =
+		I = [ch_1, ..., ch_n]
+		E = [e_1, ..., e_n], e_n=m
+		v = [val_1, ..., val_m]
+
+And here are the operations:
+
+signal.I
+	Ignores 'signal.v' and returns 'signal.I' as values:
+		I = [0]
+		E = [signal.I.length]
+		v = [signal.I_1, ..., signal.I_n]
+signal.v
+	Ignores 'signal.I' and returns 'signal.v' as a flat array:
+		I = [0]
+		E = [signal.v.length]
+		v = [signal.v_1, ..., signal.v_n]
+
+cut(path)
+	"path" points to a file which has a histogram title and an x, y pair
+	per line which makes a cutting polygon:
+		My histo
+		0, 0
+		10, 0
+		0, 10
+		10, 10
+cut(histogram-name, (x,y)...)
+	This is the inline version of the previous syntax, ie the same example
+	would be:
+		cut("My histo", (0,0), (10,0), (0,10), (10,10))
+
+hist(title, x [, args])
+	Draws a histogram of the values in x.v, with the given title.
+	The optional arguments can be:
+		logy
+			Logarithmic counts.
+		binsx=n
+			# horizontal bins.
+		fit="method"
+			'method' can be any of:
+				gauss
+		cut(cut-args)
+			This histogram processes the current event only if the
+			given cut has seen a hit. For more info about the cut
+			syntax, see above.
+		drop_old=n time-unit
+			Drops old data statistics, used to size histogram
+			extents, that is older than about n time-units;
+			s or min.
+			Note that it doesn't primarily drop histogram counts,
+			it drops the knowledge of min/max values to auto-fit
+			ranges, and parts of the histogram counts can
+			disappear if they go outside the auto-fitted range.
+
+hist2d(title, y, x [, args])
+	Histograms 'y.v' vs 'x.v', pairing up the n:th entry in both vectors,
+	until either vector is exhausted.
+	The arguments are similar to "hist", except:
+		logy
+			Does not exist.
+		logz
+			Logarithmic count coloring.
+		binsy=n
+			# vertical bins.
+		fit
+			Does not exist.
+
+b = bitfield(a1, n1, ..., aN, nN)
+	Combines signals of given bit-widths into one value. The (ai,ni) pairs
+	are combined in ascending order, ie the first pair becomes the least
+	significant bits. Non-existant values are treated as 0.
+		a1.I = [1, 2]
+		a1.E = [1, 2]
+		a1.v = [1, 2]       b.I = [1, 2, 3]
+		n1 = 8           => b.E = [2, 3, 4]
+		a2.I = [1, 3]       b.v = [0x301, 0x400, 0x002, 0x500]
+		a2.E = [2, 3]
+		a2.v = [3, 4, 5]
+		n2 = 8
+
+b, c = cluster(a)
+b, c, d = cluster(a)
+	Makes clusters of 'a', ie large neighbouring entries wrt to a.I are
+	grouped. 'b.v' = weighted a.I:s ie "x", 'c.v' = sum, and the optional
+	'd.v' is the eta function, ie the centroid within the cluster.
+		                      b.I = [0, 0]
+		                      b.E = [1, 2]
+		                      b.v = [2, 5]
+		a.I = [1, 2, 3, 5]    c.I = [0, 0]
+		a.E = [1, 2, 3, 4] => c.E = [1, 2]
+		a.v = [4, 5, 6, 7]    c.v = [15, 7]
+		                      d.I = [0, 0]
+		                      d.E = [1, 2]
+		                      d.v = [0, 0.45]
+
+d = coarse_fine(a, b, c)
+	Does on-the-fly fine-time calibration. 'a' = coarse times, 'b' = fine
+	times, and 'c' is either a module type identifier or a number for the
+	clock period. Identifiers could be 'vftx2', 'tamex3' etc, and c=1e-8
+	would be interpreted as each clock cycle taking 10 ns.
+	This example relies on previous data for the calibration, let's assume
+	a uniform fine-time distribution between 100 and 600 ch:
+		a.I = [1, 2]
+		a.E = [1, 2]
+		a.v = [10, 20]      d.I = [1, 2]
+		b.I = [1, 2]     => d.E = [1, 2]
+		b.E = [1, 2]        d.v = [5001, 10003]
+		b.v = [200, 400]
+		c = 'vftx2'
+
+a = cut(cut-args)
+a, b = cut(cut-args)
+	Extracts entries in a hist/hist2d that pass the cut. 'a' will contain
+	the x values and 'b' the y values. For more info about the cut syntax,
+	see above.
+
+c, d = match_index(a, b)
+	Cuts un-matched entries between 'a.I' and 'b.I':
+		a.I = [1, 2, 3]    c.I = [2]
+		a.E = [1, 2, 3]    c.E = [1]
+		a.v = [1, 2, 3] => c.v = [2]
+		b.I = [2, 4]       d.I = [2]
+		b.E = [1, 2]       d.E = [1]
+		b.v = [4, 5]       d.v = [4]
+c, d = match_value(a, b, c)
+	Cuts un-matched entries between 'a.v' and 'b.v' for each matched
+	channel. A match means a.I[mi]==b.I[mj] && fabs(a.v[vi]-b.v[vj])<c.
+		a.I = [1, 2, 3]       c.I = [2]
+		a.E = [1, 2, 3]       c.E = [1]
+		a.v = [10, 20, 30] => c.v = [20]
+		b.I = [2, 3]          d.I = [2]
+		b.E = [1, 2]          d.E = [1]
+		b.v = [21, 32]        d.v = [21]
+		c = 2
+
+b = max(a)
+	Returns the single largest entry in 'a.v':
+		a.I = [1, 2, 3]    b.I = [2]
+		a.E = [1, 2, 3] => b.E = [1]
+		a.v = [1, 3, 2]    b.v = [3]
+
+b = mean_arith(a)
+	Calcs arithmetic mean over all 'a.I' for each entry in 'a.v':
+		a.I = [1, 2, 3]          b.I = [0]
+		a.E = [2, 4, 5]       => b.E = [2]
+		a.v = [1, 2, 3, 4, 5]    b.v = [(1+3+5)/3, (2+4)/2]
+c = mean_arith(a, b)
+	Calcs aritmetic mean between the two signals for every '*.I' and
+	'*.v', expects 'a' and 'b' to be of equal lengths:
+		a.I = [1, 2]
+		a.E = [1, 3]       c.I = [1, 2, 3]
+		a.v = [1, 2, 3] => c.E = [1, 2, 4]
+		b.I = [2, 3]       c.v = [1/1, (2+4)/2, 3/1, 5/1]
+		b.E = [1, 2]
+		b.v = [4, 5]
+
+b = mean_geom(a)
+c = mean_geom(a, b)
+	Same as mean_arith except does (v_1 + ... + v_n)^(1/n).
+
+
+c, d = pedestal(a, b [, args])
+	Calculates pedestals of 'a' on-the-fly and cuts "a.v < std * b".
+	'args' can be:
+		tpat=a
+		If 'a.v[0]' is non-zero, the pedestal statistics are updated,
+		otherwise they are only applied.
+	'c' will contain the cut values, and 'd' the standard deviations.
+
+c = select_index(a, b)
+	Selects only 'a.I == b':
+		a.I = [1, 2]          c.I = [0]
+		a.E = [2, 4]       => c.E = [2]
+		a.v = [1, 2, 3, 4]    c.v = [3, 4]
+		b = 2
+
+d = sub_mod(a, b, c)
+	Does a zero-centered modulo-subtraction like '(a-b+n*c+c/2)%c-c/2':
+		a.I = [1, 2]
+		a.E = [1, 2]
+		a.v = [1, 2]    d.I = [1, 2, 3]
+		b.I = [2, 3] => d.E = [1, 2, 3]
+		b.E = [1, 2]    d.v = [1/1, (2+3)/2, 4/1]
+		b.v = [3, 4]
+		c = 10
+d = tot(a, b, c)
+	Does time-over-threshold, 'a' = leading, 'b' = trailing, does matching
+	of channels and edges.
+
+b = tpat(a, bitmask)
+	Lets values in 'a.v' with any bits marked by the bitmask pass.
+		a.I = [0]         b.I = [0]
+		a.E = [1]      => b.E = [1]
+		a.v = [0x101]     b.v = [0x1]
+		bitmask = 0x83
+
+f = trig_map(a, b, c, d, e)
+	Parses map in file 'a', considers lines prefixed with 'b', then maps
+	trigger channels 'c' to signal channels 'b' and does cyclical
+	subtraction on them with range 'd':
+		a syntax:
+			Det1:1 = 1
+			Det1:2 = 1
+			Det1:3 = 2
+			Det2:1 = 1
+		b = "Det1"
+		c.I = [1, 2, 3]
+		c.E = [1, 2, 3]    f.I = [1, 2, 3]
+		c.v = [1, 2, 3] => f.E = [1, 2, 3]
+		d.I = [1, 2]       f.v = [1-1, 2-1, 3-3]
+		d.E = [1, 2]
+		d.v = [1, 3]
+		e = 10
+
+d = zero_suppress(a [, b])
+	Zero-suppresses 'a.v'. 'b' is an optional cut-off which defaults to 0,
+	ie all entries in 'a.v' > 'b' are pass this node:
+		a.I = [1, 2]       d.I = [2]
+		a.E = [1, 3]    => d.E = [1]
+		a.v = [0, 2, 1]    d.v = [2]
+		b = 1
+
+Other functions:
+
+appearance("name")
+	Sets GUI style, choose one of: light, dark. The last one in the config
+	will override previous invocations.
+
+clock_match(a, b)
+	Matches the computer running time to the given signal 'a', which
+	should be a monotonically increasing timestamp.
+	'b' is the time in seconds for the unit of 'a', eg if 'a' is in ns,
+	then b=1e-9.
+
+colormap("name")
+	plutt only has "batlow" built-in, which can be chosen by leaving out
+	the argument, but you can use Scientific Colourmaps if that resides
+	under your current working dir.
+	If 'name' is eg "lajolla", the file:
+		"../ScientificColourMaps7/lajolla/lajolla.lut"
+	is loaded.
+
+Licence
+=======
+
+This program has been licenced under the LGPL 2.1, which is included in the
+file COPYING.

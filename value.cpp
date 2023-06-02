@@ -1,0 +1,126 @@
+/*
+ * plutt, a scriptable monitor for experimental data.
+ *
+ * Copyright (C) 2023  Hans Toshihide Toernqvist <hans.tornqvist@chalmers.se>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA  02110-1301  USA
+ */
+
+#include <value.hpp>
+#include <stdexcept>
+
+double Value::Scalar::GetDouble(Value::Type a_type) const
+{
+  switch (a_type) {
+    case kUint64:
+      return (double)u64;
+    case kDouble:
+      return dbl;
+    default:
+      throw std::runtime_error(__func__);
+  }
+}
+
+Value::Value():
+  m_type(Value::Type::kNone),
+  m_mi(),
+  m_me(),
+  m_v()
+{
+}
+
+void Value::Clear()
+{
+  m_mi.clear();
+  m_me.clear();
+  m_v.clear();
+}
+
+int Value::Cmp(Value::Scalar const &a_l, Value::Scalar const &a_r) const
+{
+  switch (m_type) {
+    case Type::kUint64:
+      if (a_l.u64 < a_r.u64) return -1;
+      if (a_l.u64 > a_r.u64) return 1;
+      return 0;
+    case Type::kDouble:
+      if (a_l.dbl < a_r.dbl) return -1;
+      if (a_l.dbl > a_r.dbl) return 1;
+      return 0;
+    default:
+      throw std::runtime_error(__func__);
+  }
+  // Some compilers aren't quite smart enough...
+  return 0;
+}
+
+Value::Type Value::GetType() const
+{
+  return m_type;
+}
+
+Vector<uint32_t> const &Value::GetMI() const
+{
+  return m_mi;
+}
+
+Vector<uint32_t> const &Value::GetME() const
+{
+  return m_me;
+}
+
+Vector<Value::Scalar> const &Value::GetV() const
+{
+  return m_v;
+}
+
+double Value::GetV(uint32_t a_i, bool a_do_signed) const
+{
+  switch (m_type) {
+    case Value::Type::kUint64:
+      {
+        auto u64 = m_v.at(a_i).u64;
+        if (a_do_signed) {
+          return (double)(int64_t)u64;
+        }
+        return (double)u64;
+      }
+    case Value::Type::kDouble:
+      return m_v.at(a_i).dbl;
+    default:
+      throw std::runtime_error(__func__);
+  }
+}
+
+void Value::Push(uint32_t a_i, Scalar const &a_v)
+{
+  if (m_mi.empty() || m_mi.back() != a_i) {
+    m_mi.push_back(a_i);
+    auto me_prev = m_me.empty() ? 0 : m_me.back();
+    m_me.push_back(me_prev + 1);
+  } else {
+    ++m_me.back();
+  }
+  m_v.push_back(a_v);
+}
+
+void Value::SetType(Value::Type a_type)
+{
+  if (Value::Type::kNone != m_type && a_type != m_type) {
+    std::runtime_error("Value cannot change type!");
+  }
+  m_type = a_type;
+}

@@ -1,0 +1,97 @@
+/*
+ * plutt, a scriptable monitor for experimental data.
+ *
+ * Copyright (C) 2023  Hans Toshihide Toernqvist <hans.tornqvist@chalmers.se>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA  02110-1301  USA
+ */
+
+#include <test/test.hpp>
+#include <node_cut.hpp>
+#include <test/mock_node.hpp>
+
+namespace {
+
+class MyTest: public Test {
+  void Run();
+};
+MyTest g_test_node_cut_;
+
+void ProcessExtra(MockNodeCuttable &a_nc, CutProducerList &a_cut_producer)
+{
+  Value::Scalar x, y;
+  y.dbl = x.dbl = 1;
+  a_cut_producer.Test(Value::kDouble, x, Value::kDouble, y);
+  y.dbl = x.dbl = 11;
+  a_cut_producer.Test(Value::kDouble, x, Value::kDouble, y);
+  y.dbl = x.dbl = 21;
+  a_cut_producer.Test(Value::kDouble, x, Value::kDouble, y);
+}
+
+void MyTest::Run()
+{
+  {
+    std::vector<CutPolygon::Point> v;
+    NodeCut n("a", "test/poly.txt", v);
+    TestNodeBase(n, "a");
+  }
+  {
+    MockNodeCuttable nc("MockCuttable", Value::kUint64, 1, ProcessExtra);
+    TEST_CMP(nc.GetTitle().compare("MockCuttable"), ==, 0);
+
+    std::vector<CutPolygon::Point> v;
+    NodeCut n("", "test/poly.txt", v);
+
+    n.SetCuttable(&nc);
+    nc.Preprocess(&n);
+
+    TestNodeProcess(n, 1);
+
+    auto const &v0 = n.GetValue(0);
+    TEST_CMP(v0.GetV().size(), ==, 1U);
+    TEST_CMP(std::abs(v0.GetV(0, false) - 11), <, 1e-6);
+
+    auto const &v1 = n.GetValue(1);
+    TEST_CMP(v1.GetV().size(), ==, 1U);
+    TEST_CMP(std::abs(v1.GetV(0, false) - 11), <, 1e-6);
+  }
+  {
+    MockNodeCuttable nc("MockCuttable", Value::kUint64, 1, ProcessExtra);
+    TEST_CMP(nc.GetTitle().compare("MockCuttable"), ==, 0);
+
+    std::vector<CutPolygon::Point> v;
+    v.push_back(CutPolygon::Point(20, 20));
+    v.push_back(CutPolygon::Point(30, 20));
+    v.push_back(CutPolygon::Point(30, 30));
+    v.push_back(CutPolygon::Point(20, 30));
+    NodeCut n("", "some_title", v);
+
+    n.SetCuttable(&nc);
+    nc.Preprocess(&n);
+
+    TestNodeProcess(n, 1);
+
+    auto const &v0 = n.GetValue(0);
+    TEST_CMP(v0.GetV().size(), ==, 1U);
+    TEST_CMP(std::abs(v0.GetV(0, false) - 21), <, 1e-6);
+
+    auto const &v1 = n.GetValue(1);
+    TEST_CMP(v1.GetV().size(), ==, 1U);
+    TEST_CMP(std::abs(v1.GetV(0, false) - 21), <, 1e-6);
+  }
+}
+
+}
