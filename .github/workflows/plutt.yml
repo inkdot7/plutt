@@ -1,0 +1,21 @@
+name: plutt CI
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install packages
+      run: |
+        apt-get update -yq > /dev/null
+        apt-get install -y --no-install-recommends \
+          bison build-essential flex libgsl-dev libsdl2-dev libsdl2-ttf-dev \
+          pkg-config
+    - name: make debug
+      run: make
+    - name: make release
+      run: make BUILD_MODE=release
