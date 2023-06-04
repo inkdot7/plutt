@@ -140,6 +140,7 @@ static double g_drop_old = -1.0;
 %type <bitfield> bitfield_args
 %type <i32> bitmask
 %type <i32> bitmask_item
+%type <i32> cmp_less
 %type <value> coarse_fine
 %type <dbl> clock_period
 %type <dbl> cut_inline_value
@@ -322,16 +323,25 @@ alias
 		free($1);
 	}
 
+cmp_less
+	: TK_OP_LESS {
+		$$ = 0;
+	}
+	| TK_OP_LESSEQ {
+		$$ = 1;
+	}
 filter_range_conds
 	: filter_range_cond
 	| filter_range_conds ',' filter_range_cond
 filter_range_cond
-	: double TK_OP_LESSEQ alias TK_OP_LESS double {
+	: double cmp_less alias cmp_less double {
 		g_filter_cond_vec.push_back(FilterRangeCond());
 		auto &c = g_filter_cond_vec.back();
 		c.node = $3;
 		c.lower = $1;
+		c.lower_le = $2;
 		c.upper = $5;
+		c.upper_le = $4;
 	}
 filter_args
 	: filter_arg

@@ -63,10 +63,10 @@ void NodeFilterRange::Process(uint64_t a_evid)
   auto const &mev0 = val0.GetME();
   uint32_t vi = 0;
   for (uint32_t i = 0; i < miv0.size(); ++i) {
-    bool ok = true;
     auto mi0 = miv0[i];
     auto me0 = mev0[i];
     for (; vi < me0; ++vi) {
+      bool ok = true;
       for (auto it = m_cond_vec.begin(); m_cond_vec.end() != it; ++it) {
         auto const &val = it->node->GetValue();
         auto const &miv = val.GetMI();
@@ -76,7 +76,8 @@ void NodeFilterRange::Process(uint64_t a_evid)
         NODE_ASSERT(mi, ==, mi0);
         NODE_ASSERT(me, ==, me0);
         auto dbl = val.GetV(vi, false);
-        ok &= it->lower <= dbl && dbl < it->upper;
+        ok &= it->lower_le ? it->lower <= dbl : it->lower < dbl;
+        ok &= it->upper_le ? dbl <= it->upper : dbl < it->upper;
       }
       if (ok) {
         for (auto it = m_arg_vec.begin(); m_arg_vec.end() != it; ++it) {

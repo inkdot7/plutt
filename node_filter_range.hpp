@@ -32,7 +32,9 @@
 struct FilterRangeCond {
   NodeValue *node;
   double lower;
+  int lower_le;
   double upper;
+  int upper_le;
 };
 
 class NodeFilterRange: public NodeValue {

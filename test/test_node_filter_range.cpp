@@ -70,7 +70,9 @@ void MyTest::Run()
     auto &c = cv.back();
     c.node = &nv_cond;
     c.lower = 1;
+    c.lower_le = 1;
     c.upper = 3;
+    c.upper_le = 0;
 
     std::vector<NodeValue *> av;
     av.push_back(&nv_arg);
