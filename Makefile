@@ -137,7 +137,7 @@ $(BUILD_DIR)/%.tab.o: $(BUILD_DIR)/%.tab.c
 $(BUILD_DIR)/%.tab.c: %.y Makefile
 	@echo TABC $@
 	$(QUIET)$(MKDIR)
-	$(QUIET)bison -Werror -d -o $@ $<
+	$(QUIET)bison -Werror -Wcounterexamples -d -o $@ $<
 
 $(BUILD_DIR)/root.o: root.cpp Makefile
 	@echo ROOTO $@

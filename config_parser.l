@@ -62,6 +62,7 @@ colormap               return TK_COLORMAP;
 ctdc                   return TK_CTDC;
 cut                    return TK_CUT;
 drop_old               return TK_DROP_OLD;
+filter_range           return TK_FILTER_RANGE;
 fit                    return TK_FIT;
 hist                   return TK_HIST;
 hist2d                 return TK_HIST2D;
@@ -90,7 +91,11 @@ zero_suppress          return TK_ZERO_SUPPRESS;
 #.*    ;
 \/\/.* ;
 
--- return TK_DOUBLE_DASH;
+\< return TK_OP_LESS;
+\<= return TK_OP_LESSEQ;
+\> return TK_OP_GREATER;
+\>= return TK_OP_GREATEREQ;
+-- return TK_OP_DDASH;
 
 \"[^\"\n]*\" {
 	char *p;

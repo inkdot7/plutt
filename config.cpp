@@ -32,6 +32,7 @@
 #include <node_cluster.hpp>
 #include <node_coarse_fine.hpp>
 #include <node_cut.hpp>
+#include <node_filter_range.hpp>
 #include <node_hist1.hpp>
 #include <node_hist2.hpp>
 #include <node_match_index.hpp>
@@ -193,6 +194,14 @@ NodeValue *Config::AddCut(char const *a_str, std::vector<CutPolygon::Point>
 {
   auto node = new NodeCut(GetLocStr(), a_str, a_vec);
   NodeCutAdd(node);
+  return node;
+}
+
+NodeValue *Config::AddFilterRange(
+    std::vector<FilterRangeCond> const &a_cond_vec,
+    std::vector<NodeValue *> const &a_arg_vec)
+{
+  auto node = new NodeFilterRange(GetLocStr(), a_cond_vec, a_arg_vec);
   return node;
 }
 

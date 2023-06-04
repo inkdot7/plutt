@@ -31,6 +31,8 @@
 #include <value.hpp>
 
 struct BitfieldArg;
+struct FilterRangeCond;
+struct FilterRangeArg;
 class Node;
 class NodeAlias;
 class NodeCut;
@@ -51,6 +53,8 @@ class Config {
     NodeValue *AddCluster(NodeValue *);
     NodeValue *AddCoarseFine(NodeValue *, NodeValue *, double);
     NodeValue *AddCut(char const *, std::vector<CutPolygon::Point> const &);
+    NodeValue *AddFilterRange(std::vector<FilterRangeCond> const &,
+        std::vector<NodeValue *> const &);
     void AddFit(char const *, double, double);
     void AddHist1(char const *, NodeValue *, uint32_t, char const *, char
         const *, bool, double);

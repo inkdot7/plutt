@@ -22,6 +22,7 @@
 %{
 #include <config_parser.hpp>
 #include <node_bitfield.hpp>
+#include <node_filter_range.hpp>
 #include <util.hpp>
 
 #define LOC_SAVE(arg) g_config->SetLoc(arg.first_line, arg.first_column)
@@ -39,6 +40,10 @@ int yylex(void);
 
 char *g_cut_str;
 std::vector<CutPolygon::Point> g_cut_vec;
+
+NodeFilterRange::CondVec g_filter_cond_vec;
+std::vector<std::string> g_filter_dst_vec;
+std::vector<NodeValue *> g_filter_src_vec;
 
 struct FitEntry {
 	FitEntry(double a_x, double a_y): x(a_x), y(a_y) {}
@@ -96,8 +101,8 @@ static double g_drop_old = -1.0;
 %token TK_COLORMAP
 %token TK_CTDC
 %token TK_CUT
-%token TK_DOUBLE_DASH
 %token TK_DROP_OLD
+%token TK_FILTER_RANGE
 %token TK_FIT
 %token TK_HIST
 %token TK_HIST2D
@@ -122,6 +127,12 @@ static double g_drop_old = -1.0;
 %token TK_TRIG_MAP
 %token TK_VFTX2
 %token TK_ZERO_SUPPRESS
+
+%token TK_OP_LESS
+%token TK_OP_LESSEQ
+%token TK_OP_GREATER
+%token TK_OP_GREATEREQ
+%token TK_OP_DDASH
 
 %type <value> alias
 %type <value> bitfield
@@ -166,6 +177,7 @@ stmt
 	| cluster
 	| colormap
 	| cut
+	| filter_range
 	| fit
 	| hist
 	| match_index
@@ -262,7 +274,7 @@ integer
 	| '(' integer ')' { $$ = $2; }
 
 integer_range
-	: integer TK_DOUBLE_DASH integer {
+	: integer TK_OP_DDASH integer {
 		LOC_SAVE(@1);
 		if ($1 > $3) {
 			std::cerr << g_config->GetLocStr() <<
@@ -278,7 +290,7 @@ bitmask
 	| bitmask ',' bitmask_item { $$ = $1 | $3; }
 bitmask_item
 	: TK_INTEGER { $$ = 1 << $1; }
-	| TK_INTEGER TK_DOUBLE_DASH TK_INTEGER {
+	| TK_INTEGER TK_OP_DDASH TK_INTEGER {
 		$$ = (~(uint32_t)0 << $1) & (~(uint32_t)0 >> (31 - $3));
 	}
 
@@ -308,6 +320,42 @@ alias
 		LOC_SAVE(@1);
 		$$ = g_config->AddAlias($1, NULL, 0);
 		free($1);
+	}
+
+filter_range_conds
+	: filter_range_cond
+	| filter_range_conds ',' filter_range_cond
+filter_range_cond
+	: double TK_OP_LESSEQ alias TK_OP_LESS double {
+		g_filter_cond_vec.push_back(FilterRangeCond());
+		auto &c = g_filter_cond_vec.back();
+		c.node = $3;
+		c.lower = $1;
+		c.upper = $5;
+	}
+filter_args
+	: filter_arg
+	| filter_args ',' filter_arg
+filter_arg
+	: '(' TK_IDENT '=' alias ')' {
+		g_filter_dst_vec.push_back($2);
+		g_filter_src_vec.push_back($4);
+		free($2);
+	}
+filter_range
+	: TK_FILTER_RANGE '(' filter_range_conds ',' filter_args ')' {
+		LOC_SAVE(@1);
+		auto node = g_config->AddFilterRange(
+		    g_filter_cond_vec, g_filter_src_vec);
+		// Assign destinations.
+		unsigned i = 0;
+		for (auto it = g_filter_dst_vec.begin();
+		    g_filter_dst_vec.end() != it; ++it, ++i) {
+			g_config->AddAlias(it->c_str(), node, i);
+		}
+		g_filter_cond_vec.clear();
+		g_filter_dst_vec.clear();
+		g_filter_src_vec.clear();
 	}
 
 fit_args
