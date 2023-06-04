@@ -88,11 +88,11 @@ void MyTest::Run()
     TEST_CMP(x.GetME().size(), ==, 2U);
     TEST_CMP(x.GetV().size(), ==, 2U);
 
-    TEST_CMP(x.GetMI()[0], ==, 1);
-    TEST_CMP(x.GetMI()[1], ==, 3);
+    TEST_CMP(x.GetMI()[0], ==, 1U);
+    TEST_CMP(x.GetMI()[1], ==, 3U);
 
-    TEST_CMP(x.GetME()[0], ==, 1);
-    TEST_CMP(x.GetME()[1], ==, 2);
+    TEST_CMP(x.GetME()[0], ==, 1U);
+    TEST_CMP(x.GetME()[1], ==, 2U);
 
     TEST_CMP(x.GetV(0, false), ==, 4);
     TEST_CMP(x.GetV(1, false), ==, 5);
