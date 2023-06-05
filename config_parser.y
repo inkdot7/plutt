@@ -128,6 +128,7 @@ static double g_drop_old = -1.0;
 %token TK_VFTX2
 %token TK_ZERO_SUPPRESS
 
+%token TK_OP_EQ
 %token TK_OP_LESS
 %token TK_OP_LESSEQ
 %token TK_OP_GREATER
@@ -334,7 +335,25 @@ filter_range_conds
 	: filter_range_cond
 	| filter_range_conds ',' filter_range_cond
 filter_range_cond
-	: double cmp_less alias cmp_less double {
+	: double TK_OP_EQ alias {
+		g_filter_cond_vec.push_back(FilterRangeCond());
+		auto &c = g_filter_cond_vec.back();
+		c.node = $3;
+		c.lower = $1;
+		c.lower_le = 1;
+		c.upper = $1;
+		c.upper_le = 1;
+	}
+	| alias TK_OP_EQ double {
+		g_filter_cond_vec.push_back(FilterRangeCond());
+		auto &c = g_filter_cond_vec.back();
+		c.node = $1;
+		c.lower = $3;
+		c.lower_le = 1;
+		c.upper = $3;
+		c.upper_le = 1;
+	}
+	| double cmp_less alias cmp_less double {
 		g_filter_cond_vec.push_back(FilterRangeCond());
 		auto &c = g_filter_cond_vec.back();
 		c.node = $3;

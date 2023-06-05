@@ -91,6 +91,7 @@ zero_suppress          return TK_ZERO_SUPPRESS;
 #.*    ;
 \/\/.* ;
 
+== return TK_OP_EQ;
 \< return TK_OP_LESS;
 \<= return TK_OP_LESSEQ;
 \> return TK_OP_GREATER;
