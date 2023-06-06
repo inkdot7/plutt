@@ -189,10 +189,9 @@ NodeValue *Config::AddCoarseFine(NodeValue *a_coarse, NodeValue *a_fine,
   return node;
 }
 
-NodeValue *Config::AddCut(char const *a_str, std::vector<CutPolygon::Point>
-    const &a_vec)
+NodeValue *Config::AddCut(CutPolygon *a_poly)
 {
-  auto node = new NodeCut(GetLocStr(), a_str, a_vec);
+  auto node = new NodeCut(GetLocStr(), a_poly);
   NodeCutAdd(node);
   return node;
 }
@@ -404,19 +403,9 @@ void Config::ColormapSet(char const *a_name)
   }
 }
 
-void Config::HistCutAdd(char const *a_path, std::vector<CutPolygon::Point>
-    const &a_vec)
+void Config::HistCutAdd(CutPolygon *a_poly)
 {
-  // Manage cache of cut polygons.
-  auto it = m_cut_poly_map.find(a_path);
-  if (m_cut_poly_map.end() == it) {
-    auto ret = m_cut_poly_map.insert(
-        std::make_pair(a_path, new CutPolygon(a_path, a_vec)));
-    it = ret.first;
-  }
-  auto poly = it->second;
-  // Temp list of cuts for histogram under construction.
-  m_cut_poly_list.push_back(poly);
+  m_cut_poly_list.push_back(a_poly);
 }
 
 void Config::CutListBind(std::string const &a_dst_title)

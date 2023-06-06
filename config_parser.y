@@ -38,8 +38,7 @@ yycperror(char const *s)
 }
 int yylex(void);
 
-char *g_cut_str;
-std::vector<CutPolygon::Point> g_cut_vec;
+CutPolygon *g_cut_poly;
 
 NodeFilterRange::CondVec g_filter_cond_vec;
 std::vector<std::string> g_filter_dst_vec;
@@ -211,41 +210,55 @@ colormap
 
 cut_inline_args
 	:
-	| cut_inline_args ',' cut_inline_arg
-cut_inline_arg
+	| cut_inline_args1
+	| cut_inline_args2
+cut_inline_args1
+	: cut_inline_arg1
+	| cut_inline_args1 ',' cut_inline_arg1
+cut_inline_arg1
+	: cut_inline_value {
+		LOC_SAVE(@1);
+		g_cut_poly->AddPoint($1);
+	}
+cut_inline_args2
+	: cut_inline_arg2
+	| cut_inline_args2 ',' cut_inline_arg2
+cut_inline_arg2
 	: '(' cut_inline_value ',' cut_inline_value ')' {
 		LOC_SAVE(@1);
-		g_cut_vec.push_back(CutPolygon::Point($2, $4));
+		g_cut_poly->AddPoint($2, $4);
 	}
 cut_inline_value
 	: TK_DOUBLE { $$ = $1; }
 	| TK_INTEGER { $$ = $1; }
 cut_invoc
-	: TK_CUT '(' TK_STRING cut_inline_args ')' {
-		LOC_SAVE(@1);
-		g_cut_str = $3;
+	: TK_CUT '(' TK_STRING ')' {
+		g_cut_poly = new CutPolygon($3, true);
+		free($3);
 	}
+	| TK_CUT '(' TK_STRING ',' {
+		g_cut_poly = new CutPolygon($3, false);
+		free($3);
+	} cut_inline_args ')'
 cut
 	: TK_IDENT '=' cut_invoc {
 		LOC_SAVE(@3);
-		auto node = g_config->AddCut(g_cut_str, g_cut_vec);
+		auto node = g_config->AddCut(g_cut_poly);
 		LOC_SAVE(@1);
 		g_config->AddAlias($1, node, 0);
 		free($1);
-		free(g_cut_str);
-		g_cut_vec.clear();
+		g_cut_poly = nullptr;
 	}
 	| TK_IDENT ',' TK_IDENT '=' cut_invoc {
 		LOC_SAVE(@5);
-		auto node = g_config->AddCut(g_cut_str, g_cut_vec);
+		auto node = g_config->AddCut(g_cut_poly);
 		LOC_SAVE(@1);
 		g_config->AddAlias($1, node, 0);
 		LOC_SAVE(@3);
 		g_config->AddAlias($3, node, 1);
 		free($1);
 		free($3);
-		free(g_cut_str);
-		g_cut_vec.clear();
+		g_cut_poly = nullptr;
 	}
 
 page
@@ -481,9 +494,8 @@ cluster
 hist_cut
 	: cut_invoc {
 		LOC_SAVE(@1);
-		g_config->HistCutAdd(g_cut_str, g_cut_vec);
-		free(g_cut_str);
-		g_cut_vec.clear();
+		g_config->HistCutAdd(g_cut_poly);
+		g_cut_poly = nullptr;
 	}
 hist_drop_old
 	: TK_DROP_OLD '=' double unit_time {

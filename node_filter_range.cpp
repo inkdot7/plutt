@@ -75,6 +75,8 @@ void NodeFilterRange::Process(uint64_t a_evid)
         auto me = mev.at(i);
         NODE_ASSERT(mi, ==, mi0);
         NODE_ASSERT(me, ==, me0);
+        // TODO: This double conversion should work the same for the values
+        // and the limits, but should maybe do this properly?
         auto dbl = val.GetV(vi, false);
         ok &= it->lower_le ? it->lower <= dbl : it->lower < dbl;
         ok &= it->upper_le ? dbl <= it->upper : dbl < it->upper;

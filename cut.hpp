@@ -46,8 +46,8 @@ class CutPolygon {
       double y;
     };
 
-    CutPolygon();
-    CutPolygon(char const *, std::vector<Point> const &);
+    CutPolygon(char const *, bool);
+    void AddPoint(double);
     void AddPoint(double, double);
     std::string const &GetTitle() const;
     bool Test(double) const;
@@ -55,9 +55,8 @@ class CutPolygon {
 
   private:
     std::string m_title;
+    int m_dim;
     std::vector<Point> m_point_vec;
-    double m_min_x;
-    double m_max_x;
 };
 
 // Tests 1d/2d coords against a list of polygons.

@@ -21,6 +21,7 @@
 
 #include <cut.hpp>
 #include <fstream>
+#include <sstream>
 #include <node_cut.hpp>
 
 NodeCutValue::NodeCutValue():
@@ -35,21 +36,12 @@ CutPolygon::Point::Point(double a_x, double a_y):
 {
 }
 
-CutPolygon::CutPolygon():
+CutPolygon::CutPolygon(char const *a_str, bool a_is_path):
   m_title(),
-  m_point_vec(),
-  m_min_x(1),
-  m_max_x(0)
+  m_dim(),
+  m_point_vec()
 {
-}
-
-CutPolygon::CutPolygon(char const *a_str, std::vector<Point> const &a_vec):
-  m_title(),
-  m_point_vec(),
-  m_min_x(1),
-  m_max_x(0)
-{
-  if (a_vec.empty()) {
+  if (a_is_path) {
     // No inline points, expect path.
     std::ifstream ifile(a_str);
     if (!ifile.is_open()) {
@@ -60,30 +52,51 @@ CutPolygon::CutPolygon(char const *a_str, std::vector<Point> const &a_vec):
       std::cerr << a_str << ": Missing histo title.\n";
       throw std::runtime_error(__func__);
     }
-    double x, y;
-    while (ifile >> x >> y) {
-      AddPoint(x, y);
+    for (int line_no = 1;; ++line_no) {
+      std::string line;
+      if (!std::getline(ifile, line)) {
+        break;
+      }
+      std::istringstream iss(line);
+      double x;
+      if (!(iss >> x)) {
+        std::cerr << a_str << ':' << line_no << ": Invalid x-coord.\n";
+        throw std::runtime_error(__func__);
+      }
+      double y;
+      if (!(iss >> y)) {
+        AddPoint(x);
+      } else {
+        AddPoint(x, y);
+      }
     }
   } else {
     m_title = a_str;
-    m_point_vec = a_vec;
   }
-  if (m_point_vec.size() < 2) {
-    std::cerr << a_str << ": Missing polygon.\n";
+}
+
+void CutPolygon::AddPoint(double a_x)
+{
+  if (0 == m_dim) {
+    m_dim = 1;
+  } else if (1 != m_dim) {
+    std::cerr << m_title << ": 1d cut became 2d?\n";
     throw std::runtime_error(__func__);
   }
+  Point p(a_x, 0.0);
+  m_point_vec.push_back(p);
 }
 
 void CutPolygon::AddPoint(double a_x, double a_y)
 {
+  if (0 == m_dim) {
+    m_dim = 2;
+  } else if (2 != m_dim) {
+    std::cerr << m_title << ": 2d cut became 1d?.\n";
+    throw std::runtime_error(__func__);
+  }
   Point p(a_x, a_y);
   m_point_vec.push_back(p);
-  if (m_min_x > m_max_x) {
-    m_max_x = m_min_x = a_x;
-  } else {
-    m_min_x = std::min(m_min_x, a_x);
-    m_max_x = std::max(m_max_x, a_x);
-  }
 }
 
 std::string const &CutPolygon::GetTitle() const
@@ -93,11 +106,31 @@ std::string const &CutPolygon::GetTitle() const
 
 bool CutPolygon::Test(double a_x) const
 {
-  return m_min_x <= a_x && a_x < m_max_x;
+  if (1 != m_dim) {
+    std::cerr << m_title <<
+        ": CutPolygon dim=" << m_dim << " but 1d Test.\n";
+    throw std::runtime_error(__func__);
+  }
+  if (2 != m_point_vec.size()) {
+    std::cerr << m_title <<
+        ": CutPolygon 1d Test has " << m_point_vec.size() << "!=2 points.\n";
+    throw std::runtime_error(__func__);
+  }
+  return m_point_vec[0].x <= a_x && a_x < m_point_vec[1].x;
 }
 
 bool CutPolygon::Test(double a_x, double a_y) const
 {
+  if (2 != m_dim) {
+    std::cerr << m_title <<
+        ": CutPolygon dim=" << m_dim << " but 2d Test.\n";
+    throw std::runtime_error(__func__);
+  }
+  if (m_point_vec.size() < 3) {
+    std::cerr << m_title <<
+        ": CutPolygon 2d Test has " << m_point_vec.size() << "<3 points.\n";
+    throw std::runtime_error(__func__);
+  }
   // This is so much more work than the 1D case...
   // - Create a x+ ray from the point to test.
   // - The ray points in (+1,0) so the winding = cross product is trivial.

@@ -52,7 +52,7 @@ class Config {
     NodeValue *AddBitfield(BitfieldArg *);
     NodeValue *AddCluster(NodeValue *);
     NodeValue *AddCoarseFine(NodeValue *, NodeValue *, double);
-    NodeValue *AddCut(char const *, std::vector<CutPolygon::Point> const &);
+    NodeValue *AddCut(CutPolygon *);
     NodeValue *AddFilterRange(std::vector<FilterRangeCond> const &,
         std::vector<NodeValue *> const &);
     void AddFit(char const *, double, double);
@@ -79,7 +79,7 @@ class Config {
     void AppearanceSet(char const *);
     void ClockMatch(NodeValue *, double);
     void ColormapSet(char const *);
-    void HistCutAdd(char const *, std::vector<CutPolygon::Point> const &);
+    void HistCutAdd(CutPolygon *);
 
     std::string GetLocStr() const;
     void SetLoc(int, int);

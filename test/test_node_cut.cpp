@@ -44,16 +44,16 @@ void ProcessExtra(MockNodeCuttable &a_nc, CutProducerList &a_cut_producer)
 void MyTest::Run()
 {
   {
-    std::vector<CutPolygon::Point> v;
-    NodeCut n("a", "test/poly.txt", v);
+    auto p = new CutPolygon("test/poly.txt", true);
+    NodeCut n("a", p);
     TestNodeBase(n, "a");
   }
   {
     MockNodeCuttable nc("MockCuttable", Value::kUint64, 1, ProcessExtra);
     TEST_CMP(nc.GetTitle().compare("MockCuttable"), ==, 0);
 
-    std::vector<CutPolygon::Point> v;
-    NodeCut n("", "test/poly.txt", v);
+    auto p = new CutPolygon("test/poly.txt", true);
+    NodeCut n("", p);
 
     n.SetCuttable(&nc);
     nc.Preprocess(&n);
@@ -72,12 +72,12 @@ void MyTest::Run()
     MockNodeCuttable nc("MockCuttable", Value::kUint64, 1, ProcessExtra);
     TEST_CMP(nc.GetTitle().compare("MockCuttable"), ==, 0);
 
-    std::vector<CutPolygon::Point> v;
-    v.push_back(CutPolygon::Point(20, 20));
-    v.push_back(CutPolygon::Point(30, 20));
-    v.push_back(CutPolygon::Point(30, 30));
-    v.push_back(CutPolygon::Point(20, 30));
-    NodeCut n("", "some_title", v);
+    auto p = new CutPolygon("some_title", false);
+    p->AddPoint(20, 20);
+    p->AddPoint(30, 20);
+    p->AddPoint(30, 30);
+    p->AddPoint(20, 30);
+    NodeCut n("", p);
 
     n.SetCuttable(&nc);
     nc.Preprocess(&n);

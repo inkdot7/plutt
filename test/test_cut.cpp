@@ -33,9 +33,9 @@ void MyTest::Run()
 {
   // 1d.
   {
-    CutPolygon c;
-    c.AddPoint(0, 0);
-    c.AddPoint(2, 0);
+    CutPolygon c("c1", false);
+    c.AddPoint(0);
+    c.AddPoint(2);
 
     // Test outside.
     TEST_BOOL(!c.Test(-1));
@@ -60,7 +60,7 @@ void MyTest::Run()
   // 2d.
   {
     // Square.
-    CutPolygon c;
+    CutPolygon c("c2", false);
     c.AddPoint(0.0, 0.0);
     c.AddPoint(1.0, 0.0);
     c.AddPoint(1.0, 1.0);
@@ -85,7 +85,7 @@ void MyTest::Run()
   }
   {
     // Diamond.
-    CutPolygon c;
+    CutPolygon c("c3", false);
     c.AddPoint( 0.0, -1.0);
     c.AddPoint(+1.0,  0.0);
     c.AddPoint( 0.0, +1.0);

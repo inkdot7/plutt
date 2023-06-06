@@ -32,8 +32,8 @@ struct NodeCutValue;
  */
 class NodeCut: public NodeValue {
   public:
-    NodeCut(std::string const &, char const *, std::vector<CutPolygon::Point>
-        const &);
+    NodeCut(std::string const &, CutPolygon *);
+    ~NodeCut();
     CutPolygon const &GetCutPolygon() const;
     Value const &GetValue(uint32_t);
     void Process(uint64_t);
@@ -43,7 +43,7 @@ class NodeCut: public NodeValue {
     NodeCut(NodeCut const &);
     NodeCut &operator=(NodeCut const &);
 
-    CutPolygon m_cut_poly;
+    CutPolygon *m_cut_poly;
     NodeCuttable *m_cuttable;
     NodeCutValue *m_value;
 };

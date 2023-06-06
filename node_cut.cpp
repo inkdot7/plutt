@@ -21,18 +21,22 @@
 
 #include <node_cut.hpp>
 
-NodeCut::NodeCut(std::string const &a_loc, char const *a_path,
-    std::vector<CutPolygon::Point> const &a_vec):
+NodeCut::NodeCut(std::string const &a_loc, CutPolygon *a_poly):
   NodeValue(a_loc),
-  m_cut_poly(a_path, a_vec),
+  m_cut_poly(a_poly),
   m_cuttable(),
   m_value()
 {
 }
 
+NodeCut::~NodeCut()
+{
+  delete m_cut_poly;
+}
+
 CutPolygon const &NodeCut::GetCutPolygon() const
 {
-  return m_cut_poly;
+  return *m_cut_poly;
 }
 
 Value const &NodeCut::GetValue(uint32_t a_ret_i)
@@ -56,5 +60,5 @@ void NodeCut::Process(uint64_t a_evid)
 void NodeCut::SetCuttable(NodeCuttable *a_node)
 {
   m_cuttable = a_node;
-  m_value = m_cuttable->CutDataAdd(&m_cut_poly);
+  m_value = m_cuttable->CutDataAdd(m_cut_poly);
 }
