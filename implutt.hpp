@@ -170,7 +170,7 @@ namespace ImPlutt {
   class Plot {
     public:
       Plot(Window *, PlotState *, char const *, Pos const &, Point const &,
-          Point const &, bool, bool, bool);
+          Point const &, bool, bool, bool, bool);
       ~Plot();
       void DrawOverlay(PlotState const &);
       double LinFromLinOrLogX(double) const;
@@ -185,7 +185,7 @@ namespace ImPlutt {
       double PointFromPosY(int) const;
       int PosFromPointX(double) const;
       int PosFromPointY(double) const;
-      void SaveCut();
+      bool SaveCut();
       Window *m_window;
       PlotState *m_state;
       Rect m_rect_tot;
@@ -197,6 +197,7 @@ namespace ImPlutt {
         bool y;
         bool z;
       } m_is_log;
+      bool m_is_2d;
 
     private:
       Plot(Plot const &);

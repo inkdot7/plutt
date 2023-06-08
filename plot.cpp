@@ -379,7 +379,7 @@ void PlotHist::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
   ImPlutt::Plot plot(a_window, &m_plot_state, m_title.c_str(), size,
       ImPlutt::Point(minx, 0.0),
       ImPlutt::Point(maxx, max_y * 1.1),
-      false, m_is_log_y.is_on, false);
+      false, m_is_log_y.is_on, false, false);
 
   a_window->PlotHist1(&plot,
       minx, maxx,
@@ -604,7 +604,7 @@ void PlotHist2::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
   ImPlutt::Plot plot(a_window, &m_plot_state, m_title.c_str(), size,
       ImPlutt::Point(minx, miny),
       ImPlutt::Point(maxx, maxy),
-      false, false, m_is_log_z.is_on);
+      false, false, m_is_log_z.is_on, true);
 
   a_window->PlotHist2(&plot, m_colormap,
       ImPlutt::Point(minx, miny),

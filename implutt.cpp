@@ -1460,14 +1460,16 @@ namespace ImPlutt {
   Plot::Plot(Window *a_window, PlotState *a_state,
       char const *a_title, Pos const &a_size,
       Point const &a_min_lin, Point const &a_max_lin,
-      bool a_is_log_x, bool a_is_log_y, bool a_is_log_z):
+      bool a_is_log_x, bool a_is_log_y, bool a_is_log_z,
+      bool a_is_2d):
     m_window(a_window),
     m_state(a_state),
     m_rect_tot(),
     m_rect_graph(),
     m_min(a_min_lin),
     m_max(a_max_lin),
-    m_is_log()
+    m_is_log(),
+    m_is_2d(a_is_2d)
   {
     m_is_log.x = a_is_log_x;
     m_is_log.y = a_is_log_y;
@@ -1604,11 +1606,7 @@ namespace ImPlutt {
                   break;
                 case SDLK_RETURN:
                   // Accept the cut, maybe.
-                  if (m_state->cut.list.size() < 2) {
-                    m_state->cut.t = Time_get_ms();
-                    std::cerr << "Cut must have at least 2 vertices!\n";
-                  } else {
-                    SaveCut();
+                  if (SaveCut()) {
                     m_state->CutClear();
                   }
                   break;
@@ -1994,8 +1992,14 @@ namespace ImPlutt {
         (m_max.y - m_min.y));
   }
 
-  void Plot::SaveCut()
+  bool Plot::SaveCut()
   {
+    size_t limit = m_is_2d ? 3 : 2;
+    if (m_state->cut.list.size() < limit) {
+      m_state->cut.t = Time_get_ms();
+      std::cerr << "Cut must have at least " << limit << " vertices!\n";
+      return false;
+    }
     // Generate a name suggestion.
     std::string fname;
     for (int id = 1;; ++id) {
@@ -2012,9 +2016,14 @@ namespace ImPlutt {
     // Save points.
     for (auto it2 = m_state->cut.list.begin(); m_state->cut.list.end() != it2;
         ++it2) {
-      of << it2->x << ' ' << it2->y << '\n';
+      of << it2->x;
+      if (m_is_2d) {
+        of << ' ' << it2->y;
+      }
+      of << '\n';
     }
     std::cout << "Saved cut in " << fname << ".\n";
+    return true;
   }
 
   //
@@ -2331,7 +2340,7 @@ namespace ImPlutt {
             state->proj.title.c_str(), size,
             ImPlutt::Point(min_x, 0.0),
             ImPlutt::Point(max_x, max_y * 1.1),
-            false, a_plot->m_is_log.z, false);
+            false, a_plot->m_is_log.z, false, false);
         win->PlotHist1(&plot, min_x, max_x, state->proj.vec,
             state->proj.vec.size());
       }
