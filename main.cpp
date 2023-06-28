@@ -141,6 +141,19 @@ int main(int argc, char **argv)
 {
   g_arg0 = argv[0];
 
+  // Print some niceties.
+  printf("Built with: SDL2,freetype2");
+#if PLUTT_NLOPT
+  printf(",nlopt");
+#endif
+#if PLUTT_ROOT
+  printf(",ROOT");
+#endif
+#if PLUTT_UCESB
+  printf(",ucesb");
+#endif
+  printf(".\n");
+
   // Handle arguments.
   enum InputType input_type = INPUT_NONE;
   int c;
