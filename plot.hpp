@@ -39,7 +39,7 @@ class Page {
     Page(std::string const &);
     Page(Page const &);
     void AddPlot(Plot *);
-    void Draw(ImPlutt::Window *);
+    void Draw(ImPlutt::Window *, ImPlutt::Pos const &);
     std::string const &GetLabel() const;
 
   private:
@@ -172,7 +172,7 @@ class PlotHist2: public Plot {
 };
 
 // TODO: Should all this be global?
-void plot(ImPlutt::Window *);
+void plot(ImPlutt::Window *, double);
 // TODO: Change name...
 Page *plot_page_add();
 void plot_page_create(char const *);

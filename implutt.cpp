@@ -964,6 +964,11 @@ namespace ImPlutt {
   // Standard widgets.
   //
 
+  void Window::Advance(Pos const &a_size)
+  {
+    LevelAdvance(a_size);
+  }
+
   bool Window::Button(char const *a_label)
   {
     auto size = RenderTextMeasure(a_label, TEXT_NORMAL);
@@ -1026,6 +1031,15 @@ namespace ImPlutt {
     LevelAdvance(Pos(PAD_INT + label_size.x + PAD, label_size.y + 2 * PAD));
   }
 
+  void Window::HorizontalLine()
+  {
+    auto &l = LevelGet();
+    RenderColor(g_style[g_style_i][STYLE_FG]);
+    RenderLine(Pos(0, 0), Pos(0 + l.rect.w, 0));
+    LevelAdvance(Pos(0, 1));
+    Newline();
+  }
+
   void Window::Panel()
   {
     RenderColor(g_style[g_style_i][STYLE_BG]);
@@ -1048,16 +1062,26 @@ namespace ImPlutt {
     RenderLine(tr, tl);
   }
 
-  void Window::Text(char const *a_fmt, ...)
+  void Window::Text(TextStyle a_text_style, char const *a_fmt, ...)
   {
     char buf[1024];
     va_list args;
     va_start(args, a_fmt);
     vsnprintf(buf, sizeof buf, a_fmt, args);
     va_end(args);
-    auto size = RenderTextMeasure(buf, TEXT_NORMAL);
-    RenderText(buf, TEXT_NORMAL, STYLE_TEXT, Pos(PAD, PAD));
+    auto size = RenderTextMeasure(buf, a_text_style);
+    RenderText(buf, a_text_style, STYLE_TEXT, Pos(PAD, PAD));
     LevelAdvance(Pos(size.x + 2 * PAD, size.y + 2 * PAD));
+  }
+
+  Pos Window::TextMeasure(TextStyle a_text_style, char const *a_fmt, ...)
+  {
+    char buf[1024];
+    va_list args;
+    va_start(args, a_fmt);
+    vsnprintf(buf, sizeof buf, a_fmt, args);
+    va_end(args);
+    return RenderTextMeasure(buf, a_text_style);
   }
 
   enum InputStatus Window::TextInput(TextInputState *a_state)
@@ -1588,6 +1612,8 @@ namespace ImPlutt {
                   // Accept the cut, maybe.
                   if (SaveCut()) {
                     m_state->CutClear();
+                  } else {
+                    m_state->cut.t = Time_get_ms();
                   }
                   break;
                 case SDLK_BACKSPACE:
@@ -1976,8 +2002,7 @@ namespace ImPlutt {
   {
     size_t limit = m_is_2d ? 3 : 2;
     if (m_state->cut.list.size() < limit) {
-      m_state->cut.t = Time_get_ms();
-      std::cerr << "Cut must have at least " << limit << " vertices!\n";
+      Status_set("Cut must have at least %u vertices!", limit);
       return false;
     }
     // Generate a name suggestion.
@@ -2002,7 +2027,7 @@ namespace ImPlutt {
       }
       of << '\n';
     }
-    std::cout << "Saved cut in " << fname << ".\n";
+    Status_set("Saved cut in %s.", fname.c_str());
     return true;
   }
 

@@ -65,6 +65,10 @@ std::vector<float> Snip(std::vector<uint32_t> const &, uint32_t);
 std::vector<float> Snip2(std::vector<uint32_t> const &, size_t, size_t,
     uint32_t);
 
+// Global status.
+std::string Status_get();
+void Status_set(char const *, ...);
+
 // Cyclic subtraction around 0: (a,b,c) -> (a-b+(n+1/2)*c)%c-c/2
 double SubMod(double, double, double);
 

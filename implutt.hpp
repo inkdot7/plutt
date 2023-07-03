@@ -266,10 +266,13 @@ namespace ImPlutt {
       void Push(Rect const &);
       void Rewind();
 
+      void Advance(Pos const &);
       bool Button(char const *);
       void Checkbox(char const *, CheckboxState *);
-      void Panel(void);
-      void Text(char const *, ...);
+      void HorizontalLine();
+      void Panel();
+      void Text(TextStyle, char const *, ...);
+      Pos TextMeasure(TextStyle, char const *, ...);
       enum InputStatus TextInput(TextInputState *);
 
       template <typename T> void PlotHist1(Plot const *, double, double,

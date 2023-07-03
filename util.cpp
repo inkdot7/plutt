@@ -25,6 +25,7 @@
 #include <cassert>
 #include <cmath>
 #include <string>
+#include <thread>
 #include <SDL_timer.h>
 
 namespace {
@@ -361,6 +362,39 @@ std::vector<float> Snip2(std::vector<uint32_t> const &a_v, size_t a_w, size_t
     v_src[i] = exp(v_src[i]) - 2;
   }
   return 0 == src_i ? buf0 : buf1;
+}
+
+namespace {
+  std::mutex g_status_mutex;
+  std::string g_status;
+}
+
+std::string Status_get()
+{
+  std::unique_lock<std::mutex> lock(g_status_mutex);
+  return g_status;
+}
+
+void Status_set(char const *a_fmt, ...)
+{
+  time_t tt;
+  time(&tt);
+  char buf[1024];
+  snprintf(buf, sizeof buf, "%s", ctime(&tt));
+  int ofs;
+  for (ofs = 0; buf[ofs]; ++ofs) {
+    if ('\n' == buf[ofs]) {
+      buf[ofs] = '\0';
+      break;
+    }
+  }
+  ofs += snprintf(buf + ofs, sizeof buf - (size_t)ofs, ": ");
+  va_list args;
+  va_start(args, a_fmt);
+  vsnprintf(buf + ofs, sizeof buf - (size_t)ofs, a_fmt, args);
+  va_end(args);
+  std::unique_lock<std::mutex> lock(g_status_mutex);
+  g_status = buf;
 }
 
 double SubMod(double a_l, double a_r, double a_range)

@@ -25,6 +25,7 @@
 #include <cstring>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <fit.hpp>
 
 #define LENGTH(x) (sizeof x / sizeof *x)
@@ -54,15 +55,14 @@ void Page::AddPlot(Plot *a_plot)
   m_plot_list.push_back(a_plot);
 }
 
-void Page::Draw(ImPlutt::Window *a_window)
+void Page::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
 {
   if (m_plot_list.empty()) {
     return;
   }
-  auto size = a_window->GetSize();
   int rows = (int)sqrt((double)m_plot_list.size());
   int cols = ((int)m_plot_list.size() + rows - 1) / rows;
-  ImPlutt::Pos elem_size(size.x / cols, size.y / rows);
+  ImPlutt::Pos elem_size(a_size.x / cols, a_size.y / rows);
   ImPlutt::Rect elem_rect;
   elem_rect.x = 0;
   elem_rect.y = 0;
@@ -362,7 +362,8 @@ void PlotHist::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
 
   // Header.
   a_window->Checkbox("Log-y", &m_is_log_y);
-  a_window->Text(", x=%.3g(%.3g)", m_range.GetMean(), m_range.GetSigma());
+  a_window->Text(ImPlutt::Window::TEXT_NORMAL,
+      ", x=%.3g(%.3g)", m_range.GetMean(), m_range.GetSigma());
 
   // Plot.
   auto dy = a_window->Newline();
@@ -588,7 +589,8 @@ void PlotHist2::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
 
   // Header.
   a_window->Checkbox("Log-z", &m_is_log_z);
-  a_window->Text(", x=%.1g(%.1g), y=%.1g(%.1g)",
+  a_window->Text(ImPlutt::Window::TEXT_NORMAL,
+      ", x=%.1g(%.1g), y=%.1g(%.1g)",
       m_range_x.GetMean(), m_range_x.GetSigma(),
       m_range_y.GetMean(), m_range_y.GetSigma());
 
@@ -686,7 +688,7 @@ void PlotHist2::Prefill(Value::Type a_type_y, Value::Scalar const &a_y,
   m_range_y.Add(a_type_y, a_y);
 }
 
-void plot(ImPlutt::Window *a_window)
+void plot(ImPlutt::Window *a_window, double a_event_rate)
 {
   if (g_page_list.size() > 1) {
     for (auto it = g_page_list.begin(); g_page_list.end() != it; ++it) {
@@ -695,11 +697,53 @@ void plot(ImPlutt::Window *a_window)
       }
     }
     a_window->Newline();
+    a_window->HorizontalLine();
   }
   if (!g_page_sel) {
     g_page_sel = &g_page_list.front();
   }
-  g_page_sel->Draw(a_window);
+
+  // Measure status bar.
+  std::ostringstream oss;
+  oss << "Events/s: ";
+  if (a_event_rate < 1e3) {
+    oss << a_event_rate;
+  } else {
+    oss << a_event_rate * 1e-3 << "k";
+  }
+  auto size1 = a_window->TextMeasure(ImPlutt::Window::TEXT_BOLD,
+      oss.str().c_str());
+
+  auto status = Status_get();
+  auto size2 = a_window->TextMeasure(ImPlutt::Window::TEXT_BOLD,
+      status.c_str());
+
+  // Get max an pad a little.
+  auto h = std::max(size1.y, size2.y);
+  h += h / 5;
+
+  // Draw selected page.
+  auto size = a_window->GetSize();
+  size.y = std::max(0, size.y - h);
+  g_page_sel->Draw(a_window, size);
+
+  // Draw status line.
+  a_window->Newline();
+  a_window->HorizontalLine();
+
+  ImPlutt::Rect r;
+  r.x = 0;
+  r.y = 0;
+  r.w = 20 * h;
+  r.h = h;
+  a_window->Push(r);
+
+  a_window->Advance(ImPlutt::Pos(h, 0));
+  a_window->Text(ImPlutt::Window::TEXT_BOLD, oss.str().c_str());
+
+  a_window->Pop();
+
+  a_window->Text(ImPlutt::Window::TEXT_BOLD, status.c_str());
 }
 
 Page *plot_page_add()

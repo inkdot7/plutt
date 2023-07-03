@@ -96,8 +96,9 @@ namespace {
         g_data_running = false;
       }
       std::unique_lock<std::mutex> lock(g_input_event_mutex);
-      g_input_cv.wait(lock, []{return g_input_i == g_event_i ||
-          !g_data_running;});
+      g_input_cv.wait(lock, []{
+          return g_input_i == g_event_i || !g_data_running;
+      });
       if (!g_data_running) {
         lock.unlock();
         break;
@@ -119,8 +120,9 @@ namespace {
     for (;;) {
       // Wait until there's a new buffered event.
       std::unique_lock<std::mutex> lock(g_input_event_mutex);
-      g_event_cv.wait(lock, []{return g_input_i > g_event_i ||
-          !g_data_running;});
+      g_event_cv.wait(lock, []{
+          return g_input_i > g_event_i || !g_data_running;
+      });
       if (!g_data_running) {
         lock.unlock();
         break;
@@ -225,6 +227,8 @@ int main(int argc, char **argv)
       throw std::runtime_error(__func__);
   }
 
+  Status_set("Started.");
+
   // Start data thread.
   g_data_running = true;
   std::thread thread_input(main_input, argc, argv);
@@ -233,6 +237,10 @@ int main(int argc, char **argv)
   ImPlutt::Setup();
 
   auto window = new ImPlutt::Window("plutt", 800, 600);
+
+  uint64_t event_i0 = 0;
+  unsigned loop_n = 0;
+  double event_rate = 0.0;
 
   std::cout << "Entering main loop...\n";
   for (bool is_running = true; is_running;) {
@@ -257,8 +265,17 @@ int main(int argc, char **argv)
     }
     Time_set_ms(t_end);
 
+    ++loop_n;
+#define RATE_PER_SECOND 2
+    if (UI_RATE / RATE_PER_SECOND == loop_n) {
+      auto event_i1 = g_event_i;
+      event_rate = (double)(event_i1 - event_i0) * RATE_PER_SECOND;
+      event_i0 = event_i1;
+      loop_n = 0;
+    }
+
     window->Begin();
-    plot(window);
+    plot(window, event_rate);
     window->End();
   }
   std::cout << "Exiting main loop...\n";
