@@ -24,6 +24,7 @@
 #include <err.h>
 #include <cassert>
 #include <cmath>
+#include <mutex>
 #include <string>
 #include <thread>
 #include <SDL_timer.h>
