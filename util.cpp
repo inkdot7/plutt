@@ -398,9 +398,19 @@ void Status_set(char const *a_fmt, ...)
   g_status = buf;
 }
 
-double SubMod(double a_l, double a_r, double a_range)
+double SubModDbl(double a_l, double a_r, double a_range)
 {
   double d = a_l - a_r;
+  if (d < 0) {
+    auto n = ceil(-d / a_range);
+    d += n * a_range;
+  }
+  return fmod(d + 0.5 * a_range, a_range) - 0.5 * a_range;
+}
+
+double SubModU64(uint64_t a_l, uint64_t a_r, double a_range)
+{
+  double d = (double)(int64_t)(a_l - a_r);
   if (d < 0) {
     auto n = ceil(-d / a_range);
     d += n * a_range;

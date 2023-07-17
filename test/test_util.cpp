@@ -354,25 +354,45 @@ void MyTest::Run()
   test_rebin1();
   test_rebin2();
 
-  TEST_CMP(SubMod(0, 0, 8), ==, 0);
+  TEST_CMP(SubModDbl(0, 0, 8), ==, 0);
 
-  TEST_CMP(SubMod(1, 0, 8), ==,  1);
-  TEST_CMP(SubMod(2, 0, 8), ==,  2);
-  TEST_CMP(SubMod(3, 0, 8), ==,  3);
-  TEST_CMP(SubMod(4, 0, 8), ==, -4);
-  TEST_CMP(SubMod(5, 0, 8), ==, -3);
-  TEST_CMP(SubMod(6, 0, 8), ==, -2);
-  TEST_CMP(SubMod(7, 0, 8), ==, -1);
-  TEST_CMP(SubMod(8, 0, 8), ==,  0);
+  TEST_CMP(SubModDbl(1, 0, 8), ==,  1);
+  TEST_CMP(SubModDbl(2, 0, 8), ==,  2);
+  TEST_CMP(SubModDbl(3, 0, 8), ==,  3);
+  TEST_CMP(SubModDbl(4, 0, 8), ==, -4);
+  TEST_CMP(SubModDbl(5, 0, 8), ==, -3);
+  TEST_CMP(SubModDbl(6, 0, 8), ==, -2);
+  TEST_CMP(SubModDbl(7, 0, 8), ==, -1);
+  TEST_CMP(SubModDbl(8, 0, 8), ==,  0);
 
-  TEST_CMP(SubMod(0, 1, 8), ==, -1);
-  TEST_CMP(SubMod(0, 2, 8), ==, -2);
-  TEST_CMP(SubMod(0, 3, 8), ==, -3);
-  TEST_CMP(SubMod(0, 4, 8), ==, -4);
-  TEST_CMP(SubMod(0, 5, 8), ==,  3);
-  TEST_CMP(SubMod(0, 6, 8), ==,  2);
-  TEST_CMP(SubMod(0, 7, 8), ==,  1);
-  TEST_CMP(SubMod(0, 8, 8), ==,  0);
+  TEST_CMP(SubModDbl(0, 1, 8), ==, -1);
+  TEST_CMP(SubModDbl(0, 2, 8), ==, -2);
+  TEST_CMP(SubModDbl(0, 3, 8), ==, -3);
+  TEST_CMP(SubModDbl(0, 4, 8), ==, -4);
+  TEST_CMP(SubModDbl(0, 5, 8), ==,  3);
+  TEST_CMP(SubModDbl(0, 6, 8), ==,  2);
+  TEST_CMP(SubModDbl(0, 7, 8), ==,  1);
+  TEST_CMP(SubModDbl(0, 8, 8), ==,  0);
+
+  TEST_CMP(SubModU64(0, 0, 8), ==, 0);
+
+  TEST_CMP(SubModU64(1, 0, 8), ==,  1);
+  TEST_CMP(SubModU64(2, 0, 8), ==,  2);
+  TEST_CMP(SubModU64(3, 0, 8), ==,  3);
+  TEST_CMP(SubModU64(4, 0, 8), ==, -4);
+  TEST_CMP(SubModU64(5, 0, 8), ==, -3);
+  TEST_CMP(SubModU64(6, 0, 8), ==, -2);
+  TEST_CMP(SubModU64(7, 0, 8), ==, -1);
+  TEST_CMP(SubModU64(8, 0, 8), ==,  0);
+
+  TEST_CMP(SubModU64(0, 1, 8), ==, -1);
+  TEST_CMP(SubModU64(0, 2, 8), ==, -2);
+  TEST_CMP(SubModU64(0, 3, 8), ==, -3);
+  TEST_CMP(SubModU64(0, 4, 8), ==, -4);
+  TEST_CMP(SubModU64(0, 5, 8), ==,  3);
+  TEST_CMP(SubModU64(0, 6, 8), ==,  2);
+  TEST_CMP(SubModU64(0, 7, 8), ==,  1);
+  TEST_CMP(SubModU64(0, 8, 8), ==,  0);
 
   Time_set_ms(0);
   TEST_CMP((int)Time_get_ms(), ==, 10 * 60 * 1000);

@@ -51,6 +51,8 @@
 #include <node_trig_map.hpp>
 #include <node_zero_suppress.hpp>
 
+#define DEFAULT_UI_RATE 20U
+
 extern FILE *yycpin;
 extern Config *g_config;
 
@@ -74,6 +76,7 @@ Config::Config(char const *a_path):
   m_fit_map(),
   m_clock_match(),
   m_colormap(ImPlutt::ColormapGet(nullptr)),
+  m_ui_rate(DEFAULT_UI_RATE),
   m_evid(),
   m_input()
 {
@@ -413,6 +416,16 @@ void Config::ColormapSet(char const *a_name)
 void Config::HistCutAdd(CutPolygon *a_poly)
 {
   m_cut_poly_list.push_back(a_poly);
+}
+
+unsigned Config::UIRateGet() const
+{
+  return m_ui_rate;
+}
+
+void Config::UIRateSet(unsigned a_ui_rate)
+{
+  m_ui_rate = std::min(a_ui_rate, DEFAULT_UI_RATE);
 }
 
 void Config::CutListBind(std::string const &a_dst_title)

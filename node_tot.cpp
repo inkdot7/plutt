@@ -71,7 +71,7 @@ void NodeTot::Process(uint64_t a_evid)
       while (vi_l < me_l && vi_t < me_t) {
         double l = val_l.GetV(vi_l, false);
         double t = val_t.GetV(vi_t, false);
-        double d = SubMod(t, l, m_range);
+        double d = SubModDbl(t, l, m_range);
         if (d > 0) {
           Value::Scalar diff;
           diff.dbl = d;

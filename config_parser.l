@@ -86,6 +86,7 @@ tpat                   return TK_TPAT;
 transformx             return TK_TRANSFORMX;
 transformy             return TK_TRANSFORMY;
 trig_map               return TK_TRIG_MAP;
+ui_rate                return TK_UI_RATE;
 vftx2                  return TK_VFTX2;
 zero_suppress          return TK_ZERO_SUPPRESS;
 

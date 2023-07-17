@@ -70,7 +70,10 @@ std::string Status_get();
 void Status_set(char const *, ...);
 
 // Cyclic subtraction around 0: (a,b,c) -> (a-b+(n+1/2)*c)%c-c/2
-double SubMod(double, double, double);
+// Note that the u64 version works with doubles immediately after the first
+// subtraction!
+double SubModDbl(double, double, double);
+double SubModU64(uint64_t, uint64_t, double);
 
 // Tab-completion of filenames.
 std::string TabComplete(std::string const &);

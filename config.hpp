@@ -81,6 +81,8 @@ class Config {
     void ClockMatch(NodeValue *, double);
     void ColormapSet(char const *);
     void HistCutAdd(CutPolygon *);
+    unsigned UIRateGet() const;
+    void UIRateSet(unsigned);
 
     std::string GetLocStr() const;
     void SetLoc(int, int);
@@ -123,6 +125,7 @@ class Config {
       double t0;
     } m_clock_match;
     size_t m_colormap;
+    unsigned m_ui_rate;
     uint64_t m_evid;
     Input *m_input;
 };

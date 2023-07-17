@@ -246,8 +246,7 @@ int main(int argc, char **argv)
   for (bool is_running = true; is_running;) {
 
     // Use event timeout to cap UI rate.
-#define UI_RATE 20
-    auto t_end = SDL_GETTICKS() + 1000 / UI_RATE;
+    auto t_end = SDL_GETTICKS() + 1000 / g_config->UIRateGet();
     for (;;) {
       auto t_cur = SDL_GETTICKS();
       if (t_cur > t_end) {
@@ -267,7 +266,7 @@ int main(int argc, char **argv)
 
     ++loop_n;
 #define RATE_PER_SECOND 2
-    if (UI_RATE / RATE_PER_SECOND == loop_n) {
+    if (g_config->UIRateGet() / RATE_PER_SECOND == loop_n) {
       auto event_i1 = g_event_i;
       event_rate = (double)(event_i1 - event_i0) * RATE_PER_SECOND;
       event_i0 = event_i1;

@@ -125,6 +125,7 @@ static double g_drop_old = -1.0;
 %token TK_TRANSFORMX
 %token TK_TRANSFORMY
 %token TK_TRIG_MAP
+%token TK_UI_RATE
 %token TK_VFTX2
 %token TK_ZERO_SUPPRESS
 
@@ -187,6 +188,7 @@ stmt
 	| match_value
 	| page
 	| pedestal
+	| ui_rate
 
 appearance
 	: TK_APPEARANCE '(' TK_STRING ')' {
@@ -654,6 +656,11 @@ pedestal
 		g_pedestal_tpat = nullptr;
 		free($1);
 		free($3);
+	}
+ui_rate
+	: TK_UI_RATE '=' integer {
+		LOC_SAVE(@1);
+		g_config->UIRateSet($3);
 	}
 select_index
 	: TK_SELECT_INDEX '(' value ',' integer ')' {

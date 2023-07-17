@@ -74,10 +74,16 @@ void NodeSubMod::Process(uint64_t a_evid)
       vi_r = me_r;
     } else {
       while (vi_l < me_l && vi_r < me_r) {
-        double l = val_l.GetV(vi_l, false);
-        double r = val_r.GetV(vi_r, false);
         Value::Scalar diff;
-        diff.dbl = SubMod(l, r, m_range);
+        if (Value::kDouble == val_l.GetType()) {
+          auto l = val_l.GetV(vi_l, false);
+          auto r = val_r.GetV(vi_r, false);
+          diff.dbl = SubModDbl(l, r, m_range);
+        } else {
+          auto l = val_l.GetV().at(vi_l).u64;
+          auto r = val_r.GetV().at(vi_r).u64;
+          diff.dbl = SubModU64(l, r, m_range);
+        }
         m_value.Push(mi_l, diff);
         ++vi_l;
         ++vi_r;

@@ -77,7 +77,7 @@ void NodeTrigMap::Process(uint64_t a_evid)
           trig_i < trig_vec.size()) {
         double trig = trig_vec.at(trig_i);
         Value::Scalar diff;
-        diff.dbl = SubMod(sig, trig, m_range);
+        diff.dbl = SubModDbl(sig, trig, m_range);
         m_value.Push(mi, diff);
       }
     }
