@@ -66,6 +66,7 @@ filter_range           return TK_FILTER_RANGE;
 fit                    return TK_FIT;
 hist                   return TK_HIST;
 hist2d                 return TK_HIST2D;
+length                 return TK_LENGTH;
 logy                   return TK_LOGY;
 logz                   return TK_LOGZ;
 match_index            return TK_MATCH_INDEX;

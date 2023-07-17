@@ -105,6 +105,7 @@ static double g_drop_old = -1.0;
 %token TK_FIT
 %token TK_HIST
 %token TK_HIST2D
+%token TK_LENGTH
 %token TK_LOGY
 %token TK_LOGZ
 %token TK_MATCH_INDEX
@@ -148,6 +149,7 @@ static double g_drop_old = -1.0;
 %type <dbl> double
 %type <i32> integer
 %type <range> integer_range
+%type <value> length
 %type <value> max
 %type <value> mean_arith
 %type <value> mean_geom
@@ -424,6 +426,7 @@ value
 	: alias         { $$ = $1; }
 	| bitfield      { $$ = $1; }
 	| coarse_fine   { $$ = $1; }
+	| length        { $$ = $1; }
 	| max           { $$ = $1; }
 	| mean_arith    { $$ = $1; }
 	| mean_geom     { $$ = $1; }
@@ -599,6 +602,11 @@ match_value
 		g_config->AddAlias($3, node, 1);
 		free($1);
 		free($3);
+	}
+length
+	: TK_LENGTH '(' value ')' {
+		LOC_SAVE(@1);
+		$$ = g_config->AddLength($3);
 	}
 max
 	: TK_MAX '(' value ')' {

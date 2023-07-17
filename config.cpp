@@ -35,6 +35,7 @@
 #include <node_filter_range.hpp>
 #include <node_hist1.hpp>
 #include <node_hist2.hpp>
+#include <node_length.hpp>
 #include <node_match_index.hpp>
 #include <node_match_value.hpp>
 #include <node_max.hpp>
@@ -268,6 +269,12 @@ void Config::AddHist2(char const *a_title, NodeValue *a_y, NodeValue *a_x,
       a_y, a_x, a_yb, a_xb, LinearTransform(ky, my), LinearTransform(kx, mx),
       a_fit, a_log_z, a_drop_old_s);
   NodeCuttableAdd(node);
+}
+
+NodeValue *Config::AddLength(NodeValue *a_value)
+{
+  auto node = new NodeLength(GetLocStr(), a_value);
+  return node;
 }
 
 NodeValue *Config::AddMatchIndex(NodeValue *a_l, NodeValue *a_r)

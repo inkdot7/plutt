@@ -60,6 +60,7 @@ class Config {
         const *, bool, double);
     void AddHist2(char const *, NodeValue *, NodeValue *, uint32_t, uint32_t,
         char const *, char const *, char const *, bool, double);
+    NodeValue *AddLength(NodeValue *);
     NodeValue *AddMatchIndex(NodeValue *, NodeValue *);
     NodeValue *AddMatchValue(NodeValue *, NodeValue *, double);
     NodeValue *AddMax(NodeValue *);
