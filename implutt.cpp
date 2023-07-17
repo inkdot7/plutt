@@ -2162,7 +2162,7 @@ namespace ImPlutt {
     }
     auto min_z = a_plot->LinOrLogFromLinZ(min_t);
     auto max_z = a_plot->LinOrLogFromLinZ(max_t);
-    max_z = std::max(max_z, 1.0);
+    auto dz = std::max(max_z - min_z, 1.0);
 
     auto const &cmap = g_cmap_vec.at(a_colormap);
 
@@ -2184,7 +2184,7 @@ namespace ImPlutt {
           auto v = (double)*t++;
           if (v > 0.0) {
             v = a_plot->LinOrLogFromLinZ(v);
-            auto f = (v - min_z) / (max_z - min_z);
+            auto f = (v - min_z) / dz;
             auto const ramp_i = (size_t)(
                 (double)(cmap.ramp.size() - 1) * f);
             auto const &rgb = cmap.ramp.at(ramp_i);
@@ -2231,7 +2231,7 @@ namespace ImPlutt {
           v /= n;
           if (v > 0.0) {
             v = a_plot->LinOrLogFromLinZ(v);
-            auto f = (v - min_z) / (max_z - min_z);
+            auto f = (v - min_z) / dz;
             auto const ramp_i = (size_t)(
                 (double)(cmap.ramp.size() - 1) * f);
             auto const &rgb = cmap.ramp.at(ramp_i);
