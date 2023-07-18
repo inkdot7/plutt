@@ -352,7 +352,7 @@ filter_range_conds
 	: filter_range_cond
 	| filter_range_conds ',' filter_range_cond
 filter_range_cond
-	: double TK_OP_EQ alias {
+	: double TK_OP_EQ value {
 		g_filter_cond_vec.push_back(FilterRangeCond());
 		auto &c = g_filter_cond_vec.back();
 		c.node = $3;
@@ -361,7 +361,7 @@ filter_range_cond
 		c.upper = $1;
 		c.upper_le = 1;
 	}
-	| alias TK_OP_EQ double {
+	| value TK_OP_EQ double {
 		g_filter_cond_vec.push_back(FilterRangeCond());
 		auto &c = g_filter_cond_vec.back();
 		c.node = $1;
@@ -370,7 +370,7 @@ filter_range_cond
 		c.upper = $3;
 		c.upper_le = 1;
 	}
-	| double cmp_less alias cmp_less double {
+	| double cmp_less value cmp_less double {
 		g_filter_cond_vec.push_back(FilterRangeCond());
 		auto &c = g_filter_cond_vec.back();
 		c.node = $3;
@@ -383,7 +383,7 @@ filter_args
 	: filter_arg
 	| filter_args ',' filter_arg
 filter_arg
-	: '(' TK_IDENT '=' alias ')' {
+	: '(' TK_IDENT '=' value ')' {
 		g_filter_dst_vec.push_back($2);
 		g_filter_src_vec.push_back($4);
 		free($2);
