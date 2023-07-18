@@ -35,8 +35,8 @@
     auto r_ = r;\
     if (!(l_ op r_)) {\
       std::cerr << __FILE__ << ':' << __LINE__ << ": " <<\
-          GetLocStr() << ": Assertion '" << #l << "'='" << l_ << "' "#op" \
-          '" << #r << "'='" << r_ << "' failed!\n";\
+          GetLocStr() << ": Assertion '" << #l << "'='" << l_ << "' "#op \
+          " '" << #r << "'='" << r_ << "' failed!\n";\
       throw std::runtime_error(__func__);\
     }\
   } while (0)
