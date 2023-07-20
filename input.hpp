@@ -52,12 +52,13 @@
  */
 class Input {
   public:
+    // TODO: GetData is all 64... Clean up!
     enum Type {
       kNone,
-      kUint32
-    };
-    union Scalar {
-      uint32_t u32;
+      kUint8,
+      kUint16,
+      kUint32,
+      kUint64
     };
 
     virtual ~Input() {}

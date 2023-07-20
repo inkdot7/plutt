@@ -66,10 +66,14 @@ std::cout << m_name << '.' << a_suffix << " id=" << a_id << " type=" << a_type
   }
   *mem = new Member;
   switch (a_type) {
+    case Input::Type::kUint8:
+    case Input::Type::kUint16:
     case Input::Type::kUint32:
+    case Input::Type::kUint64:
       (*mem)->type = Value::Type::kUint64;
       break;
     default:
+    std::cerr << GetLocStr() << ": Non-implemented input type.\n";
       throw std::runtime_error(__func__);
   }
   (*mem)->id = a_id;
@@ -87,11 +91,12 @@ void NodeSignal::Process(uint64_t a_evid)
 
 #define FETCH_SIGNAL_DATA(SUFF) \
   auto const p_##SUFF = m_config->GetInput()->GetData(m_##SUFF->id); \
-  auto const p32_##SUFF = static_cast<uint32_t const *>(p_##SUFF.first); \
+  auto const p64_##SUFF = static_cast<uint64_t const *>(p_##SUFF.first); \
   auto const len_##SUFF = p_##SUFF.second
 #define SIGNAL_LEN_CHECK(cond) do { \
   if (!(cond)) { \
-    std::cerr << m_name << ": Signal check failed: (" << #cond << ").\n"; \
+    std::cerr << __FILE__ << ':' << __LINE__ << ':' << m_name << \
+        ": Signal check failed: (" << #cond << ").\n"; \
     return; \
   } \
 } while (0)
@@ -105,15 +110,15 @@ void NodeSignal::Process(uint64_t a_evid)
     SIGNAL_LEN_CHECK(1 == len_M);
     SIGNAL_LEN_CHECK(len_ME == len_MI);
     SIGNAL_LEN_CHECK(1 == len_);
-    SIGNAL_LEN_CHECK(*p32_ <= len_v);
+    SIGNAL_LEN_CHECK(*p64_ <= len_v);
     m_value.SetType(m_v->type);
     uint32_t v_i = 0;
-    for (uint32_t i = 0; i < *p32_M; ++i) {
-      auto mi = p32_MI[i];
-      auto me = p32_ME[i];
+    for (uint32_t i = 0; i < *p64_M; ++i) {
+      auto mi = (uint32_t)p64_MI[i];
+      auto me = p64_ME[i];
       for (; v_i < me; ++v_i) {
         Value::Scalar s;
-        s.u64 = p32_v[v_i];
+        s.u64 = p64_v[v_i];
         m_value.Push(mi, s);
       }
     }
@@ -123,34 +128,37 @@ void NodeSignal::Process(uint64_t a_evid)
     FETCH_SIGNAL_DATA(MI);
     FETCH_SIGNAL_DATA(v);
     SIGNAL_LEN_CHECK(1 == len_);
-    SIGNAL_LEN_CHECK(*p32_ <= len_MI);
-    SIGNAL_LEN_CHECK(*p32_ <= len_v);
+    SIGNAL_LEN_CHECK(*p64_ <= len_MI);
+    SIGNAL_LEN_CHECK(*p64_ <= len_v);
     m_value.SetType(m_v->type);
-    for (uint32_t i = 0; i < *p32_; ++i) {
+    for (uint32_t i = 0; i < *p64_; ++i) {
       Value::Scalar s;
-      s.u64 = p32_v[i];
-      m_value.Push(p32_MI[i], s);
+      auto mi = (uint32_t)p64_MI[i];
+      s.u64 = p64_v[i];
+      m_value.Push(mi, s);
     }
   } else if (m_v) {
     // Non-indexed array.
     FETCH_SIGNAL_DATA();
     FETCH_SIGNAL_DATA(v);
     SIGNAL_LEN_CHECK(1 == len_);
-    SIGNAL_LEN_CHECK(*p32_ <= len_v);
+    SIGNAL_LEN_CHECK(*p64_ <= len_v);
     m_value.SetType(m_v->type);
-    for (uint32_t i = 0; i < *p32_; ++i) {
+    for (uint32_t i = 0; i < *p64_; ++i) {
       Value::Scalar s;
-      s.u64 = p32_v[i];
+      s.u64 = p64_v[i];
       m_value.Push(0, s);
     }
   } else {
     // Scalar.
     FETCH_SIGNAL_DATA();
-    SIGNAL_LEN_CHECK(1 == len_);
+    if (0) SIGNAL_LEN_CHECK(1 == len_);
     m_value.SetType(m_->type);
     Value::Scalar s;
-    s.u64 = *p32_;
-    m_value.Push(0, s);
+    if (p64_) {
+      s.u64 = *p64_;
+      m_value.Push(0, s);
+    }
   }
 }
 

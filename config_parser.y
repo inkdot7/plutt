@@ -340,6 +340,13 @@ alias
 		$$ = g_config->AddAlias($1, NULL, 0);
 		free($1);
 	}
+	| TK_IDENT '.' TK_IDENT {
+		LOC_SAVE(@1);
+		auto s = std::string($1) + "." + $3;
+		$$ = g_config->AddAlias(s.c_str(), NULL, 0);
+		free($1);
+		free($3);
+	}
 
 cmp_less
 	: TK_OP_LESS {
@@ -441,7 +448,7 @@ value
 	| zero_suppress { $$ = $1; }
 
 member
-	: value '.' TK_IDENT {
+	: value ':' TK_IDENT {
 		LOC_SAVE(@1);
 		$$ = g_config->AddMember($1, $3);
 		free($3);

@@ -46,21 +46,33 @@ class RootImpl {
     TChain m_chain;
     TTreeReader m_reader;
     struct Entry {
-      Entry(std::string a_name, Input::Type a_type, size_t a_arr_ref_i):
+      Entry(std::string a_name, Input::Type a_type, bool a_is_vector):
         name(a_name),
         type(a_type),
-        arr_ref_i(a_arr_ref_i),
+        is_vector(a_is_vector),
+        val_u8(),
+        arr_u8(),
+        val_u16(),
+        arr_u16(),
         val_u32(),
         arr_u32(),
+        val_u64(),
+        arr_u64(),
         buf()
       {
       }
       Entry(Entry const &a_e):
         name(),
         type(),
-        arr_ref_i(),
+        is_vector(),
+        val_u8(),
+        arr_u8(),
+        val_u16(),
+        arr_u16(),
         val_u32(),
         arr_u32(),
+        val_u64(),
+        arr_u64(),
         buf()
       {
         Copy(a_e);
@@ -72,25 +84,36 @@ class RootImpl {
       }
       std::string name;
       Input::Type type;
-      // 0 = scalar, 1 = m_branch_vec.at(0) etc.
-      size_t arr_ref_i;
+      bool is_vector;
+      TTreeReaderValue<uint8_t> *val_u8;
+      TTreeReaderArray<uint8_t> *arr_u8;
+      TTreeReaderValue<uint16_t> *val_u16;
+      TTreeReaderArray<uint16_t> *arr_u16;
       TTreeReaderValue<uint32_t> *val_u32;
       TTreeReaderArray<uint32_t> *arr_u32;
-      Vector<uint32_t> buf;
+      TTreeReaderValue<uint64_t> *val_u64;
+      TTreeReaderArray<uint64_t> *arr_u64;
+      Vector<uint64_t> buf;
       private:
       void Copy(Entry const &a_e)
       {
         name = a_e.name;
         type = a_e.type;
-        arr_ref_i = a_e.arr_ref_i;
+        is_vector = a_e.is_vector;
         // With great power comes great guns to shoot your foot with.
         // We can cheat a bit here:
         // If we never copy m_branch_vec, copying is only done on resizing so
         // there's really only one place for these.
         // The ownership is really with RootImpl since it allocates, so it
         // must also delete.
+        val_u8 = a_e.val_u8;
+        arr_u8 = a_e.arr_u8;
+        val_u16 = a_e.val_u16;
+        arr_u16 = a_e.arr_u16;
         val_u32 = a_e.val_u32;
         arr_u32 = a_e.arr_u32;
+        val_u64 = a_e.val_u64;
+        arr_u64 = a_e.arr_u64;
       }
     };
     std::mutex m_mutex;
@@ -139,15 +162,28 @@ RootImpl::RootImpl(Config &a_config, int a_argc, char **a_argv):
 RootImpl::~RootImpl()
 {
   for (auto it = m_branch_vec.begin(); m_branch_vec.end() != it; ++it) {
+    delete it->val_u8;
+    delete it->arr_u8;
+    delete it->val_u16;
+    delete it->arr_u16;
     delete it->val_u32;
     delete it->arr_u32;
+    delete it->val_u64;
+    delete it->arr_u64;
   }
 }
 
-void RootImpl::BindBranch(Config &a_config, std::string const &a_name,
-    char const *a_suffix, char const *a_config_suffix, bool a_optional)
+void RootImpl::BindBranch(Config &a_config, std::string const &a_name, char
+    const *a_suffix, char const *a_config_suffix, bool a_optional)
 {
+  // full = name + suffix
+  // If full = "m*", then GetBranch("m*").GetTitle() = "m*".
+  // If full = "b.m*", then GetBranch("b.m*").GetTitle() = "m*".
   auto full_name = a_name + (a_suffix ? a_suffix : "");
+  auto dot = full_name.find_first_of('.');
+  std::string member =
+      full_name.npos == dot ? full_name : full_name.substr(dot + 1);
+
   auto branch = m_chain.GetBranch(full_name.c_str());
   if (!branch) {
     if (a_optional) {
@@ -157,65 +193,58 @@ void RootImpl::BindBranch(Config &a_config, std::string const &a_name,
     throw std::runtime_error(__func__);
   }
 
-  // The title looks like "full_name/type" or "full_name[arr_ref]/type".
+  // The title looks like "full_name*" or "full_name[arr_ref]*".
   auto title = branch->GetTitle();
-  if (0 != strncmp(full_name.c_str(), title, full_name.length())) {
-    std::cerr << full_name << ": Title (" << title << ") mismatch.\n";
+  if (0 != strncmp(member.c_str(), title, member.length())) {
+    std::cerr << full_name << ": member=" << member <<
+        " title=" << title << " mismatch.\n";
     throw std::runtime_error(__func__);
   }
-  auto rover = &title[full_name.length()];
-  size_t arr_ref_i = 0;
-  if ('[' == *rover) {
-    auto bracket = rover + 1;
-    auto bracket_end = strchr(bracket, ']');
-    if (!bracket_end) {
-      std::cerr << title << ": Broken title bracket mismatch.\n";
-      throw std::runtime_error(__func__);
-    }
-    std::string arr_ref(bracket, static_cast<size_t>(bracket_end - bracket));
-    // arr_ref must have been defined recently, search backwards.
-    for (size_t j = 0;; ++j) {
-      if (m_branch_vec.size() == j) {
-        std::cerr << title << ": Array size reference undefined.\n";
-        throw std::runtime_error(__func__);
-      }
-      auto &entry = m_branch_vec.at(j);
-      if (0 == arr_ref.compare(entry.name)) {
-        arr_ref_i = 1 + j;
-        break;
-      }
-    }
-    rover = bracket_end + 1;
-  }
-  if ('/' != *rover) {
-    std::cerr << title << ": Branch title missing '/type'.\n";
+  auto bracket = &title[member.length()];
+  bool is_vector = '[' == *bracket;
+
+  TClass *exp_cls;
+  EDataType exp_typ;
+  branch->GetExpectedType(exp_cls, exp_typ);
+  if (exp_cls) {
+    std::cerr << full_name << ": Class members not supported.\n";
     throw std::runtime_error(__func__);
   }
   Input::Type type;
-  auto type_str = rover + 1;
-  if (0 == strcmp(type_str, "i")) {
-    type = Input::Type::kUint32;
-  } else {
-    std::cerr << title << ": Unsupported type.\n";
-    throw std::runtime_error(__func__);
+  switch (exp_typ) {
+    case kUChar_t: type = Input::Type::kUint8; break;
+    case kUShort_t: type = Input::Type::kUint16; break;
+    case kUInt_t: type = Input::Type::kUint32; break;
+    case kULong_t: type = Input::Type::kUint64; break;
+    default:
+      std::cerr << full_name <<
+          ": Unsupported ROOT type " << exp_typ << ".\n";
+      throw std::runtime_error(__func__);
   }
 
   auto id = m_branch_vec.size();
-  m_branch_vec.push_back(RootImpl::Entry(full_name, type, arr_ref_i));
+  m_branch_vec.push_back(RootImpl::Entry(full_name, type, is_vector));
   auto &entry = m_branch_vec.back();
 
   // Reader instantiation ladder.
   switch (type) {
-    case Input::Type::kUint32:
-      if (arr_ref_i) {
-        entry.arr_u32 = new
-            TTreeReaderArray<uint32_t>(m_reader, full_name.c_str());
-      } else {
-        entry.val_u32 = new
-            TTreeReaderValue<uint32_t>(m_reader, full_name.c_str());
-      }
-      break;
+#define READER_MAKE(depth) \
+    case Input::Type::kUint##depth: \
+      if (is_vector) { \
+        entry.arr_u##depth = new \
+            TTreeReaderArray<uint##depth##_t>(m_reader, full_name.c_str()); \
+      } else { \
+        entry.val_u##depth = new \
+            TTreeReaderValue<uint##depth##_t>(m_reader, full_name.c_str()); \
+      } \
+      break
+    READER_MAKE(8);
+    READER_MAKE(16);
+    READER_MAKE(32);
+    READER_MAKE(64);
     default:
+      std::cerr << full_name <<
+          ": Non-implemented input type " << type << ".\n";
       throw std::runtime_error(__func__);
   }
 
@@ -229,21 +258,25 @@ void RootImpl::Buffer()
   for (auto it = m_branch_vec.begin(); m_branch_vec.end() != it; ++it) {
     // TODO: Error-checking!
     switch (it->type) {
-      case Input::Type::kUint32:
-        if (it->arr_ref_i) {
-          auto const size = it->arr_u32->GetSize();
-          it->buf.resize(size);
-          if (size) {
-            memcpy(&it->buf[0], &it->arr_u32->At(0),
-                sizeof(uint32_t) * size);
-          }
-        } else {
-          it->buf.resize(1);
-          it->buf[0] = **it->val_u32;
-        }
-        break;
+#define BUF_COPY(depth) \
+      case Input::Type::kUint##depth: \
+        if (it->is_vector) { \
+          auto const size = it->arr_u##depth->GetSize(); \
+          it->buf.resize(size); \
+          for (size_t i = 0; i < size; ++i) { \
+            it->buf[i] = it->arr_u##depth->At(i); \
+          } \
+        } else { \
+          it->buf.resize(1); \
+          it->buf[0] = **it->val_u##depth; \
+        } \
+        break
+      BUF_COPY(8);
+      BUF_COPY(16);
+      BUF_COPY(32);
+      BUF_COPY(64);
       default:
-        std::cerr << it->name << ": Only uint32 input supported.\n";
+        std::cerr << it->name << ": Non-implemented input type.\n";
         throw std::runtime_error(__func__);
     }
   }
@@ -280,21 +313,13 @@ std::pair<void const *, size_t> RootImpl::GetData(size_t a_id)
 {
   const std::lock_guard<std::mutex> lock(m_mutex);
   auto const &entry = m_branch_vec.at(a_id);
-  switch (entry.type) {
-    case Input::Type::kUint32:
-      if (entry.arr_ref_i) {
-        if (entry.buf.empty()) {
-          return std::make_pair(nullptr, 0);
-        }
-        return std::make_pair(&entry.buf.at(0), entry.buf.size());
-      } else {
-        return std::make_pair(&entry.buf.at(0), 1);
-      }
-    default:
-      break;
+  if (entry.is_vector) {
+    if (entry.buf.empty()) {
+      return std::make_pair(nullptr, 0);
+    }
+    return std::make_pair(&entry.buf.at(0), entry.buf.size());
   }
-  std::cerr << entry.name << ": Only uint32 input supported.\n";
-  throw std::runtime_error(__func__);
+  return std::make_pair(&entry.buf.at(0), 1);
 }
 
 Root::Root(Config &a_config, int a_argc, char **a_argv):

@@ -131,7 +131,7 @@ zero_suppress          return TK_ZERO_SUPPRESS;
 	return TK_IDENT;
 }
 
-[\+\-*(),\.=\[\]] return *yycptext;
+[\+\-*(),\.:=\[\]] return *yycptext;
 
 [ \t\n] ;
 
