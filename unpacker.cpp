@@ -46,7 +46,8 @@ Unpacker::Unpacker(Config &a_config, int a_argc, char **a_argv):
   m_struct_info(),
   m_map(),
   m_event_buf(),
-  m_event_buf_i()
+  m_out_size(),
+  m_out_buf()
 {
   // Make string of signals.
   std::string signals_str;
@@ -138,8 +139,8 @@ Unpacker::Unpacker(Config &a_config, int a_argc, char **a_argv):
     BindSignal(a_config, buf_macro, *it,  "E",  "v", event_buf_i, signal_map,
         true);
   }
-  m_event_buf[0].resize(event_buf_i);
-  m_event_buf[1].resize(event_buf_i);
+  m_event_buf.resize(event_buf_i);
+  m_out_buf.resize(m_out_size);
 
   /* Run unpacker and connect. */
   std::string cmd = std::string(m_path) + " --ntuple=RAW," + signals_str +
@@ -230,13 +231,15 @@ void Unpacker::BindSignal(Config &a_config, std::vector<char> const
   for (; isblank(*p); ++p)
     ;
   int struct_info_type;
-  Type type;
-  size_t type_bytes;
+  Type output_type;
+  size_t in_type_bytes;
+  size_t out_type_bytes;
   size_t arr_n;
   if (MATCH_WORD(p, "UINT32,")) {
     struct_info_type = EXT_DATA_ITEM_TYPE_UINT32;
-    type = kUint32;
-    type_bytes = sizeof(uint32_t);
+    output_type = kUint64;
+    in_type_bytes = sizeof(uint32_t);
+    out_type_bytes = sizeof(uint64_t);
   } else {
     auto q = p;
     for (; isalnum(*p); ++p)
@@ -287,38 +290,39 @@ void Unpacker::BindSignal(Config &a_config, std::vector<char> const
     std::cerr << full_name << ": 0 array limit.\n";
     throw std::runtime_error(__func__);
   }
-  auto bytes = type_bytes * arr_n;
+  auto in_bytes = in_type_bytes * arr_n;
+  auto out_bytes = out_type_bytes * arr_n;
   // 32-bit align.
   a_event_buf_i = (a_event_buf_i + 3U) & ~3U;
-  a_config.BindSignal(a_name, a_config_suffix, m_map.size(), type);
+  a_config.BindSignal(a_name, a_config_suffix, m_map.size(), output_type);
 
-  std::cout << full_name << ": " << a_event_buf_i << ' ' << type_bytes << '*'
-      << arr_n << '\n';
+  std::cout << full_name << ": " << a_event_buf_i << ' ' << in_type_bytes <<
+      '*' << arr_n << '\n';
 
   // Setup links.
   int ok = 1;
   if (MATCH_WORD(macro, "EXT_STR_ITEM_INFO") ||
       MATCH_WORD(macro, "EXT_STR_ITEM_INFO2")) {
     // Unlimited scalar.
-std::cout << "0: " << a_event_buf_i << ' ' << bytes << ' ' << struct_info_type
-<< ' ' << full_name << '\n';
+std::cout << "0: " << a_event_buf_i << ' ' << in_bytes << ' ' <<
+struct_info_type << ' ' << full_name << '\n';
     ok &= 0 == ext_data_struct_info_item(m_struct_info, a_event_buf_i,
-        bytes, struct_info_type, "", -1, full_name.c_str(), "", -1, 0);
+        in_bytes, struct_info_type, "", -1, full_name.c_str(), "", -1, 0);
   } else if (MATCH_WORD(macro, "EXT_STR_ITEM_INFO_LIM") ||
       MATCH_WORD(macro, "EXT_STR_ITEM_INFO2_LIM")) {
     // Limited scalar.
-std::cout << "1: " << a_event_buf_i << ' ' << bytes << ' ' << struct_info_type
-<< ' ' << full_name << ' ' << ret.first->second << '\n';
+std::cout << "1: " << a_event_buf_i << ' ' << in_bytes << ' ' <<
+struct_info_type << ' ' << full_name << ' ' << ret.first->second << '\n';
     ok &= 0 == ext_data_struct_info_item(m_struct_info, a_event_buf_i,
-        bytes, struct_info_type, "", -1, full_name.c_str(), "",
+        in_bytes, struct_info_type, "", -1, full_name.c_str(), "",
         static_cast<int>(ret.first->second), 0);
   } else if (MATCH_WORD(macro, "EXT_STR_ITEM_INFO_ZZP") ||
       MATCH_WORD(macro, "EXT_STR_ITEM_INFO2_ZZP")) {
-std::cout << "2: " << a_event_buf_i << ' ' << bytes << ' ' << struct_info_type
-<< ' ' << full_name << ' ' << ctrl << '\n';
+std::cout << "2: " << a_event_buf_i << ' ' << in_bytes << ' ' <<
+struct_info_type << ' ' << full_name << ' ' << ctrl << '\n';
     ok &= 0 == ext_data_struct_info_item(m_struct_info, a_event_buf_i,
-        bytes, struct_info_type, "", -1, full_name.c_str(), ctrl.c_str(), -1,
-        0);
+        in_bytes, struct_info_type, "", -1, full_name.c_str(), ctrl.c_str(),
+        -1, 0);
   } else {
     std::cerr << full_name << ": unknown struct-info macro.\n";
     throw std::runtime_error(__func__);
@@ -329,14 +333,22 @@ std::cout << "2: " << a_event_buf_i << ' ' << bytes << ' ' << struct_info_type
     throw std::runtime_error(__func__);
   }
 
-  m_map.push_back(Entry(a_event_buf_i, arr_n));
+  m_map.push_back(Entry(a_event_buf_i, m_out_size, arr_n));
 
-  a_event_buf_i += bytes;
+  a_event_buf_i += in_bytes;
+  m_out_size += out_bytes;
 }
 
 void Unpacker::Buffer()
 {
-  m_event_buf_i ^= 1;
+  // Convert ucesb event-buffer.
+  for (auto it = m_map.begin(); m_map.end() != it; ++it) {
+    auto pin = (uint32_t const *)&m_event_buf[it->in_ofs];
+    auto pout = (uint64_t *)&m_out_buf[it->out_ofs];
+    for (size_t i = 0; i < it->len; ++i) {
+      *pout++ = *pin++;
+    }
+  }
 }
 
 std::vector<char> Unpacker::ExtractRange(std::vector<char> const &a_buf, char
@@ -361,9 +373,8 @@ std::vector<char> Unpacker::ExtractRange(std::vector<char> const &a_buf, char
 
 bool Unpacker::Fetch()
 {
-  auto &buf = m_event_buf[m_event_buf_i ^ 1];
-  memset(buf.data(), 0, buf.size());
-  auto ret = m_clnt->fetch_event(buf.data(), buf.size());
+  memset(m_event_buf.data(), 0, m_event_buf.size());
+  auto ret = m_clnt->fetch_event(m_event_buf.data(), m_event_buf.size());
   if (0 == ret) {
     return false;
   }
@@ -377,7 +388,7 @@ bool Unpacker::Fetch()
 std::pair<void const *, size_t> Unpacker::GetData(size_t a_id)
 {
   auto &entry = m_map.at(a_id);
-  return std::make_pair(&m_event_buf[m_event_buf_i].at(entry.ofs), entry.len);
+  return std::make_pair(&m_out_buf.at(entry.out_ofs), entry.len);
 }
 
 

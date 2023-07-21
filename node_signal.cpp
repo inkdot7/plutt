@@ -66,9 +66,6 @@ std::cout << m_name << '.' << a_suffix << " id=" << a_id << " type=" << a_type
   }
   *mem = new Member;
   switch (a_type) {
-    case Input::Type::kUint8:
-    case Input::Type::kUint16:
-    case Input::Type::kUint32:
     case Input::Type::kUint64:
       (*mem)->type = Value::Type::kUint64;
       break;
@@ -93,10 +90,13 @@ void NodeSignal::Process(uint64_t a_evid)
   auto const p_##SUFF = m_config->GetInput()->GetData(m_##SUFF->id); \
   auto const p64_##SUFF = static_cast<uint64_t const *>(p_##SUFF.first); \
   auto const len_##SUFF = p_##SUFF.second
-#define SIGNAL_LEN_CHECK(cond) do { \
-  if (!(cond)) { \
+#define SIGNAL_LEN_CHECK(l, op, r) do { \
+  auto l_ = l; \
+  auto r_ = r; \
+  if (!(l_ op r_)) { \
     std::cerr << __FILE__ << ':' << __LINE__ << ':' << m_name << \
-        ": Signal check failed: (" << #cond << ").\n"; \
+        ": Signal check failed: (" << \
+        #l "=" << l_ << " " #op " " #r "=" << r_ << ").\n"; \
     return; \
   } \
 } while (0)
@@ -107,10 +107,10 @@ void NodeSignal::Process(uint64_t a_evid)
     FETCH_SIGNAL_DATA(ME);
     FETCH_SIGNAL_DATA();
     FETCH_SIGNAL_DATA(v);
-    SIGNAL_LEN_CHECK(1 == len_M);
-    SIGNAL_LEN_CHECK(len_ME == len_MI);
-    SIGNAL_LEN_CHECK(1 == len_);
-    SIGNAL_LEN_CHECK(*p64_ <= len_v);
+    SIGNAL_LEN_CHECK(1U, ==, len_M);
+    SIGNAL_LEN_CHECK(len_ME, ==, len_MI);
+    SIGNAL_LEN_CHECK(1U, ==, len_);
+    SIGNAL_LEN_CHECK(*p64_, <=, len_v);
     m_value.SetType(m_v->type);
     uint32_t v_i = 0;
     for (uint32_t i = 0; i < *p64_M; ++i) {
@@ -127,9 +127,9 @@ void NodeSignal::Process(uint64_t a_evid)
     FETCH_SIGNAL_DATA();
     FETCH_SIGNAL_DATA(MI);
     FETCH_SIGNAL_DATA(v);
-    SIGNAL_LEN_CHECK(1 == len_);
-    SIGNAL_LEN_CHECK(*p64_ <= len_MI);
-    SIGNAL_LEN_CHECK(*p64_ <= len_v);
+    SIGNAL_LEN_CHECK(1U, ==, len_);
+    SIGNAL_LEN_CHECK(*p64_, <=, len_MI);
+    SIGNAL_LEN_CHECK(*p64_, <=, len_v);
     m_value.SetType(m_v->type);
     for (uint32_t i = 0; i < *p64_; ++i) {
       Value::Scalar s;
@@ -141,8 +141,8 @@ void NodeSignal::Process(uint64_t a_evid)
     // Non-indexed array.
     FETCH_SIGNAL_DATA();
     FETCH_SIGNAL_DATA(v);
-    SIGNAL_LEN_CHECK(1 == len_);
-    SIGNAL_LEN_CHECK(*p64_ <= len_v);
+    SIGNAL_LEN_CHECK(1U, ==, len_);
+    SIGNAL_LEN_CHECK(*p64_, <=, len_v);
     m_value.SetType(m_v->type);
     for (uint32_t i = 0; i < *p64_; ++i) {
       Value::Scalar s;
@@ -152,7 +152,7 @@ void NodeSignal::Process(uint64_t a_evid)
   } else {
     // Scalar.
     FETCH_SIGNAL_DATA();
-    if (0) SIGNAL_LEN_CHECK(1 == len_);
+    SIGNAL_LEN_CHECK(1U, >=, len_);
     m_value.SetType(m_->type);
     Value::Scalar s;
     if (p64_) {

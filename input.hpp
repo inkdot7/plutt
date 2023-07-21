@@ -52,12 +52,8 @@
  */
 class Input {
   public:
-    // TODO: GetData is all 64... Clean up!
     enum Type {
       kNone,
-      kUint8,
-      kUint16,
-      kUint32,
       kUint64
     };
 

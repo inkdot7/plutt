@@ -23,7 +23,6 @@
 
 #include <root.hpp>
 #include <sys/stat.h>
-#include <mutex>
 #include <TChain.h>
 #include <TTreeReader.h>
 #include <TTreeReaderArray.h>
@@ -46,9 +45,11 @@ class RootImpl {
     TChain m_chain;
     TTreeReader m_reader;
     struct Entry {
-      Entry(std::string a_name, Input::Type a_type, bool a_is_vector):
+      Entry(std::string a_name, EDataType a_in_type, Input::Type a_out_type,
+          bool a_is_vector):
         name(a_name),
-        type(a_type),
+        in_type(a_in_type),
+        out_type(a_out_type),
         is_vector(a_is_vector),
         val_u8(),
         arr_u8(),
@@ -63,7 +64,8 @@ class RootImpl {
       }
       Entry(Entry const &a_e):
         name(),
-        type(),
+        in_type(),
+        out_type(),
         is_vector(),
         val_u8(),
         arr_u8(),
@@ -83,7 +85,8 @@ class RootImpl {
         return *this;
       }
       std::string name;
-      Input::Type type;
+      EDataType in_type;
+      Input::Type out_type;
       bool is_vector;
       TTreeReaderValue<uint8_t> *val_u8;
       TTreeReaderArray<uint8_t> *arr_u8;
@@ -98,7 +101,8 @@ class RootImpl {
       void Copy(Entry const &a_e)
       {
         name = a_e.name;
-        type = a_e.type;
+        in_type = a_e.in_type;
+        out_type = a_e.out_type;
         is_vector = a_e.is_vector;
         // With great power comes great guns to shoot your foot with.
         // We can cheat a bit here:
@@ -116,7 +120,6 @@ class RootImpl {
         arr_u64 = a_e.arr_u64;
       }
     };
-    std::mutex m_mutex;
     std::vector<Entry> m_branch_vec;
     Long64_t m_ev_n;
     Long64_t m_ev_i;
@@ -127,7 +130,6 @@ class RootImpl {
 RootImpl::RootImpl(Config &a_config, int a_argc, char **a_argv):
   m_chain(a_argv[0]),
   m_reader(&m_chain),
-  m_mutex(),
   m_branch_vec(),
   m_ev_n(),
   m_ev_i(),
@@ -204,32 +206,35 @@ void RootImpl::BindBranch(Config &a_config, std::string const &a_name, char
   bool is_vector = '[' == *bracket;
 
   TClass *exp_cls;
-  EDataType exp_typ;
-  branch->GetExpectedType(exp_cls, exp_typ);
+  EDataType exp_type;
+  branch->GetExpectedType(exp_cls, exp_type);
   if (exp_cls) {
     std::cerr << full_name << ": Class members not supported.\n";
     throw std::runtime_error(__func__);
   }
-  Input::Type type;
-  switch (exp_typ) {
-    case kUChar_t: type = Input::Type::kUint8; break;
-    case kUShort_t: type = Input::Type::kUint16; break;
-    case kUInt_t: type = Input::Type::kUint32; break;
-    case kULong_t: type = Input::Type::kUint64; break;
+  Input::Type out_type;
+  switch (exp_type) {
+    case kUChar_t:
+    case kUShort_t:
+    case kUInt_t:
+    case kULong_t:
+      out_type = Input::Type::kUint64;
+      break;
     default:
       std::cerr << full_name <<
-          ": Unsupported ROOT type " << exp_typ << ".\n";
+          ": Unsupported ROOT type " << exp_type << ".\n";
       throw std::runtime_error(__func__);
   }
 
   auto id = m_branch_vec.size();
-  m_branch_vec.push_back(RootImpl::Entry(full_name, type, is_vector));
+  m_branch_vec.push_back(RootImpl::Entry(full_name, exp_type, out_type,
+      is_vector));
   auto &entry = m_branch_vec.back();
 
   // Reader instantiation ladder.
-  switch (type) {
-#define READER_MAKE(depth) \
-    case Input::Type::kUint##depth: \
+  switch (exp_type) {
+#define READER_MAKE(root_type, depth) \
+    case root_type: \
       if (is_vector) { \
         entry.arr_u##depth = new \
             TTreeReaderArray<uint##depth##_t>(m_reader, full_name.c_str()); \
@@ -238,28 +243,27 @@ void RootImpl::BindBranch(Config &a_config, std::string const &a_name, char
             TTreeReaderValue<uint##depth##_t>(m_reader, full_name.c_str()); \
       } \
       break
-    READER_MAKE(8);
-    READER_MAKE(16);
-    READER_MAKE(32);
-    READER_MAKE(64);
+    READER_MAKE(kUChar_t, 8);
+    READER_MAKE(kUShort_t, 16);
+    READER_MAKE(kUInt_t, 32);
+    READER_MAKE(kULong_t, 64);
     default:
       std::cerr << full_name <<
-          ": Non-implemented input type " << type << ".\n";
+          ": Non-implemented input type " << out_type << ".\n";
       throw std::runtime_error(__func__);
   }
 
-  a_config.BindSignal(a_name, a_config_suffix, id, type);
+  a_config.BindSignal(a_name, a_config_suffix, id, out_type);
 }
 
 void RootImpl::Buffer()
 {
   // Copy from readers to vectors.
-  const std::lock_guard<std::mutex> lock(m_mutex);
   for (auto it = m_branch_vec.begin(); m_branch_vec.end() != it; ++it) {
     // TODO: Error-checking!
-    switch (it->type) {
-#define BUF_COPY(depth) \
-      case Input::Type::kUint##depth: \
+    switch (it->in_type) {
+#define BUF_COPY(root_type, depth) \
+      case root_type: \
         if (it->is_vector) { \
           auto const size = it->arr_u##depth->GetSize(); \
           it->buf.resize(size); \
@@ -271,10 +275,10 @@ void RootImpl::Buffer()
           it->buf[0] = **it->val_u##depth; \
         } \
         break
-      BUF_COPY(8);
-      BUF_COPY(16);
-      BUF_COPY(32);
-      BUF_COPY(64);
+      BUF_COPY(kUChar_t, 8);
+      BUF_COPY(kUShort_t, 16);
+      BUF_COPY(kUInt_t, 32);
+      BUF_COPY(kULong_t, 64);
       default:
         std::cerr << it->name << ": Non-implemented input type.\n";
         throw std::runtime_error(__func__);
@@ -311,7 +315,6 @@ bool RootImpl::Fetch()
 
 std::pair<void const *, size_t> RootImpl::GetData(size_t a_id)
 {
-  const std::lock_guard<std::mutex> lock(m_mutex);
   auto const &entry = m_branch_vec.at(a_id);
   if (entry.is_vector) {
     if (entry.buf.empty()) {

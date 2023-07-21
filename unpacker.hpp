@@ -65,18 +65,20 @@ class Unpacker: public Input {
     FILE *m_pip;
     ext_data_struct_info m_struct_info;
     struct Entry {
-      Entry(size_t a_ofs, size_t a_len):
-        ofs(a_ofs),
+      Entry(size_t a_in_ofs, size_t a_out_ofs, size_t a_len):
+        in_ofs(a_in_ofs),
+        out_ofs(a_out_ofs),
         len(a_len)
       {
       }
-      size_t ofs;
+      size_t in_ofs;
+      size_t out_ofs;
       size_t len;
     };
     std::vector<Entry> m_map;
-    std::vector<uint8_t> m_event_buf[2];
-    // Points to the buffer that has the last buffered event.
-    size_t m_event_buf_i;
+    std::vector<uint8_t> m_event_buf;
+    size_t m_out_size;
+    std::vector<uint8_t> m_out_buf;
 };
 
 #endif
