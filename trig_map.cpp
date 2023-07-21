@@ -87,8 +87,8 @@ TrigMap::Prefix const *TrigMap::LoadPrefix(char const *a_path, char const
     m_prefix_map_last = &path_it->second;
     yytmin = fopen(a_path, "rb");
     if (!yytmin) {
-      std::cerr << a_path << ':' << a_prefix_name << ": Could not open: " <<
-          strerror(errno) << ".\n";
+      std::cerr << a_path << ':' << a_prefix_name <<
+          ": Could not open: " << strerror(errno) << ".\n";
       throw std::runtime_error(__func__);
     }
     yytmpath = a_path;
@@ -103,5 +103,10 @@ TrigMap::Prefix const *TrigMap::LoadPrefix(char const *a_path, char const
   }
   auto &prefix_map = path_it->second;
   auto prefix_it = prefix_map.find(a_prefix_name);
+  if (prefix_map.end() == prefix_it) {
+    std::cerr << a_path << ':' << a_prefix_name <<
+        ": Prefix not in file.\n";
+    throw std::runtime_error(__func__);
+  }
   return &prefix_it->second;
 }
