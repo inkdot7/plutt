@@ -70,7 +70,7 @@ std::cout << m_name << '.' << a_suffix << " id=" << a_id << " type=" << a_type
       (*mem)->type = Value::Type::kUint64;
       break;
     default:
-    std::cerr << GetLocStr() << ": Non-implemented input type.\n";
+    std::cerr << GetLocStr() << ": Non-implemented input type (BindSignal).\n";
       throw std::runtime_error(__func__);
   }
   (*mem)->id = a_id;
