@@ -44,7 +44,7 @@ void NodeSignal::BindSignal(std::string const &a_suffix, size_t a_id,
 std::cout << m_name << '.' << a_suffix << " id=" << a_id << " type=" << a_type
     << '\n';
 #define BIND_SIGNAL_ASSERT_INT do { \
-    if (Input::Type::kUint64 != a_type) { \
+    if (Input::kUint64 != a_type) { \
       std::cerr << GetLocStr() << ": 'M' member not integer!\n"; \
       throw std::runtime_error(__func__); \
     } \
@@ -75,11 +75,11 @@ std::cout << m_name << '.' << a_suffix << " id=" << a_id << " type=" << a_type
   }
   *mem = new Member;
   switch (a_type) {
-    case Input::Type::kUint64:
-      (*mem)->type = Input::Type::kUint64;
+    case Input::kUint64:
+      (*mem)->type = Input::kUint64;
       break;
-    case Input::Type::kDouble:
-      (*mem)->type = Input::Type::kDouble;
+    case Input::kDouble:
+      (*mem)->type = Input::kDouble;
       break;
     default:
     std::cerr << GetLocStr() << ": Non-implemented input type.\n";

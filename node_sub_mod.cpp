@@ -55,7 +55,7 @@ void NodeSubMod::Process(uint64_t a_evid)
     return;
   }
   NODE_ASSERT(val_l.GetType(), ==, val_r.GetType());
-  m_value.SetType(Input::Type::kDouble);
+  m_value.SetType(Input::kDouble);
 
   uint32_t i_l = 0;
   uint32_t i_r = 0;

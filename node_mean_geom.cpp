@@ -45,7 +45,7 @@ void NodeMeanGeom::Process(uint64_t a_evid)
   NODE_PROCESS(m_l, a_evid);
 
   m_value.Clear();
-  m_value.SetType(Input::Type::kDouble);
+  m_value.SetType(Input::kDouble);
 
   auto const &val_l = m_l->GetValue();
 

@@ -47,7 +47,7 @@ void NodeTrigMap::Process(uint64_t a_evid)
   NODE_PROCESS(m_trig, a_evid);
 
   m_value.Clear();
-  m_value.SetType(Input::Type::kDouble);
+  m_value.SetType(Input::kDouble);
 
   // Build trigger lookup vector.
   std::vector<double> trig_vec;

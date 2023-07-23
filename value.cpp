@@ -23,7 +23,7 @@
 #include <stdexcept>
 
 Value::Value():
-  m_type(Input::Type::kNone),
+  m_type(Input::kNone),
   m_mi(),
   m_me(),
   m_v()
@@ -78,7 +78,7 @@ Vector<Input::Scalar> const &Value::GetV() const
 double Value::GetV(uint32_t a_i, bool a_do_signed) const
 {
   switch (m_type) {
-    case Input::Type::kUint64:
+    case Input::kUint64:
       {
         auto u64 = m_v.at(a_i).u64;
         if (a_do_signed) {
@@ -86,7 +86,7 @@ double Value::GetV(uint32_t a_i, bool a_do_signed) const
         }
         return (double)u64;
       }
-    case Input::Type::kDouble:
+    case Input::kDouble:
       return m_v.at(a_i).dbl;
     default:
       throw std::runtime_error(__func__);
@@ -107,7 +107,7 @@ void Value::Push(uint32_t a_i, Input::Scalar const &a_v)
 
 void Value::SetType(Input::Type a_type)
 {
-  if (Input::Type::kNone != m_type && a_type != m_type) {
+  if (Input::kNone != m_type && a_type != m_type) {
     std::runtime_error("Value cannot change type!");
   }
   m_type = a_type;

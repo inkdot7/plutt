@@ -50,7 +50,7 @@ void NodeTot::Process(uint64_t a_evid)
   auto const &val_l = m_l->GetValue();
   auto const &val_t = m_t->GetValue();
   NODE_ASSERT(val_l.GetType(), ==, val_t.GetType());
-  m_value.SetType(Input::Type::kDouble);
+  m_value.SetType(Input::kDouble);
 
   uint32_t i_l = 0;
   uint32_t i_t = 0;

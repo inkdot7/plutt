@@ -69,8 +69,8 @@ NodePedestal::NodePedestal(std::string const &a_loc, NodeValue *a_child,
   m_sigma(),
   m_stats()
 {
-  m_value.SetType(Input::Type::kDouble);
-  m_sigma.SetType(Input::Type::kDouble);
+  m_value.SetType(Input::kDouble);
+  m_sigma.SetType(Input::kDouble);
 }
 
 Value const &NodePedestal::GetValue(uint32_t a_ret_i)

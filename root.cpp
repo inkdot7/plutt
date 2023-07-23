@@ -238,11 +238,11 @@ void RootImpl::BindBranch(Config &a_config, std::string const &a_name, char
     case kUShort_t:
     case kUInt_t:
     case kULong_t:
-      out_type = Input::Type::kUint64;
+      out_type = Input::kUint64;
       break;
     case kFloat_t:
     case kDouble_t:
-      out_type = Input::Type::kDouble;
+      out_type = Input::kDouble;
       break;
     default:
       std::cerr << full_name <<

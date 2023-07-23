@@ -56,7 +56,7 @@ void NodeCoarseFine::Process(uint64_t a_evid)
   NODE_ASSERT(val_c.GetMI().size(), ==, val_f.GetMI().size());
   NODE_ASSERT(val_c.GetV().size(), ==, val_f.GetV().size());
 
-  m_value.SetType(Input::Type::kDouble);
+  m_value.SetType(Input::kDouble);
 
   uint32_t vi = 0;
   for (uint32_t i = 0; i < val_c.GetMI().size(); ++i) {
