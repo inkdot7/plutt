@@ -51,14 +51,14 @@ class RootImpl {
         in_type(a_in_type),
         out_type(a_out_type),
         is_vector(a_is_vector),
-        val_u8(),
-        arr_u8(),
-        val_u16(),
-        arr_u16(),
-        val_u32(),
-        arr_u32(),
-        val_u64(),
-        arr_u64(),
+        val_uchar(),
+        arr_uchar(),
+        val_ushort(),
+        arr_ushort(),
+        val_uint(),
+        arr_uint(),
+        val_ulong(),
+        arr_ulong(),
         val_float(),
         arr_float(),
         val_double(),
@@ -71,14 +71,14 @@ class RootImpl {
         in_type(),
         out_type(),
         is_vector(),
-        val_u8(),
-        arr_u8(),
-        val_u16(),
-        arr_u16(),
-        val_u32(),
-        arr_u32(),
-        val_u64(),
-        arr_u64(),
+        val_uchar(),
+        arr_uchar(),
+        val_ushort(),
+        arr_ushort(),
+        val_uint(),
+        arr_uint(),
+        val_ulong(),
+        arr_ulong(),
         val_float(),
         arr_float(),
         val_double(),
@@ -96,18 +96,18 @@ class RootImpl {
       EDataType in_type;
       Input::Type out_type;
       bool is_vector;
-      TTreeReaderValue<uint8_t> *val_u8;
-      TTreeReaderArray<uint8_t> *arr_u8;
-      TTreeReaderValue<uint16_t> *val_u16;
-      TTreeReaderArray<uint16_t> *arr_u16;
-      TTreeReaderValue<uint32_t> *val_u32;
-      TTreeReaderArray<uint32_t> *arr_u32;
-      TTreeReaderValue<uint64_t> *val_u64;
-      TTreeReaderArray<uint64_t> *arr_u64;
-      TTreeReaderValue<float> *val_float;
-      TTreeReaderArray<float> *arr_float;
-      TTreeReaderValue<double> *val_double;
-      TTreeReaderArray<double> *arr_double;
+      TTreeReaderValue<UChar_t> *val_uchar;
+      TTreeReaderArray<UChar_t> *arr_uchar;
+      TTreeReaderValue<UShort_t> *val_ushort;
+      TTreeReaderArray<UShort_t> *arr_ushort;
+      TTreeReaderValue<UInt_t> *val_uint;
+      TTreeReaderArray<UInt_t> *arr_uint;
+      TTreeReaderValue<ULong_t> *val_ulong;
+      TTreeReaderArray<ULong_t> *arr_ulong;
+      TTreeReaderValue<Float_t> *val_float;
+      TTreeReaderArray<Float_t> *arr_float;
+      TTreeReaderValue<Double_t> *val_double;
+      TTreeReaderArray<Double_t> *arr_double;
       Vector<Input::Scalar> buf;
       private:
       void Copy(Entry const &a_e)
@@ -122,14 +122,14 @@ class RootImpl {
         // there's really only one place for these.
         // The ownership is really with RootImpl since it allocates, so it
         // must also delete.
-        val_u8 = a_e.val_u8;
-        arr_u8 = a_e.arr_u8;
-        val_u16 = a_e.val_u16;
-        arr_u16 = a_e.arr_u16;
-        val_u32 = a_e.val_u32;
-        arr_u32 = a_e.arr_u32;
-        val_u64 = a_e.val_u64;
-        arr_u64 = a_e.arr_u64;
+        val_uchar = a_e.val_uchar;
+        arr_uchar = a_e.arr_uchar;
+        val_ushort = a_e.val_ushort;
+        arr_ushort = a_e.arr_ushort;
+        val_uint = a_e.val_uint;
+        arr_uint = a_e.arr_uint;
+        val_ulong = a_e.val_ulong;
+        arr_ulong = a_e.arr_ulong;
         val_float = a_e.val_float;
         arr_float = a_e.arr_float;
         val_double = a_e.val_double;
@@ -180,14 +180,14 @@ RootImpl::RootImpl(Config &a_config, int a_argc, char **a_argv):
 RootImpl::~RootImpl()
 {
   for (auto it = m_branch_vec.begin(); m_branch_vec.end() != it; ++it) {
-    delete it->val_u8;
-    delete it->arr_u8;
-    delete it->val_u16;
-    delete it->arr_u16;
-    delete it->val_u32;
-    delete it->arr_u32;
-    delete it->val_u64;
-    delete it->arr_u64;
+    delete it->val_uchar;
+    delete it->arr_uchar;
+    delete it->val_ushort;
+    delete it->arr_ushort;
+    delete it->val_uint;
+    delete it->arr_uint;
+    delete it->val_ulong;
+    delete it->arr_ulong;
     delete it->val_float;
     delete it->arr_float;
     delete it->val_double;
@@ -257,25 +257,23 @@ void RootImpl::BindBranch(Config &a_config, std::string const &a_name, char
 
   // Reader instantiation ladder.
   switch (exp_type) {
-#define READER_MAKE_TYPE(root_type, c_type, arr_member, val_member)     \
+#define READER_MAKE_TYPE(root_type, c_type, reader_type)     \
     case root_type: \
       if (is_vector) { \
-        entry.arr_member = new \
+        entry.arr_##reader_type = new \
             TTreeReaderArray<c_type>(m_reader, full_name.c_str()); \
       } else { \
-        entry.val_member = new                                        \
+        entry.val_##reader_type = new                                        \
             TTreeReaderValue<c_type>(m_reader, full_name.c_str()); \
       } \
       break
-#define READER_MAKE_UINT(root_type, depth) \
-    READER_MAKE_TYPE(root_type, uint##depth##_t, arr_u##depth, val_u##depth)
 
-    READER_MAKE_UINT(kUChar_t, 8);
-    READER_MAKE_UINT(kUShort_t, 16);
-    READER_MAKE_UINT(kUInt_t, 32);
-    READER_MAKE_UINT(kULong_t, 64);
-    READER_MAKE_TYPE(kFloat_t, float, arr_float, val_float);
-    READER_MAKE_TYPE(kDouble_t, double, arr_double, val_double);
+    READER_MAKE_TYPE(kUChar_t,  UChar_t,  uchar);
+    READER_MAKE_TYPE(kUShort_t, UShort_t, ushort);
+    READER_MAKE_TYPE(kUInt_t,   UInt_t,   uint);
+    READER_MAKE_TYPE(kULong_t,  ULong_t,  ulong);
+    READER_MAKE_TYPE(kFloat_t,  float,    float);
+    READER_MAKE_TYPE(kDouble_t, double,   double);
     default:
       std::cerr << full_name <<
           ": Non-implemented input type " << out_type << ".\n";
@@ -304,10 +302,10 @@ void RootImpl::Buffer()
           it->buf[0].s_type = **it->val_##reader_type; \
         } \
         break
-      BUF_COPY_TYPE(kUChar_t,  u8,     u64);
-      BUF_COPY_TYPE(kUShort_t, u16,    u64);
-      BUF_COPY_TYPE(kUInt_t,   u32,    u64);
-      BUF_COPY_TYPE(kULong_t,  u64,    u64);
+      BUF_COPY_TYPE(kUChar_t,  uchar,  u64);
+      BUF_COPY_TYPE(kUShort_t, ushort, u64);
+      BUF_COPY_TYPE(kUInt_t,   uint,   u64);
+      BUF_COPY_TYPE(kULong_t,  ulong,  u64);
       BUF_COPY_TYPE(kFloat_t,  float,  dbl);
       BUF_COPY_TYPE(kDouble_t, double, dbl);
       default:
