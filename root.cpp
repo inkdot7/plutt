@@ -249,7 +249,7 @@ void RootImpl::BindBranch(Config &a_config, std::string const &a_name, char
     READER_MAKE(kULong_t, 64);
     default:
       std::cerr << full_name <<
-          ": Non-implemented input type " << out_type << ".\n";
+          ": Non-implemented input type " << out_type << " (BindBranch).\n";
       throw std::runtime_error(__func__);
   }
 
@@ -280,7 +280,7 @@ void RootImpl::Buffer()
       BUF_COPY(kUInt_t, 32);
       BUF_COPY(kULong_t, 64);
       default:
-        std::cerr << it->name << ": Non-implemented input type.\n";
+        std::cerr << it->name << ": Non-implemented input type (Buffer).\n";
         throw std::runtime_error(__func__);
     }
   }
