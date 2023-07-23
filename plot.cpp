@@ -690,6 +690,9 @@ void PlotHist2::Prefill(Value::Type a_type_y, Value::Scalar const &a_y,
 
 void plot(ImPlutt::Window *a_window, double a_event_rate)
 {
+  if (g_page_list.empty()) {
+    return;
+  }
   if (g_page_list.size() > 1) {
     for (auto it = g_page_list.begin(); g_page_list.end() != it; ++it) {
       if (a_window->Button(it->GetLabel().c_str())) {
