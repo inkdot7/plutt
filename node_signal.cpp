@@ -69,6 +69,9 @@ std::cout << m_name << '.' << a_suffix << " id=" << a_id << " type=" << a_type
     case Input::Type::kUint64:
       (*mem)->type = Value::Type::kUint64;
       break;
+    case Input::Type::kDouble:
+      (*mem)->type = Value::Type::kDouble;
+      break;
     default:
     std::cerr << GetLocStr() << ": Non-implemented input type (BindSignal).\n";
       throw std::runtime_error(__func__);

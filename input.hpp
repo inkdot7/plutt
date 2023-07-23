@@ -54,7 +54,8 @@ class Input {
   public:
     enum Type {
       kNone,
-      kUint64
+      kUint64,
+      kDouble
     };
 
     virtual ~Input() {}
