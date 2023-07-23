@@ -32,7 +32,7 @@ MyTest g_test_node_bitfield_;
 
 void ProcessExtra0(MockNodeValue &a_nv)
 {
-  Value::Scalar s;
+  Input::Scalar s;
   s.u64 = 1;
   a_nv.m_value[0].Push(1, s);
   s.u64 = 2;
@@ -41,7 +41,7 @@ void ProcessExtra0(MockNodeValue &a_nv)
 
 void ProcessExtra1(MockNodeValue &a_nv)
 {
-  Value::Scalar s;
+  Input::Scalar s;
   s.u64 = 3;
   a_nv.m_value[0].Push(1, s);
   s.u64 = 4;
@@ -57,9 +57,9 @@ void MyTest::Run()
     TestNodeBase(n, "a");
   }
   {
-    MockNodeValue nv0(Value::kUint64, 1, ProcessExtra0);
+    MockNodeValue nv0(Input::kUint64, 1, ProcessExtra0);
     auto a0 = new BitfieldArg("a0", &nv0, 8);
-    MockNodeValue nv1(Value::kUint64, 1, ProcessExtra1);
+    MockNodeValue nv1(Input::kUint64, 1, ProcessExtra1);
     auto a1 = new BitfieldArg("a1", &nv1, 8);
     // Parser builds arg-list in reverse order!
     a1->next = a0;

@@ -120,8 +120,8 @@ class Config {
     struct {
       NodeValue *node;
       double s_from_ts;
-      Value::Scalar ts_prev;
-      Value::Scalar ts0;
+      Input::Scalar ts_prev;
+      Input::Scalar ts0;
       double t0;
     } m_clock_match;
     size_t m_colormap;

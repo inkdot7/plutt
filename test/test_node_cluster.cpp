@@ -33,7 +33,7 @@ MyTest g_test_node_cluster_;
 
 void ProcessExtra(MockNodeValue &a_nv)
 {
-  Value::Scalar s;
+  Input::Scalar s;
 
   s.u64 = 4;
   a_nv.m_value[0].Push(1, s);
@@ -52,7 +52,7 @@ void MyTest::Run()
     TestNodeBase(n, "a");
   }
   {
-    MockNodeValue nv(Value::kUint64, 1, ProcessExtra);
+    MockNodeValue nv(Input::kUint64, 1, ProcessExtra);
 
     NodeCluster n("", &nv);
 

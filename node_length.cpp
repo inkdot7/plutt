@@ -42,10 +42,10 @@ void NodeLength::Process(uint64_t a_evid)
   NODE_PROCESS(m_child, a_evid);
 
   m_value.Clear();
-  m_value.SetType(Value::Type::kUint64);
+  m_value.SetType(Input::Type::kUint64);
 
   auto const &val = m_child->GetValue();
-  Value::Scalar s;
+  Input::Scalar s;
   s.u64 = val.GetV().size();
   m_value.Push(0, s);
 }

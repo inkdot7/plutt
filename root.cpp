@@ -36,7 +36,7 @@ class RootImpl {
     ~RootImpl();
     void Buffer();
     bool Fetch();
-    std::pair<void const *, size_t> GetData(size_t);
+    std::pair<Input::Scalar const *, size_t> GetData(size_t);
 
   private:
     void BindBranch(Config &, std::string const &, char const *, char const *,
@@ -46,7 +46,7 @@ class RootImpl {
     TTreeReader m_reader;
     struct Entry {
       Entry(std::string a_name, EDataType a_in_type, Input::Type a_out_type,
-          bool a_is_vector):
+            bool a_is_vector):
         name(a_name),
         in_type(a_in_type),
         out_type(a_out_type),
@@ -59,6 +59,10 @@ class RootImpl {
         arr_u32(),
         val_u64(),
         arr_u64(),
+        val_float(),
+        arr_float(),
+        val_double(),
+        arr_double(),
         buf()
       {
       }
@@ -75,6 +79,10 @@ class RootImpl {
         arr_u32(),
         val_u64(),
         arr_u64(),
+        val_float(),
+        arr_float(),
+        val_double(),
+        arr_double(),
         buf()
       {
         Copy(a_e);
@@ -96,7 +104,11 @@ class RootImpl {
       TTreeReaderArray<uint32_t> *arr_u32;
       TTreeReaderValue<uint64_t> *val_u64;
       TTreeReaderArray<uint64_t> *arr_u64;
-      Vector<uint64_t> buf;
+      TTreeReaderValue<float> *val_float;
+      TTreeReaderArray<float> *arr_float;
+      TTreeReaderValue<double> *val_double;
+      TTreeReaderArray<double> *arr_double;
+      Vector<Input::Scalar> buf;
       private:
       void Copy(Entry const &a_e)
       {
@@ -118,6 +130,8 @@ class RootImpl {
         arr_u32 = a_e.arr_u32;
         val_u64 = a_e.val_u64;
         arr_u64 = a_e.arr_u64;
+        arr_float = a_e.arr_float;
+        arr_double = a_e.arr_double;
       }
     };
     std::vector<Entry> m_branch_vec;
@@ -172,6 +186,8 @@ RootImpl::~RootImpl()
     delete it->arr_u32;
     delete it->val_u64;
     delete it->arr_u64;
+    delete it->arr_float;
+    delete it->arr_double;
   }
 }
 
@@ -220,6 +236,10 @@ void RootImpl::BindBranch(Config &a_config, std::string const &a_name, char
     case kULong_t:
       out_type = Input::Type::kUint64;
       break;
+    case kFloat_t:
+    case kDouble_t:
+      out_type = Input::Type::kDouble;
+      break;
     default:
       std::cerr << full_name <<
           ": Unsupported ROOT type " << exp_type << ".\n";
@@ -228,25 +248,30 @@ void RootImpl::BindBranch(Config &a_config, std::string const &a_name, char
 
   auto id = m_branch_vec.size();
   m_branch_vec.push_back(RootImpl::Entry(full_name, exp_type, out_type,
-      is_vector));
+        is_vector));
   auto &entry = m_branch_vec.back();
 
   // Reader instantiation ladder.
   switch (exp_type) {
-#define READER_MAKE(root_type, depth) \
+#define READER_MAKE_TYPE(root_type, c_type, arr_member, val_member)     \
     case root_type: \
       if (is_vector) { \
-        entry.arr_u##depth = new \
-            TTreeReaderArray<uint##depth##_t>(m_reader, full_name.c_str()); \
+        entry.arr_member = new \
+            TTreeReaderArray<c_type>(m_reader, full_name.c_str()); \
       } else { \
-        entry.val_u##depth = new \
-            TTreeReaderValue<uint##depth##_t>(m_reader, full_name.c_str()); \
+        entry.val_member = new                                        \
+            TTreeReaderValue<c_type>(m_reader, full_name.c_str()); \
       } \
       break
-    READER_MAKE(kUChar_t, 8);
-    READER_MAKE(kUShort_t, 16);
-    READER_MAKE(kUInt_t, 32);
-    READER_MAKE(kULong_t, 64);
+#define READER_MAKE_UINT(root_type, depth) \
+    READER_MAKE_TYPE(root_type, uint##depth##_t, arr_u##depth, val_u##depth)
+
+    READER_MAKE_UINT(kUChar_t, 8);
+    READER_MAKE_UINT(kUShort_t, 16);
+    READER_MAKE_UINT(kUInt_t, 32);
+    READER_MAKE_UINT(kULong_t, 64);
+    READER_MAKE_TYPE(kFloat_t, float, arr_float, val_float);
+    READER_MAKE_TYPE(kDouble_t, double, arr_double, val_double);
     default:
       std::cerr << full_name <<
           ": Non-implemented input type " << out_type << ".\n";
@@ -262,23 +287,25 @@ void RootImpl::Buffer()
   for (auto it = m_branch_vec.begin(); m_branch_vec.end() != it; ++it) {
     // TODO: Error-checking!
     switch (it->in_type) {
-#define BUF_COPY(root_type, depth) \
+#define BUF_COPY_TYPE(root_type, reader_type, s_type) \
       case root_type: \
         if (it->is_vector) { \
-          auto const size = it->arr_u##depth->GetSize(); \
+          auto const size = it->arr_##reader_type->GetSize(); \
           it->buf.resize(size); \
           for (size_t i = 0; i < size; ++i) { \
-            it->buf[i] = it->arr_u##depth->At(i); \
+            it->buf[i].s_type = it->arr_##reader_type->At(i); \
           } \
         } else { \
           it->buf.resize(1); \
-          it->buf[0] = **it->val_u##depth; \
+          it->buf[0].s_type = **it->val_##reader_type; \
         } \
         break
-      BUF_COPY(kUChar_t, 8);
-      BUF_COPY(kUShort_t, 16);
-      BUF_COPY(kUInt_t, 32);
-      BUF_COPY(kULong_t, 64);
+      BUF_COPY_TYPE(kUChar_t,  u8,     u64);
+      BUF_COPY_TYPE(kUShort_t, u16,    u64);
+      BUF_COPY_TYPE(kUInt_t,   u32,    u64);
+      BUF_COPY_TYPE(kULong_t,  u64,    u64);
+      BUF_COPY_TYPE(kFloat_t,  float,  dbl);
+      BUF_COPY_TYPE(kDouble_t, double, dbl);
       default:
         std::cerr << it->name << ": Non-implemented input type.\n";
         throw std::runtime_error(__func__);
@@ -313,7 +340,7 @@ bool RootImpl::Fetch()
   return true;
 }
 
-std::pair<void const *, size_t> RootImpl::GetData(size_t a_id)
+std::pair<Input::Scalar const *, size_t> RootImpl::GetData(size_t a_id)
 {
   auto const &entry = m_branch_vec.at(a_id);
   if (entry.is_vector) {
@@ -345,7 +372,7 @@ bool Root::Fetch()
   return m_impl->Fetch();
 }
 
-std::pair<void const *, size_t> Root::GetData(size_t a_id)
+std::pair<Input::Scalar const *, size_t> Root::GetData(size_t a_id)
 {
   return m_impl->GetData(a_id);
 }

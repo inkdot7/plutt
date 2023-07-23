@@ -23,6 +23,7 @@
 #define VALUE_HPP
 
 #include <cstdint>
+#include <input.hpp>
 #include <vector.hpp>
 
 /*
@@ -30,37 +31,26 @@
  */
 class Value {
   public:
-    enum Type {
-      kNone,
-      kUint64,
-      kDouble
-    };
-    union Scalar {
-      double GetDouble(Type) const;
-      uint64_t u64;
-      double dbl;
-    };
-
     Value();
     void Clear();
     // Compares two scalars assumed to be of the same type as current object.
-    int Cmp(Scalar const &, Scalar const &) const;
-    Type GetType() const;
+    int Cmp(Input::Scalar const &, Input::Scalar const &) const;
+    Input::Type GetType() const;
     Vector<uint32_t> const &GetMI() const;
     Vector<uint32_t> const &GetME() const;
-    Vector<Scalar> const &GetV() const;
+    Vector<Input::Scalar> const &GetV() const;
     // Converts whatever v-type to double. This is online, not paper plots,
     // but developers need to be careful still!
     double GetV(uint32_t, bool) const;
     // Pushes scalar to given channel.
-    void Push(uint32_t, Scalar const &);
-    void SetType(Type);
+    void Push(uint32_t, Input::Scalar const &);
+    void SetType(Input::Type);
 
   private:
-    Type m_type;
+    Input::Type m_type;
     Vector<uint32_t> m_mi;
     Vector<uint32_t> m_me;
-    Vector<Scalar> m_v;
+    Vector<Input::Scalar> m_v;
 };
 
 #endif

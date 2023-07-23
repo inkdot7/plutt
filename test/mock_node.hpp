@@ -26,7 +26,7 @@
 
 class MockNodeCuttable: public NodeCuttable {
   public:
-    MockNodeCuttable(std::string const &, Value::Type, unsigned, void
+    MockNodeCuttable(std::string const &, Input::Type, unsigned, void
         (*)(MockNodeCuttable &, CutProducerList &) = nullptr);
     CutPolygon const &GetCutPolygon() const;
     Value const &GetValue(uint32_t);
@@ -45,7 +45,7 @@ class MockNodeCuttable: public NodeCuttable {
 
 class MockNodeValue: public NodeValue {
   public:
-    MockNodeValue(Value::Type, unsigned, void (*)(MockNodeValue &) = nullptr);
+    MockNodeValue(Input::Type, unsigned, void (*)(MockNodeValue &) = nullptr);
     Value const &GetValue(uint32_t);
     void Preprocess(Node *);
     void Process(uint64_t);

@@ -44,7 +44,7 @@ void NodeMeanArith::Process(uint64_t a_evid)
   NODE_PROCESS(m_l, a_evid);
 
   m_value.Clear();
-  m_value.SetType(Value::Type::kDouble);
+  m_value.SetType(Input::Type::kDouble);
 
   auto const &val_l = m_l->GetValue();
 
@@ -66,7 +66,7 @@ void NodeMeanArith::Process(uint64_t a_evid)
       if (!num) {
         break;
       }
-      Value::Scalar mean;
+      Input::Scalar mean;
       mean.dbl = sum / num;
       m_value.Push(0, mean);
     }
@@ -84,7 +84,7 @@ void NodeMeanArith::Process(uint64_t a_evid)
       auto me1_l = val_l.GetME()[i];
       auto me1_r = val_r.GetME()[i];
       while (me0_l < me1_l && me0_r < me1_r) {
-        Value::Scalar mean;
+        Input::Scalar mean;
         double sum = 0.0;
         double num = 0;
         if (me0_l < me1_l) {

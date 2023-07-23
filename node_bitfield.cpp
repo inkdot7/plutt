@@ -81,7 +81,7 @@ void NodeBitfield::Process(uint64_t a_evid)
   for (auto it = m_source_vec.begin(); m_source_vec.end() != it; ++it) {
     NODE_PROCESS(it->node, a_evid);
     it->value = &it->node->GetValue();
-    if (Value::kUint64 != it->value->GetType()) {
+    if (Input::kUint64 != it->value->GetType()) {
       std::cerr << "Bitfield signals must have integer type!\n";
       throw std::runtime_error(__func__);
     }
@@ -90,7 +90,7 @@ void NodeBitfield::Process(uint64_t a_evid)
   }
 
   m_value.Clear();
-  m_value.SetType(Value::kUint64);
+  m_value.SetType(Input::kUint64);
 
   for (;;) {
     uint32_t min_i = UINT32_MAX;
@@ -137,7 +137,7 @@ void NodeBitfield::Process(uint64_t a_evid)
         ++it->i;
       }
     }
-    Value::Scalar s;
+    Input::Scalar s;
     s.u64 = val;
     m_value.Push(min_i, s);
   }

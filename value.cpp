@@ -22,20 +22,8 @@
 #include <value.hpp>
 #include <stdexcept>
 
-double Value::Scalar::GetDouble(Value::Type a_type) const
-{
-  switch (a_type) {
-    case kUint64:
-      return (double)u64;
-    case kDouble:
-      return dbl;
-    default:
-      throw std::runtime_error(__func__);
-  }
-}
-
 Value::Value():
-  m_type(Value::Type::kNone),
+  m_type(Input::Type::kNone),
   m_mi(),
   m_me(),
   m_v()
@@ -49,14 +37,14 @@ void Value::Clear()
   m_v.clear();
 }
 
-int Value::Cmp(Value::Scalar const &a_l, Value::Scalar const &a_r) const
+int Value::Cmp(Input::Scalar const &a_l, Input::Scalar const &a_r) const
 {
   switch (m_type) {
-    case Type::kUint64:
+    case Input::kUint64:
       if (a_l.u64 < a_r.u64) return -1;
       if (a_l.u64 > a_r.u64) return 1;
       return 0;
-    case Type::kDouble:
+    case Input::kDouble:
       if (a_l.dbl < a_r.dbl) return -1;
       if (a_l.dbl > a_r.dbl) return 1;
       return 0;
@@ -67,7 +55,7 @@ int Value::Cmp(Value::Scalar const &a_l, Value::Scalar const &a_r) const
   return 0;
 }
 
-Value::Type Value::GetType() const
+Input::Type Value::GetType() const
 {
   return m_type;
 }
@@ -82,7 +70,7 @@ Vector<uint32_t> const &Value::GetME() const
   return m_me;
 }
 
-Vector<Value::Scalar> const &Value::GetV() const
+Vector<Input::Scalar> const &Value::GetV() const
 {
   return m_v;
 }
@@ -90,7 +78,7 @@ Vector<Value::Scalar> const &Value::GetV() const
 double Value::GetV(uint32_t a_i, bool a_do_signed) const
 {
   switch (m_type) {
-    case Value::Type::kUint64:
+    case Input::Type::kUint64:
       {
         auto u64 = m_v.at(a_i).u64;
         if (a_do_signed) {
@@ -98,14 +86,14 @@ double Value::GetV(uint32_t a_i, bool a_do_signed) const
         }
         return (double)u64;
       }
-    case Value::Type::kDouble:
+    case Input::Type::kDouble:
       return m_v.at(a_i).dbl;
     default:
       throw std::runtime_error(__func__);
   }
 }
 
-void Value::Push(uint32_t a_i, Scalar const &a_v)
+void Value::Push(uint32_t a_i, Input::Scalar const &a_v)
 {
   if (m_mi.empty() || m_mi.back() != a_i) {
     m_mi.push_back(a_i);
@@ -117,9 +105,9 @@ void Value::Push(uint32_t a_i, Scalar const &a_v)
   m_v.push_back(a_v);
 }
 
-void Value::SetType(Value::Type a_type)
+void Value::SetType(Input::Type a_type)
 {
-  if (Value::Type::kNone != m_type && a_type != m_type) {
+  if (Input::Type::kNone != m_type && a_type != m_type) {
     std::runtime_error("Value cannot change type!");
   }
   m_type = a_type;

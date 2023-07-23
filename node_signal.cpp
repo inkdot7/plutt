@@ -43,14 +43,23 @@ void NodeSignal::BindSignal(std::string const &a_suffix, size_t a_id,
 {
 std::cout << m_name << '.' << a_suffix << " id=" << a_id << " type=" << a_type
     << '\n';
+#define BIND_SIGNAL_ASSERT_INT do { \
+    if (Input::Type::kUint64 != a_type) { \
+      std::cerr << GetLocStr() << ": 'M' member not integer!\n"; \
+      throw std::runtime_error(__func__); \
+    } \
+  } while (0)
   Member **mem;
   if (0 == a_suffix.compare("")) {
     mem = &m_;
   } else if (0 == a_suffix.compare("M")) {
+    BIND_SIGNAL_ASSERT_INT;
     mem = &m_M;
   } else if (0 == a_suffix.compare("I") || 0 == a_suffix.compare("MI")) {
+    BIND_SIGNAL_ASSERT_INT;
     mem = &m_MI;
   } else if (0 == a_suffix.compare("ME")) {
+    BIND_SIGNAL_ASSERT_INT;
     mem = &m_ME;
   } else if (0 == a_suffix.compare("v")) {
     mem = &m_v;
@@ -67,7 +76,10 @@ std::cout << m_name << '.' << a_suffix << " id=" << a_id << " type=" << a_type
   *mem = new Member;
   switch (a_type) {
     case Input::Type::kUint64:
-      (*mem)->type = Value::Type::kUint64;
+      (*mem)->type = Input::Type::kUint64;
+      break;
+    case Input::Type::kDouble:
+      (*mem)->type = Input::Type::kDouble;
       break;
     default:
     std::cerr << GetLocStr() << ": Non-implemented input type.\n";
@@ -87,9 +99,9 @@ void NodeSignal::Process(uint64_t a_evid)
   m_value.Clear();
 
 #define FETCH_SIGNAL_DATA(SUFF) \
-  auto const p_##SUFF = m_config->GetInput()->GetData(m_##SUFF->id); \
-  auto const p64_##SUFF = static_cast<uint64_t const *>(p_##SUFF.first); \
-  auto const len_##SUFF = p_##SUFF.second
+  auto const pair_##SUFF = m_config->GetInput()->GetData(m_##SUFF->id); \
+  auto const p_##SUFF = pair_##SUFF.first; \
+  auto const len_##SUFF = pair_##SUFF.second
 #define SIGNAL_LEN_CHECK(l, op, r) do { \
   auto l_ = l; \
   auto r_ = r; \
@@ -110,16 +122,23 @@ void NodeSignal::Process(uint64_t a_evid)
     SIGNAL_LEN_CHECK(1U, ==, len_M);
     SIGNAL_LEN_CHECK(len_ME, ==, len_MI);
     SIGNAL_LEN_CHECK(1U, ==, len_);
-    SIGNAL_LEN_CHECK(*p64_, <=, len_v);
+    SIGNAL_LEN_CHECK(p_->u64, <=, len_v);
     m_value.SetType(m_v->type);
     uint32_t v_i = 0;
-    for (uint32_t i = 0; i < *p64_M; ++i) {
-      auto mi = (uint32_t)p64_MI[i];
-      auto me = p64_ME[i];
-      for (; v_i < me; ++v_i) {
-        Value::Scalar s;
-        s.u64 = p64_v[v_i];
-        m_value.Push(mi, s);
+    for (uint32_t i = 0; i < p_M->u64; ++i) {
+      auto mi = (uint32_t)p_MI[i].u64;
+      auto me = (uint32_t)p_ME[i].u64;
+      switch (m_v->type) {
+#define COPY_VECTOR(input_type, member) \
+        case Input::input_type: \
+          for (; v_i < me; ++v_i) { \
+            m_value.Push(mi, p_v[v_i]); \
+          } \
+          break
+        COPY_VECTOR(kUint64, u64);
+        COPY_VECTOR(kDouble, dbl);
+        default:
+          throw std::runtime_error(__func__);
       }
     }
   } else if (m_MI) {
@@ -128,13 +147,13 @@ void NodeSignal::Process(uint64_t a_evid)
     FETCH_SIGNAL_DATA(MI);
     FETCH_SIGNAL_DATA(v);
     SIGNAL_LEN_CHECK(1U, ==, len_);
-    SIGNAL_LEN_CHECK(*p64_, <=, len_MI);
-    SIGNAL_LEN_CHECK(*p64_, <=, len_v);
+    SIGNAL_LEN_CHECK(p_->u64, <=, len_MI);
+    SIGNAL_LEN_CHECK(p_->u64, <=, len_v);
     m_value.SetType(m_v->type);
-    for (uint32_t i = 0; i < *p64_; ++i) {
-      Value::Scalar s;
-      auto mi = (uint32_t)p64_MI[i];
-      s.u64 = p64_v[i];
+    for (uint32_t i = 0; i < p_->u64; ++i) {
+      Input::Scalar s;
+      auto mi = (uint32_t)p_MI[i].u64;
+      s.u64 = p_v[i].u64;
       m_value.Push(mi, s);
     }
   } else if (m_v) {
@@ -142,22 +161,18 @@ void NodeSignal::Process(uint64_t a_evid)
     FETCH_SIGNAL_DATA();
     FETCH_SIGNAL_DATA(v);
     SIGNAL_LEN_CHECK(1U, ==, len_);
-    SIGNAL_LEN_CHECK(*p64_, <=, len_v);
+    SIGNAL_LEN_CHECK(p_->u64, <=, len_v);
     m_value.SetType(m_v->type);
-    for (uint32_t i = 0; i < *p64_; ++i) {
-      Value::Scalar s;
-      s.u64 = p64_v[i];
-      m_value.Push(0, s);
+    for (uint32_t i = 0; i < p_->u64; ++i) {
+      m_value.Push(0, p_v[i]);
     }
   } else {
     // Scalar.
     FETCH_SIGNAL_DATA();
     SIGNAL_LEN_CHECK(1U, >=, len_);
     m_value.SetType(m_->type);
-    Value::Scalar s;
-    if (p64_) {
-      s.u64 = *p64_;
-      m_value.Push(0, s);
+    if (len_ > 0) {
+      m_value.Push(0, *p_);
     }
   }
 }

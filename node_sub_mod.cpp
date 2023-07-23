@@ -50,12 +50,12 @@ void NodeSubMod::Process(uint64_t a_evid)
 
   auto const &val_l = m_l->GetValue();
   auto const &val_r = m_r->GetValue();
-  if (Value::kNone == val_l.GetType() ||
-      Value::kNone == val_r.GetType()) {
+  if (Input::kNone == val_l.GetType() ||
+      Input::kNone == val_r.GetType()) {
     return;
   }
   NODE_ASSERT(val_l.GetType(), ==, val_r.GetType());
-  m_value.SetType(Value::Type::kDouble);
+  m_value.SetType(Input::Type::kDouble);
 
   uint32_t i_l = 0;
   uint32_t i_r = 0;
@@ -74,8 +74,8 @@ void NodeSubMod::Process(uint64_t a_evid)
       vi_r = me_r;
     } else {
       while (vi_l < me_l && vi_r < me_r) {
-        Value::Scalar diff;
-        if (Value::kDouble == val_l.GetType()) {
+        Input::Scalar diff;
+        if (Input::kDouble == val_l.GetType()) {
           auto l = val_l.GetV(vi_l, false);
           auto r = val_r.GetV(vi_r, false);
           diff.dbl = SubModDbl(l, r, m_range);

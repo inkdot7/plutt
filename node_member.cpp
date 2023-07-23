@@ -55,9 +55,9 @@ void NodeMember::Process(uint64_t a_evid)
 
   auto const &val = m_child->GetValue();
   if (m_is_i) {
-    m_value.SetType(Value::Type::kUint64);
+    m_value.SetType(Input::Type::kUint64);
     for (auto it = val.GetMI().begin(); val.GetMI().end() != it; ++it) {
-      Value::Scalar s;
+      Input::Scalar s;
       s.u64 = *it;
       m_value.Push(0, s);
     }

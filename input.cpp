@@ -19,36 +19,16 @@
  * MA  02110-1301  USA
  */
 
-#if PLUTT_ROOT
-
-#ifndef ROOT_HPP
-#define ROOT_HPP
-
 #include <input.hpp>
 
-class Config;
-// Root has less strict headers, hide everything in root.cpp...
-class RootImpl;
-
-/*
- * Root input.
- * Takes argc/argv after main arguments and hopes they are all Root files.
- */
-class Root: public Input {
-  public:
-    Root(Config &, int, char **);
-    ~Root();
-    void Buffer();
-    bool Fetch();
-    std::pair<Input::Scalar const *, size_t> GetData(size_t);
-
-  private:
-    Root(Root const &);
-    Root &operator=(Root const &);
-
-    RootImpl *m_impl;
-};
-
-#endif
-
-#endif
+double Input::Scalar::GetDouble(Input::Type a_type) const
+{
+  switch (a_type) {
+    case kUint64:
+      return (double)u64;
+    case kDouble:
+      return dbl;
+    default:
+      throw std::runtime_error(__func__);
+  }
+}

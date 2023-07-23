@@ -31,9 +31,9 @@ NodeCluster::NodeCluster(std::string const &a_loc, NodeValue *a_child):
   m_e(),
   m_eta()
 {
-  m_x.SetType(Value::kDouble);
-  m_e.SetType(Value::kDouble);
-  m_eta.SetType(Value::kDouble);
+  m_x.SetType(Input::kDouble);
+  m_e.SetType(Input::kDouble);
+  m_eta.SetType(Input::kDouble);
 }
 
 Value const &NodeCluster::GetValue(uint32_t a_ret_i)
@@ -114,7 +114,7 @@ void NodeCluster::Process(uint64_t a_evid)
 
   // Move sorted set to value.
   for (auto it = sorted_set.begin(); sorted_set.end() != it; ++it) {
-    Value::Scalar s;
+    Input::Scalar s;
     s.dbl = it->x;
     m_x.Push(0, s);
     s.dbl = it->e;

@@ -29,8 +29,8 @@
 #include <string>
 #include <vector>
 #include <implutt.hpp>
+#include <input.hpp>
 #include <util.hpp>
-#include <value.hpp>
 
 class Plot;
 
@@ -67,7 +67,7 @@ class Range {
       MODE_STATS
     };
     Range(double);
-    void Add(Value::Type, Value::Scalar const &);
+    void Add(Input::Type, Input::Scalar const &);
     Axis GetExtents(uint32_t) const;
     double GetMax() const;
     double GetMean() const;
@@ -76,7 +76,7 @@ class Range {
     void SetMode(Mode);
   private:
     Mode m_mode;
-    Value::Type m_type;
+    Input::Type m_type;
     uint64_t m_drop_old_ms;
     struct {
       double min;
@@ -114,9 +114,9 @@ class PlotHist: public Plot {
     PlotHist(Page *, std::string const &, uint32_t, LinearTransform const &,
         char const *, bool, double);
     void Draw(ImPlutt::Window *, ImPlutt::Pos const &);
-    void Fill(Value::Type, Value::Scalar const &);
+    void Fill(Input::Type, Input::Scalar const &);
     void Fit();
-    void Prefill(Value::Type, Value::Scalar const &);
+    void Prefill(Input::Type, Input::Scalar const &);
 
   private:
     void FitGauss(std::vector<uint32_t> const &, Axis const &);
@@ -143,12 +143,12 @@ class PlotHist2: public Plot {
         double);
     void Draw(ImPlutt::Window *, ImPlutt::Pos const &);
     void Fill(
-        Value::Type, Value::Scalar const &,
-        Value::Type, Value::Scalar const &);
+        Input::Type, Input::Scalar const &,
+        Input::Type, Input::Scalar const &);
     void Fit();
     void Prefill(
-        Value::Type, Value::Scalar const &,
-        Value::Type, Value::Scalar const &);
+        Input::Type, Input::Scalar const &,
+        Input::Type, Input::Scalar const &);
 
   private:
     std::string m_title;

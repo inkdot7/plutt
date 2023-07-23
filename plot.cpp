@@ -87,7 +87,7 @@ std::string const &Page::GetLabel() const
 
 Range::Range(double a_drop_old_s):
   m_mode(MODE_ALL),
-  m_type(Value::kNone),
+  m_type(Input::kNone),
   m_drop_old_ms(a_drop_old_s < 0 ? 0 :
       (uint64_t)(1000 * a_drop_old_s / LENGTH(m_stat))),
   m_stat(),
@@ -95,9 +95,9 @@ Range::Range(double a_drop_old_s):
 {
 }
 
-void Range::Add(Value::Type a_type, Value::Scalar const &a_v)
+void Range::Add(Input::Type a_type, Input::Scalar const &a_v)
 {
-  if (Value::kNone == m_type) {
+  if (Input::kNone == m_type) {
     m_type = a_type;
   } else if (m_type != a_type) {
     std::cerr << "Histogrammed signal cannot change type!\n";
@@ -142,7 +142,7 @@ Axis Range::GetExtents(uint32_t a_bins) const
       {
         l = GetMin();
         r = GetMax();
-        if (Value::kUint64 == m_type) {
+        if (Input::kUint64 == m_type) {
           // For integers, 'r' is on the right side of max.
           ++r;
         }
@@ -155,7 +155,7 @@ Axis Range::GetExtents(uint32_t a_bins) const
           d = std::max(std::abs(l) * 1e-10, 1e-20);
         }
         // If we're looking at floats or huge integers, add some margin.
-        if (Value::kUint64 != m_type || d > (1 << 16)) {
+        if (Input::kUint64 != m_type || d > (1 << 16)) {
           l -= d * 0.1;
           r += d * 0.1;
         }
@@ -199,7 +199,7 @@ Axis Range::GetExtents(uint32_t a_bins) const
 
   // Choose bins, which may fudge range.
   uint32_t bins;
-  if (Value::kDouble == m_type) {
+  if (Input::kDouble == m_type) {
     bins = a_bins > 0 ? a_bins : 200;
   } else {
     if (a_bins > 0) {
@@ -409,7 +409,7 @@ void PlotHist::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
   }
 }
 
-void PlotHist::Fill(Value::Type a_type, Value::Scalar const &a_x)
+void PlotHist::Fill(Input::Type a_type, Input::Scalar const &a_x)
 {
   const std::lock_guard<std::mutex> lock(m_hist_mutex);
 
@@ -417,10 +417,10 @@ void PlotHist::Fill(Value::Type a_type, Value::Scalar const &a_x)
   auto span = m_axis.max - m_axis.min;
   double dx;
   switch (a_type) {
-    case Value::kUint64:
+    case Input::kUint64:
       dx = U64SubDouble(a_x.u64, m_axis.min);
       break;
-    case Value::kDouble:
+    case Input::kDouble:
       dx = a_x.dbl - m_axis.min;
       break;
     default:
@@ -448,7 +448,7 @@ void PlotHist::Fit()
   }
 }
 
-void PlotHist::Prefill(Value::Type a_type, Value::Scalar const &a_x)
+void PlotHist::Prefill(Input::Type a_type, Input::Scalar const &a_x)
 {
   const std::lock_guard<std::mutex> lock(m_hist_mutex);
 
@@ -615,8 +615,8 @@ void PlotHist2::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
       m_pixels);
 }
 
-void PlotHist2::Fill(Value::Type a_type_y, Value::Scalar const &a_y,
-    Value::Type a_type_x, Value::Scalar const &a_x)
+void PlotHist2::Fill(Input::Type a_type_y, Input::Scalar const &a_y,
+    Input::Type a_type_x, Input::Scalar const &a_x)
 {
   const std::lock_guard<std::mutex> lock(m_hist_mutex);
 
@@ -625,10 +625,10 @@ void PlotHist2::Fill(Value::Type a_type_y, Value::Scalar const &a_y,
   auto span_y = m_axis_y.max - m_axis_y.min;
   double dx;
   switch (a_type_x) {
-    case Value::kUint64:
+    case Input::kUint64:
       dx = U64SubDouble(a_x.u64, m_axis_x.min);
       break;
-    case Value::kDouble:
+    case Input::kDouble:
       dx = a_x.dbl - m_axis_x.min;
       break;
     default:
@@ -636,10 +636,10 @@ void PlotHist2::Fill(Value::Type a_type_y, Value::Scalar const &a_y,
   }
   double dy;
   switch (a_type_y) {
-    case Value::kUint64:
+    case Input::kUint64:
       dy = U64SubDouble(a_y.u64, m_axis_y.min);
       break;
-    case Value::kDouble:
+    case Input::kDouble:
       dy = a_y.dbl - m_axis_y.min;
       break;
     default:
@@ -679,8 +679,8 @@ void PlotHist2::Fit()
   }
 }
 
-void PlotHist2::Prefill(Value::Type a_type_y, Value::Scalar const &a_y,
-    Value::Type a_type_x, Value::Scalar const &a_x)
+void PlotHist2::Prefill(Input::Type a_type_y, Input::Scalar const &a_y,
+    Input::Type a_type_x, Input::Scalar const &a_x)
 {
   const std::lock_guard<std::mutex> lock(m_hist_mutex);
 

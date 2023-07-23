@@ -33,24 +33,24 @@ void MyTest::Run()
 {
   // Scalars.
   {
-    Value::Scalar s;
+    Input::Scalar s;
     s.u64 = 100;
-    TEST_CMP(std::abs(s.GetDouble(Value::kUint64) - 100.0), <, 1e-9);
+    TEST_CMP(std::abs(s.GetDouble(Input::kUint64) - 100.0), <, 1e-9);
     s.dbl = 200.0;
-    TEST_CMP(std::abs(s.GetDouble(Value::kDouble) - 200.0), <, 1e-9);
+    TEST_CMP(std::abs(s.GetDouble(Input::kDouble) - 200.0), <, 1e-9);
   }
 
   // Values.
   {
     Value v;
-    TEST_CMP(v.GetType(), ==, Value::kNone);
-    v.SetType(Value::kUint64);
-    TEST_CMP(v.GetType(), ==, Value::kUint64);
+    TEST_CMP(v.GetType(), ==, Input::kNone);
+    v.SetType(Input::kUint64);
+    TEST_CMP(v.GetType(), ==, Input::kUint64);
     TEST_BOOL(v.GetMI().empty());
     TEST_BOOL(v.GetME().empty());
     TEST_BOOL(v.GetV().empty());
 
-    Value::Scalar s;
+    Input::Scalar s;
     s.u64 = 10;
     v.Push(1, s);
     TEST_CMP(v.GetMI().size(), ==, 1U);
@@ -84,7 +84,7 @@ void MyTest::Run()
     TEST_CMP(v.GetV().at(2).u64, ==, 1000U);
 
     v.Clear();
-    TEST_CMP(v.GetType(), ==, Value::kUint64);
+    TEST_CMP(v.GetType(), ==, Input::kUint64);
     TEST_BOOL(v.GetMI().empty());
     TEST_BOOL(v.GetME().empty());
     TEST_BOOL(v.GetV().empty());

@@ -69,8 +69,8 @@ NodePedestal::NodePedestal(std::string const &a_loc, NodeValue *a_child,
   m_sigma(),
   m_stats()
 {
-  m_value.SetType(Value::Type::kDouble);
-  m_sigma.SetType(Value::Type::kDouble);
+  m_value.SetType(Input::Type::kDouble);
+  m_sigma.SetType(Input::Type::kDouble);
 }
 
 Value const &NodePedestal::GetValue(uint32_t a_ret_i)
@@ -124,7 +124,7 @@ void NodePedestal::Process(uint64_t a_evid)
       double mean, var;
       s.Get(&mean, &var);
       if (var > 0) {
-        Value::Scalar scl;
+        Input::Scalar scl;
         auto std = sqrt(var);
         auto e = v - mean;
         if (e > m_cutoff * std) {

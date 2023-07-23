@@ -272,7 +272,7 @@ void CutProducerList::Reset()
   }
 }
 
-void CutProducerList::Test(Value::Type a_type, Value::Scalar const &a_x)
+void CutProducerList::Test(Input::Type a_type, Input::Scalar const &a_x)
 {
   auto x = a_x.GetDouble(a_type);
   // Test polys.
@@ -294,8 +294,8 @@ void CutProducerList::Test(Value::Type a_type, Value::Scalar const &a_x)
   }
 }
 
-void CutProducerList::Test(Value::Type a_x_type, Value::Scalar const &a_x,
-    Value::Type a_y_type, Value::Scalar const &a_y)
+void CutProducerList::Test(Input::Type a_x_type, Input::Scalar const &a_x,
+    Input::Type a_y_type, Input::Scalar const &a_y)
 {
   auto x = a_x.GetDouble(a_x_type);
   auto y = a_y.GetDouble(a_y_type);

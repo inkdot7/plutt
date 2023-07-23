@@ -233,13 +233,11 @@ void Unpacker::BindSignal(Config &a_config, std::vector<char> const
   int struct_info_type;
   Type output_type;
   size_t in_type_bytes;
-  size_t out_type_bytes;
   size_t arr_n;
   if (MATCH_WORD(p, "UINT32,")) {
     struct_info_type = EXT_DATA_ITEM_TYPE_UINT32;
     output_type = kUint64;
     in_type_bytes = sizeof(uint32_t);
-    out_type_bytes = sizeof(uint64_t);
   } else {
     auto q = p;
     for (; isalnum(*p); ++p)
@@ -291,7 +289,6 @@ void Unpacker::BindSignal(Config &a_config, std::vector<char> const
     throw std::runtime_error(__func__);
   }
   auto in_bytes = in_type_bytes * arr_n;
-  auto out_bytes = out_type_bytes * arr_n;
   // 32-bit align.
   a_event_buf_i = (a_event_buf_i + 3U) & ~3U;
   a_config.BindSignal(a_name, a_config_suffix, m_map.size(), output_type);
@@ -333,21 +330,27 @@ struct_info_type << ' ' << full_name << ' ' << ctrl << '\n';
     throw std::runtime_error(__func__);
   }
 
-  m_map.push_back(Entry(a_event_buf_i, m_out_size, arr_n));
+  m_map.push_back(Entry(struct_info_type, a_event_buf_i, m_out_size, arr_n));
 
   a_event_buf_i += in_bytes;
-  m_out_size += out_bytes;
+  ++m_out_size;
 }
 
 void Unpacker::Buffer()
 {
   // Convert ucesb event-buffer.
   for (auto it = m_map.begin(); m_map.end() != it; ++it) {
-    auto pin = (uint32_t const *)&m_event_buf[it->in_ofs];
-    auto pout = (uint64_t *)&m_out_buf[it->out_ofs];
-    for (size_t i = 0; i < it->len; ++i) {
-      *pout++ = *pin++;
-    }
+#define COPY_BUF_TYPE(TYPE, in_type, out_member) do { \
+    if (EXT_DATA_ITEM_TYPE_##TYPE == it->ext_type) { \
+      auto pin = (in_type const *)&m_event_buf[it->in_ofs]; \
+      auto pout = &m_out_buf[it->out_ofs]; \
+      for (size_t i = 0; i < it->len; ++i) { \
+        pout->out_member = *pin++; \
+        ++pout; \
+      } \
+    } \
+  } while (0)
+    COPY_BUF_TYPE(UINT32, uint32_t, u64);
   }
 }
 
@@ -385,7 +388,7 @@ bool Unpacker::Fetch()
   return true;
 }
 
-std::pair<void const *, size_t> Unpacker::GetData(size_t a_id)
+std::pair<Input::Scalar const *, size_t> Unpacker::GetData(size_t a_id)
 {
   auto &entry = m_map.at(a_id);
   return std::make_pair(&m_out_buf.at(entry.out_ofs), entry.len);

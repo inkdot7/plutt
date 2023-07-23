@@ -47,7 +47,7 @@ void NodeMax::Process(uint64_t a_evid)
   m_value.SetType(val.GetType());
 
   int max_i = -1;
-  Value::Scalar max;
+  Input::Scalar max;
   uint32_t v_i = 0;
   for (uint32_t i = 0; i < val.GetMI().size(); ++i) {
     auto mi = val.GetMI()[i];

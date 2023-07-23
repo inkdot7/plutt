@@ -57,7 +57,7 @@ void NodeZeroSuppress::Process(uint64_t a_evid)
     for (; vi < me; ++vi) {
       auto v = val.GetV(vi, false);
       if (v >= m_cutoff) {
-        Value::Scalar s = val.GetV().at(vi);
+        Input::Scalar s = val.GetV().at(vi);
         m_value.Push(mi, s);
       }
     }

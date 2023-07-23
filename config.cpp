@@ -481,10 +481,10 @@ void Config::DoEvent(Input *a_input)
       (double)(s.field - m_clock_match.ts0.field); \
 } while (0)
       switch (val.GetType()) {
-        case Value::kUint64:
+        case Input::kUint64:
           CLOCK_MATCH_PREP(u64);
           break;
-        case Value::kDouble:
+        case Input::kDouble:
           CLOCK_MATCH_PREP(dbl);
           break;
         default:

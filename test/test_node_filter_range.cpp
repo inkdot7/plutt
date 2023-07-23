@@ -32,7 +32,7 @@ MyTest g_test_node_cluster_;
 
 void ProcessExtraCond(MockNodeValue &a_nv)
 {
-  Value::Scalar s;
+  Input::Scalar s;
 
   s.u64 = 1;
   a_nv.m_value[0].Push(1, s);
@@ -44,7 +44,7 @@ void ProcessExtraCond(MockNodeValue &a_nv)
 
 void ProcessExtraArg(MockNodeValue &a_nv)
 {
-  Value::Scalar s;
+  Input::Scalar s;
 
   s.u64 = 4;
   a_nv.m_value[0].Push(1, s);
@@ -62,8 +62,8 @@ void MyTest::Run()
     TestNodeBase(n, "a");
   }
   {
-    MockNodeValue nv_cond(Value::kUint64, 1, ProcessExtraCond);
-    MockNodeValue nv_arg(Value::kUint64, 1, ProcessExtraArg);
+    MockNodeValue nv_cond(Input::kUint64, 1, ProcessExtraCond);
+    MockNodeValue nv_arg(Input::kUint64, 1, ProcessExtraArg);
 
     NodeFilterRange::CondVec cv;
     cv.push_back(FilterRangeCond());

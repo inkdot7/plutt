@@ -48,7 +48,7 @@ class Unpacker: public Input {
     ~Unpacker();
     void Buffer();
     bool Fetch();
-    std::pair<void const *, size_t> GetData(size_t);
+    std::pair<Input::Scalar const *, size_t> GetData(size_t);
 
   private:
     Unpacker(Unpacker const &);
@@ -65,12 +65,14 @@ class Unpacker: public Input {
     FILE *m_pip;
     ext_data_struct_info m_struct_info;
     struct Entry {
-      Entry(size_t a_in_ofs, size_t a_out_ofs, size_t a_len):
+      Entry(int a_ext_type, size_t a_in_ofs, size_t a_out_ofs, size_t a_len):
+        ext_type(a_ext_type),
         in_ofs(a_in_ofs),
         out_ofs(a_out_ofs),
         len(a_len)
       {
       }
+      int ext_type;
       size_t in_ofs;
       size_t out_ofs;
       size_t len;
@@ -78,7 +80,7 @@ class Unpacker: public Input {
     std::vector<Entry> m_map;
     std::vector<uint8_t> m_event_buf;
     size_t m_out_size;
-    std::vector<uint8_t> m_out_buf;
+    std::vector<Input::Scalar> m_out_buf;
 };
 
 #endif

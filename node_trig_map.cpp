@@ -47,7 +47,7 @@ void NodeTrigMap::Process(uint64_t a_evid)
   NODE_PROCESS(m_trig, a_evid);
 
   m_value.Clear();
-  m_value.SetType(Value::Type::kDouble);
+  m_value.SetType(Input::Type::kDouble);
 
   // Build trigger lookup vector.
   std::vector<double> trig_vec;
@@ -76,7 +76,7 @@ void NodeTrigMap::Process(uint64_t a_evid)
       if (m_prefix->GetTrig(mi, &trig_i) &&
           trig_i < trig_vec.size()) {
         double trig = trig_vec.at(trig_i);
-        Value::Scalar diff;
+        Input::Scalar diff;
         diff.dbl = SubModDbl(sig, trig, m_range);
         m_value.Push(mi, diff);
       }

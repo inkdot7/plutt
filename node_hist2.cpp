@@ -55,25 +55,25 @@ void NodeHist2::Process(uint64_t a_evid)
     // Pre-fill.
     uint32_t vi = 0;
     for (uint32_t i = 0; i < vmi.size(); ++i) {
-      Value::Scalar x;
+      Input::Scalar x;
       x.u64 = vmi[i];
       auto me = vme[i];
       for (; vi < me; ++vi) {
-        Value::Scalar const &y = vec_y.at(vi);
-        m_cut_producer.Test(Value::kUint64, x, val_y.GetType(), y);
-        m_plot_hist2.Prefill(val_y.GetType(), y, Value::kUint64, x);
+        Input::Scalar const &y = vec_y.at(vi);
+        m_cut_producer.Test(Input::kUint64, x, val_y.GetType(), y);
+        m_plot_hist2.Prefill(val_y.GetType(), y, Input::kUint64, x);
       }
     }
     m_plot_hist2.Fit();
     // Fill.
     vi = 0;
     for (uint32_t i = 0; i < vmi.size(); ++i) {
-      Value::Scalar x;
+      Input::Scalar x;
       x.u64 = vmi[i];
       auto me = vme[i];
       for (; vi < me; ++vi) {
-        Value::Scalar const &y = vec_y.at(vi);
-        m_plot_hist2.Fill(val_y.GetType(), y, Value::kUint64, x);
+        Input::Scalar const &y = vec_y.at(vi);
+        m_plot_hist2.Fill(val_y.GetType(), y, Input::kUint64, x);
       }
     }
   } else {

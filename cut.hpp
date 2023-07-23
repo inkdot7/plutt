@@ -26,6 +26,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <input.hpp>
 #include <value.hpp>
 
 class NodeCut;
@@ -67,9 +68,9 @@ class CutProducerList {
     NodeCutValue *AddData(CutPolygon const *);
     bool *AddEvent(CutPolygon const *);
     void Reset();
-    void Test(Value::Type, Value::Scalar const &);
-    void Test(Value::Type, Value::Scalar const &,
-        Value::Type, Value::Scalar const &);
+    void Test(Input::Type, Input::Scalar const &);
+    void Test(Input::Type, Input::Scalar const &,
+        Input::Type, Input::Scalar const &);
 
   private:
     typedef std::map<CutPolygon const *, bool> CutPolyMap;

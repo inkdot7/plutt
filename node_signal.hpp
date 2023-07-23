@@ -44,7 +44,7 @@ class NodeSignal: public NodeValue {
     NodeSignal &operator=(NodeSignal const &);
 
     struct Member {
-      Value::Type type;
+      Input::Type type;
       size_t id;
     };
     Config *m_config;

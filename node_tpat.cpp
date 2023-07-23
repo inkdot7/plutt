@@ -45,15 +45,15 @@ void NodeTpat::Process(uint64_t a_evid)
   m_value.Clear();
 
   auto const &val = m_tpat->GetValue();
-  NODE_ASSERT(val.GetType(), ==, Value::kUint64);
-  m_value.SetType(Value::kUint64);
+  NODE_ASSERT(val.GetType(), ==, Input::kUint64);
+  m_value.SetType(Input::kUint64);
 
   if (val.GetV().empty()) {
     return;
   }
   NODE_ASSERT(val.GetV().size(), ==, 1U);
   if (val.GetV().at(0).u64 & m_mask) {
-    Value::Scalar s;
+    Input::Scalar s;
     s.u64 = 1;
     m_value.Push(0, s);
   }
@@ -66,7 +66,7 @@ bool NodeTpat::Test(Node *a_parent, NodeValue *a_tpat)
   if (v.empty()) {
     return false;
   }
-  if (val.GetType() != Value::kUint64 ||
+  if (val.GetType() != Input::kUint64 ||
       v.size() != 1 ||
       1 != v.at(0).u64) {
     std::cerr <<

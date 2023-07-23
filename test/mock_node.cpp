@@ -22,7 +22,7 @@
 #include <test/mock_node.hpp>
 #include <test/test.hpp>
 
-MockNodeCuttable::MockNodeCuttable(std::string const &a_title, Value::Type
+MockNodeCuttable::MockNodeCuttable(std::string const &a_title, Input::Type
     a_type, unsigned a_val_num, void (*a_process_extra)(MockNodeCuttable &,
     CutProducerList &)):
   NodeCuttable("", a_title),
@@ -61,7 +61,7 @@ void MockNodeCuttable::Process(uint64_t a_evid)
   }
 }
 
-MockNodeValue::MockNodeValue(Value::Type a_type, unsigned a_val_num, void
+MockNodeValue::MockNodeValue(Input::Type a_type, unsigned a_val_num, void
     (*a_process_extra)(MockNodeValue &)):
   NodeValue(""),
   m_value(a_val_num),

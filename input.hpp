@@ -54,7 +54,13 @@ class Input {
   public:
     enum Type {
       kNone,
-      kUint64
+      kUint64,
+      kDouble
+    };
+    union Scalar {
+      double GetDouble(Type) const;
+      uint64_t u64;
+      double dbl;
     };
 
     virtual ~Input() {}
@@ -63,7 +69,7 @@ class Input {
     // Fetches data.
     virtual bool Fetch() = 0;
     // Gets event-buffer by ID, check Config::BindSignal.
-    virtual std::pair<void const *, size_t> GetData(size_t) = 0;
+    virtual std::pair<Scalar const *, size_t> GetData(size_t) = 0;
 };
 
 #endif

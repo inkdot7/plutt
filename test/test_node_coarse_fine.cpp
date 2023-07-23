@@ -40,14 +40,14 @@ uint32_t EvidToFineRaw()
 
 void ProcessExtraCoarse(MockNodeValue &a_nv)
 {
-  Value::Scalar s;
+  Input::Scalar s;
   s.u64 = g_evid;
   a_nv.m_value[0].Push(1, s);
 }
 
 void ProcessExtraFine(MockNodeValue &a_nv)
 {
-  Value::Scalar s;
+  Input::Scalar s;
   s.u64 = EvidToFineRaw();
   a_nv.m_value[0].Push(1, s);
 }
@@ -59,8 +59,8 @@ void MyTest::Run()
     TestNodeBase(n, "a");
   }
   {
-    MockNodeValue nvc(Value::kUint64, 1, ProcessExtraCoarse);
-    MockNodeValue nvf(Value::kUint64, 1, ProcessExtraFine);
+    MockNodeValue nvc(Input::kUint64, 1, ProcessExtraCoarse);
+    MockNodeValue nvf(Input::kUint64, 1, ProcessExtraFine);
 
 #define PERIOD 10.0
     NodeCoarseFine n("", &nvc, &nvf, PERIOD);
