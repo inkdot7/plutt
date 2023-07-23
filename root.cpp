@@ -131,8 +131,8 @@ class RootImpl {
         val_u64 = a_e.val_u64;
         arr_u64 = a_e.arr_u64;
         val_float = a_e.val_float;
-        arr_double = a_e.arr_double;
-        val_float = a_e.val_float;
+        arr_float = a_e.arr_float;
+        val_double = a_e.val_double;
         arr_double = a_e.arr_double;
       }
     };
@@ -189,8 +189,8 @@ RootImpl::~RootImpl()
     delete it->val_u64;
     delete it->arr_u64;
     delete it->val_float;
-    delete it->arr_double;
-    delete it->val_float;
+    delete it->arr_float;
+    delete it->val_double;
     delete it->arr_double;
   }
 }
