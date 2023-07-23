@@ -20,6 +20,7 @@
  */
 
 #include <input.hpp>
+#include <stdexcept>
 
 double Input::Scalar::GetDouble(Input::Type a_type) const
 {
