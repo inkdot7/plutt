@@ -82,6 +82,10 @@ Pressing 'x'/'y':
 	- It's possible to zoom the projected plot, but the other features of
 	  the main window plots are disabled.
 
+Pressing shift+'x':
+	- Clears the histogram, including statistics and data range, under the
+	  pointer.
+
 Let's define the data
 ---------------------
 

@@ -158,6 +158,7 @@ namespace ImPlutt {
       } x, y;
       Rect band_r;
     } zooming;
+    bool do_clear;
     void CutClear();
     bool GoTo(UserState);
     void Project(UserState, char const *, Point const &, Point const &);

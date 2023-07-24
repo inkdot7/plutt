@@ -1575,9 +1575,14 @@ namespace ImPlutt {
                   break;
                 case SDLK_x:
                   if (m_window->ContainsLocal(m_rect_graph, it->pointer)) {
-                    // X-projection.
-                    m_state->Project(PlotState::PROJ_X, a_title, m_min,
-                        m_max);
+                    if (KMOD_SHIFT & sdle.key.keysym.mod) {
+                      // Clear histogram.
+                      m_state->do_clear = true;
+                    } else {
+                      // X-projection.
+                      m_state->Project(PlotState::PROJ_X, a_title, m_min,
+                          m_max);
+                    }
                   }
                   break;
                 case SDLK_y:

@@ -85,6 +85,13 @@ std::string const &Page::GetLabel() const
   return m_label;
 }
 
+void Axis::Clear()
+{
+  bins = 0;
+  min = 0.0;
+  max = 0.0;
+}
+
 Range::Range(double a_drop_old_s):
   m_mode(MODE_ALL),
   m_type(Input::kNone),
@@ -132,6 +139,20 @@ void Range::Add(Input::Type a_type, Input::Scalar const &a_v)
     s2.num = 0;
     s2.t_oldest = 0;
   }
+}
+
+void Range::Clear()
+{
+  for (size_t i = 0; i < LENGTH(m_stat); ++i) {
+    auto &s = m_stat[i];
+    s.min = 0.0;
+    s.max = 0.0;
+    s.sum = 0.0;
+    s.sum2 = 0.0;
+    s.num = 0;
+    s.t_oldest = 0;
+  }
+  m_stat_i = 0;
 }
 
 Axis Range::GetExtents(uint32_t a_bins) const
@@ -338,6 +359,14 @@ void PlotHist::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
   // tries to figure out ranges, so a locked copy is important!
   {
     const std::lock_guard<std::mutex> lock(m_hist_mutex);
+    if (m_plot_state.do_clear) {
+      // We should clear.
+      // TODO: Clear all, or just histogram contents?
+      m_range.Clear();
+      m_axis.Clear();
+      m_hist.clear();
+      m_plot_state.do_clear = false;
+    }
     m_axis_copy = m_axis;
     if (m_hist_copy.size() != m_hist.size()) {
       m_hist_copy.resize(m_hist.size());
@@ -575,6 +604,14 @@ void PlotHist2::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
 {
   {
     const std::lock_guard<std::mutex> lock(m_hist_mutex);
+    if (m_plot_state.do_clear) {
+      m_range_x.Clear();
+      m_range_y.Clear();
+      m_axis_x.Clear();
+      m_axis_y.Clear();
+      m_hist.clear();
+      m_plot_state.do_clear = false;
+    }
     m_axis_x_copy = m_axis_x;
     m_axis_y_copy = m_axis_y;
     if (m_hist_copy.size() != m_hist.size()) {

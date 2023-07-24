@@ -50,6 +50,7 @@ class Page {
 };
 
 struct Axis {
+  void Clear();
   uint32_t bins;
   double min;
   double max;
@@ -68,6 +69,7 @@ class Range {
     };
     Range(double);
     void Add(Input::Type, Input::Scalar const &);
+    void Clear();
     Axis GetExtents(uint32_t) const;
     double GetMax() const;
     double GetMean() const;
