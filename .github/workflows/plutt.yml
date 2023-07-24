@@ -19,8 +19,8 @@ jobs:
     - name: make release
       run: make BUILD_MODE=release
     - name: Install nlopt
-      run:
-        add-apt-repository universe
+      run: |
+        sudo add-apt-repository universe
         sudo apt-get update -yq > /dev/null
         sudo apt-get install -y --no-install-recommends \
           libnlopt-dev
