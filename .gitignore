@@ -1,3 +1,4 @@
 *.bash
 *.plutt
+*.root
 cut*.txt
