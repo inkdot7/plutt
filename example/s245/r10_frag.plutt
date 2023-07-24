@@ -1,0 +1,22 @@
+// Test with:
+//
+// ./plutt -f r10_frag.plutt -r h509 r10_53x_beam_frag_hit_track.root
+
+// Plots as in: http://fy.chalmers.se/subatom/advsubdet/ROOT_1.0.pdf
+
+// Left upper figure p. 23.
+
+hist2d("Zst2", Zs2y, Zs2x)
+
+// Right upper figure p. 23.
+
+// TODO: option to force histogram range.
+
+hist2d("Tf", Tfy, Tfx)
+
+// Lower figure p. 23
+
+// TODO: complex (and) cut
+// ("Li11"&&z3out&&"Tfx<100&&Tfx>-100&&Zs2x<4&&Zs2x>-4")
+
+hist2d("Zs2x vs. Tfx", Zs2x, Tfx)

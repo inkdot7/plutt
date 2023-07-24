@@ -1,0 +1,39 @@
+// Test with:
+//
+// ./plutt -f r10_example.plutt -r h509 r10_470-529_beam_proton_hit_track.root
+
+// Plots as in: http://fy.chalmers.se/subatom/advsubdet/ROOT_1.0.pdf
+
+// Figure p. 17 (expr. p. 16).
+
+hist2d("inz vs. inbeta", inz, inbeta)
+
+// Figure p. 18 (expr. p. 17).
+
+// TODO: Expressions not working?:
+
+// hist2d("inz vs. inbeta II", inz, 9.5*300./931.5*sqrt(1/(inbeta*inbeta)-1))
+
+// Figure p. 20 (simple B/W version)
+
+hist2d("Pi1e vs. P12e", Pi1e, Pi2e)
+
+// TODO: coloured subparts of the above figure, i.e. with cuts/filters.
+
+// Left figure p. 21
+
+hist2d("Tot vs. Toe", Tot, Toe)
+
+// Right figure p. 21
+
+// TODO: Expressions, and (single-direction) filtering?
+
+// hist2d("Tot vs. Toe II", 1/((Tot-Po02t)*(Tot-Po02t)), Toe,
+//   filter(Tot-Po02t>25))
+
+// Figure p. 22 (simple B/W version)
+
+hist("Pi2e", Pi2e)
+
+// TODO: coloured subparts of the above figure, i.e. with cuts/filters.
+
