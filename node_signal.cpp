@@ -22,6 +22,7 @@
 #include <node_signal.hpp>
 #include <config.hpp>
 #include <cassert>
+#include <cmath>
 #include <sstream>
 
 NodeSignal::NodeSignal(Config &a_config, char const *a_name):
@@ -113,7 +114,7 @@ void NodeSignal::Process(uint64_t a_evid)
   } \
 } while (0)
 #define IF_NOT_NAN_u64(v)
-#define IF_NOT_NAN_dbl(v) if (!isnan(v.dbl))
+#define IF_NOT_NAN_dbl(v) if (!std::isnan(v.dbl))
   if (m_ME) {
     // Multi-hit array.
     FETCH_SIGNAL_DATA(M);
