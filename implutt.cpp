@@ -1255,7 +1255,8 @@ namespace ImPlutt {
     max_lin(),
     cut(),
     proj(),
-    zooming()
+    zooming(),
+    do_clear()
   {
   }
 
