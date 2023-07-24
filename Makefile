@@ -130,7 +130,7 @@ $(BUILD_DIR)/%.o: %.c Makefile
 $(BUILD_DIR)/%.yy.o: $(BUILD_DIR)/%.yy.c
 	@echo LEXO $@
 	$(QUIET)$(CXX) -c -o $@ $< $(CPPFLAGS) $(CXXFLAGS_UNSAFE)
-$(BUILD_DIR)/%.yy.c: %.l $(BUILD_DIR)/%.tab.c Makefile
+$(BUILD_DIR)/%.yy.c: %.l
 	@echo LEXC $@
 	$(QUIET)$(MKDIR)
 	$(QUIET)flex -o $@ $<
@@ -142,6 +142,14 @@ $(BUILD_DIR)/%.tab.c: %.y Makefile
 	@echo TABC $@
 	$(QUIET)$(MKDIR)
 	$(QUIET)bison -Werror -d -o $@ $<
+
+# These cannot be generalized...
+$(BUILD_DIR)/config_parser.yy.h: $(BUILD_DIR)/config_parser.yy.c
+$(BUILD_DIR)/config_parser.yy.c: $(BUILD_DIR)/config_parser.tab.h
+$(BUILD_DIR)/config_parser.tab.h: $(BUILD_DIR)/config_parser.tab.c
+$(BUILD_DIR)/trig_map_parser.yy.h: $(BUILD_DIR)/trig_map_parser.yy.c
+$(BUILD_DIR)/trig_map_parser.yy.c: $(BUILD_DIR)/trig_map_parser.tab.h
+$(BUILD_DIR)/trig_map_parser.tab.h: $(BUILD_DIR)/trig_map_parser.tab.c
 
 $(BUILD_DIR)/root.o: root.cpp Makefile
 	@echo ROOTO $@
@@ -168,8 +176,8 @@ $(BUILD_DIR)/test_root_dict_rdict.pcm: $(BUILD_DIR)/test/test_root_dict_rdict.pc
 	@echo CP $@
 	$(QUIET)cp $< $@
 
-$(BUILD_DIR)/config.o: $(BUILD_DIR)/config_parser.yy.c
-$(BUILD_DIR)/trig_map.o: $(BUILD_DIR)/trig_map_parser.yy.c
+$(BUILD_DIR)/config.o: $(BUILD_DIR)/config_parser.yy.h
+$(BUILD_DIR)/trig_map.o: $(BUILD_DIR)/trig_map_parser.yy.h
 
 # Vim config file support.
 
