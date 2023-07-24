@@ -112,6 +112,8 @@ void NodeSignal::Process(uint64_t a_evid)
     return; \
   } \
 } while (0)
+#define IF_NOT_NAN_u64(v)
+#define IF_NOT_NAN_dbl(v) if (!isnan(v.dbl))
   if (m_ME) {
     // Multi-hit array.
     FETCH_SIGNAL_DATA(M);
@@ -125,21 +127,24 @@ void NodeSignal::Process(uint64_t a_evid)
     SIGNAL_LEN_CHECK(p_->u64, <=, len_v);
     m_value.SetType(m_v->type);
     uint32_t v_i = 0;
-    for (uint32_t i = 0; i < p_M->u64; ++i) {
-      auto mi = (uint32_t)p_MI[i].u64;
-      auto me = (uint32_t)p_ME[i].u64;
-      switch (m_v->type) {
-#define COPY_VECTOR(input_type, member) \
-        case Input::input_type: \
+    switch (m_v->type) {
+#define COPY_M_HIT(input_type, member) \
+      case Input::input_type: \
+        for (uint32_t i = 0; i < p_M->u64; ++i) { \
+          auto mi = (uint32_t)p_MI[i].u64; \
+          auto me = (uint32_t)p_ME[i].u64; \
           for (; v_i < me; ++v_i) { \
-            m_value.Push(mi, p_v[v_i]); \
+            auto v_ = p_v[v_i]; \
+            IF_NOT_NAN_##member(v_) { \
+              m_value.Push(mi, v_); \
+            } \
           } \
-          break
-        COPY_VECTOR(kUint64, u64);
-        COPY_VECTOR(kDouble, dbl);
-        default:
-          throw std::runtime_error(__func__);
-      }
+        } \
+        break
+      COPY_M_HIT(kUint64, u64);
+      COPY_M_HIT(kDouble, dbl);
+      default:
+        throw std::runtime_error(__func__);
     }
   } else if (m_MI) {
     // Single-hit array.
@@ -150,11 +155,21 @@ void NodeSignal::Process(uint64_t a_evid)
     SIGNAL_LEN_CHECK(p_->u64, <=, len_MI);
     SIGNAL_LEN_CHECK(p_->u64, <=, len_v);
     m_value.SetType(m_v->type);
-    for (uint32_t i = 0; i < p_->u64; ++i) {
-      Input::Scalar s;
-      auto mi = (uint32_t)p_MI[i].u64;
-      s.u64 = p_v[i].u64;
-      m_value.Push(mi, s);
+    switch (m_v->type) {
+#define COPY_S_HIT(input_type, member) \
+    case Input::input_type: \
+      for (uint32_t i = 0; i < p_->u64; ++i) { \
+        auto mi = (uint32_t)p_MI[i].u64; \
+        auto v_ = p_v[i]; \
+        IF_NOT_NAN_##member(v_) { \
+          m_value.Push(mi, v_); \
+        } \
+      } \
+      break
+      COPY_S_HIT(kUint64, u64);
+      COPY_S_HIT(kDouble, dbl);
+      default:
+        throw std::runtime_error(__func__);
     }
   } else if (m_v) {
     // Non-indexed array.
@@ -163,8 +178,20 @@ void NodeSignal::Process(uint64_t a_evid)
     SIGNAL_LEN_CHECK(1U, ==, len_);
     SIGNAL_LEN_CHECK(p_->u64, <=, len_v);
     m_value.SetType(m_v->type);
-    for (uint32_t i = 0; i < p_->u64; ++i) {
-      m_value.Push(0, p_v[i]);
+    switch (m_v->type) {
+#define COPY_INDEX(input_type, member) \
+      case Input::input_type: \
+        for (uint32_t i = 0; i < p_->u64; ++i) { \
+          auto v_ = p_v[i]; \
+          IF_NOT_NAN_##member(v_) { \
+            m_value.Push(0, v_); \
+          } \
+        } \
+        break
+      COPY_INDEX(kUint64, u64);
+      COPY_INDEX(kDouble, dbl);
+      default:
+        throw std::runtime_error(__func__);
     }
   } else {
     // Scalar.
@@ -172,7 +199,21 @@ void NodeSignal::Process(uint64_t a_evid)
     SIGNAL_LEN_CHECK(1U, >=, len_);
     m_value.SetType(m_->type);
     if (len_ > 0) {
-      m_value.Push(0, *p_);
+      switch (m_->type) {
+#define COPY_SCALAR(input_type, member) \
+        case Input::input_type: \
+          { \
+            auto v_ = *p_; \
+            IF_NOT_NAN_##member(v_) { \
+              m_value.Push(0, v_); \
+            } \
+          } \
+          break
+        COPY_SCALAR(kUint64, u64);
+        COPY_SCALAR(kDouble, dbl);
+      default:
+        throw std::runtime_error(__func__);
+    }
     }
   }
 }
