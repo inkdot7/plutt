@@ -113,8 +113,8 @@ void NodeSignal::Process(uint64_t a_evid)
     return; \
   } \
 } while (0)
-#define IF_NOT_NAN_u64(v)
-#define IF_NOT_NAN_dbl(v) if (!std::isnan(v.dbl))
+#define IF_VALUE_u64(v)
+#define IF_VALUE_dbl(v) if (!std::isnan(v.dbl) && !std::isinf(v.dbl))
   if (m_ME) {
     // Multi-hit array.
     FETCH_SIGNAL_DATA(M);
@@ -136,7 +136,7 @@ void NodeSignal::Process(uint64_t a_evid)
           auto me = (uint32_t)p_ME[i].u64; \
           for (; v_i < me; ++v_i) { \
             auto v_ = p_v[v_i]; \
-            IF_NOT_NAN_##member(v_) { \
+            IF_VALUE_##member(v_) { \
               m_value.Push(mi, v_); \
             } \
           } \
@@ -162,7 +162,7 @@ void NodeSignal::Process(uint64_t a_evid)
       for (uint32_t i = 0; i < p_->u64; ++i) { \
         auto mi = (uint32_t)p_MI[i].u64; \
         auto v_ = p_v[i]; \
-        IF_NOT_NAN_##member(v_) { \
+        IF_VALUE_##member(v_) { \
           m_value.Push(mi, v_); \
         } \
       } \
@@ -184,7 +184,7 @@ void NodeSignal::Process(uint64_t a_evid)
       case Input::input_type: \
         for (uint32_t i = 0; i < p_->u64; ++i) { \
           auto v_ = p_v[i]; \
-          IF_NOT_NAN_##member(v_) { \
+          IF_VALUE_##member(v_) { \
             m_value.Push(0, v_); \
           } \
         } \
@@ -195,26 +195,23 @@ void NodeSignal::Process(uint64_t a_evid)
         throw std::runtime_error(__func__);
     }
   } else {
-    // Scalar.
+    // Scalar or simple array.
     FETCH_SIGNAL_DATA();
-    SIGNAL_LEN_CHECK(1U, >=, len_);
     m_value.SetType(m_->type);
-    if (len_ > 0) {
-      switch (m_->type) {
+    switch (m_->type) {
 #define COPY_SCALAR(input_type, member) \
-        case Input::input_type: \
-          { \
-            auto v_ = *p_; \
-            IF_NOT_NAN_##member(v_) { \
-              m_value.Push(0, v_); \
-            } \
+      case Input::input_type: \
+        for (uint32_t i = 0; i < len_; ++i) { \
+          auto v_ = p_[i]; \
+          IF_VALUE_##member(v_) { \
+            m_value.Push(0, v_); \
           } \
-          break
-        COPY_SCALAR(kUint64, u64);
-        COPY_SCALAR(kDouble, dbl);
+        } \
+        break
+      COPY_SCALAR(kUint64, u64);
+      COPY_SCALAR(kDouble, dbl);
       default:
         throw std::runtime_error(__func__);
-    }
     }
   }
 }
