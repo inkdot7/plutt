@@ -13,9 +13,16 @@ jobs:
       run: |
         sudo apt-get update -yq > /dev/null
         sudo apt-get install -y --no-install-recommends \
-          bison build-essential flex libgsl-dev libsdl2-dev libsdl2-ttf-dev \
-          pkg-config
+          bison build-essential flex libsdl2-dev pkg-config
     - name: make debug
       run: make
     - name: make release
+      run: make BUILD_MODE=release
+    - name: Install nlopt
+      run:
+        sudo apt-get install -y --no-install-recommends \
+          libnlopt-dev
+    - name: make debug nlopt
+      run: make
+    - name: make release nlopt
       run: make BUILD_MODE=release
