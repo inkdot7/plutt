@@ -96,13 +96,14 @@ OBJ:=$(patsubst %.cpp,$(BUILD_DIR)/%.o,$(SRC)) \
 	$(addprefix $(BUILD_DIR)/,trig_map_parser.yy.o trig_map_parser.tab.o)
 
 TEST_SRC:=$(wildcard test/*.cpp)
-TEST_OBJ:=$(patsubst %.cpp,$(BUILD_DIR)/%.o,$(TEST_SRC))
+TEST_OBJ:=$(patsubst %.cpp,$(BUILD_DIR)/%.o,$(TEST_SRC)) \
+	$(BUILD_DIR)/test/test_root_dict.o
 
 .PHONY: clean
 all: $(BUILD_DIR)/plutt test
 
 .PHONY: test
-test: $(BUILD_DIR)/tests
+test: $(BUILD_DIR)/tests $(BUILD_DIR)/test_root_dict_rdict.pcm
 	$(QUIET)./$<
 
 $(BUILD_DIR)/plutt: $(OBJ)
@@ -143,6 +144,26 @@ $(BUILD_DIR)/root.o: root.cpp Makefile
 	@echo ROOTO $@
 	$(QUIET)$(MKDIR)
 	$(QUIET)$(CXX) -c -o $@ $< $(CPPFLAGS) $(CXXFLAGS) $(ROOT_CFLAGS)
+
+$(BUILD_DIR)/test/test_root.o: test/test_root.cpp Makefile
+	@echo ROOTO $@
+	$(QUIET)$(MKDIR)
+	$(QUIET)$(CXX) -c -o $@ $< $(CPPFLAGS) $(CXXFLAGS) $(ROOT_CFLAGS)
+
+$(BUILD_DIR)/test/test_root_dict.o: $(BUILD_DIR)/test/test_root_dict.cpp
+	@echo ROOTO $@
+	$(QUIET)$(MKDIR)
+	$(QUIET)$(CXX) -c -o $@ $< $(CPPFLAGS) $(ROOT_CFLAGS)
+
+$(BUILD_DIR)/test/test_root_dict.cpp: test/test_root.hpp test/test_root_linkdef.hpp
+	@echo CLING $@
+	$(QUIET)$(MKDIR)
+	$(QUIET)rootcling -f -DPLUTT_ROOT=1 -I. $@ $^
+
+$(BUILD_DIR)/test/test_root_dict_rdict.pcm: $(BUILD_DIR)/test/test_root_dict.cpp
+$(BUILD_DIR)/test_root_dict_rdict.pcm: $(BUILD_DIR)/test/test_root_dict_rdict.pcm
+	@echo CP $@
+	$(QUIET)cp $< $@
 
 $(BUILD_DIR)/config.o: $(BUILD_DIR)/config_parser.yy.c
 $(BUILD_DIR)/trig_map.o: $(BUILD_DIR)/trig_map_parser.yy.c
