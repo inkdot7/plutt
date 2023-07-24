@@ -25,6 +25,14 @@
 
 class MyClass: public TObject {
   public:
+    MyClass():
+      d(),
+      f(),
+      uc(),
+      ui(),
+      ul(),
+      us()
+    {}
     virtual ~MyClass() {}
     Double_t d;
     Float_t f;
