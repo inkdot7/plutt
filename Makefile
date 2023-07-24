@@ -19,6 +19,8 @@
 
 .SECONDARY:
 
+include build_dir.mk
+
 ROOT_CONFIG:=root-config
 ifeq ($(UCESB_DIR),)
 UCESB_DIR:=../ucesb
@@ -40,7 +42,8 @@ endif
 ifeq ($(shell (pkg-config nlopt 2>/dev/null && echo Yes) | grep Yes),Yes)
 CPPFLAGS+=-DPLUTT_NLOPT=1
 CXXFLAGS:=$(CXXFLAGS) $(shell pkg-config nlopt --cflags)
-LIBS+=$(shell pkg-config nlopt --libs)
+NLOPT_LIBS:=$(shell pkg-config nlopt --libs)
+LIBS+=$(NLOPT_LIBS) $(shell echo $(filter -L%,$(NLOPT_LIBS)) | sed 's/-L/-Wl,-rpath,/')
 $(info nlopt: yes)
 else
 $(info nlopt: no)
@@ -52,6 +55,8 @@ ifeq ($(shell ($(ROOT_CONFIG) --version 2>/dev/null && echo Yes) | grep Yes),Yes
 CPPFLAGS+=-DPLUTT_ROOT=1
 ROOT_CFLAGS:=$(shell $(ROOT_CONFIG) --cflags | sed 's/-I/-isystem/')
 LIBS+=$(shell $(ROOT_CONFIG) --libs)
+ROOT_DICT_O:=$(BUILD_DIR)/test/test_root_dict.o
+ROOT_DICT_PCM:=$(BUILD_DIR)/test_root_dict_rdict.pcm
 $(info ROOT: yes)
 else
 $(info ROOT: no)
@@ -79,7 +84,6 @@ endif
 BASE_CFLAGS:=$(shell pkg-config freetype2 sdl2 --cflags)
 LIBS+=$(shell pkg-config freetype2 sdl2 --libs)
 
-include build_dir.mk
 CPPFLAGS:=$(CPPFLAGS) -MMD \
 	-I$(BUILD_DIR) -I. \
 	$(BASE_CFLAGS)
@@ -96,14 +100,13 @@ OBJ:=$(patsubst %.cpp,$(BUILD_DIR)/%.o,$(SRC)) \
 	$(addprefix $(BUILD_DIR)/,trig_map_parser.yy.o trig_map_parser.tab.o)
 
 TEST_SRC:=$(wildcard test/*.cpp)
-TEST_OBJ:=$(patsubst %.cpp,$(BUILD_DIR)/%.o,$(TEST_SRC)) \
-	$(BUILD_DIR)/test/test_root_dict.o
+TEST_OBJ:=$(patsubst %.cpp,$(BUILD_DIR)/%.o,$(TEST_SRC)) $(ROOT_DICT_O)
 
 .PHONY: clean
 all: $(BUILD_DIR)/plutt test
 
 .PHONY: test
-test: $(BUILD_DIR)/tests $(BUILD_DIR)/test_root_dict_rdict.pcm
+test: $(BUILD_DIR)/tests $(ROOT_DICT_PCM)
 	$(QUIET)./$<
 
 $(BUILD_DIR)/plutt: $(OBJ)

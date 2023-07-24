@@ -19,9 +19,9 @@
  * MA  02110-1301  USA
  */
 
-#include <TObject.h>
-
 #if PLUTT_ROOT
+
+#include <TObject.h>
 
 class MyClass: public TObject {
   public:

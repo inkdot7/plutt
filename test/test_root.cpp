@@ -19,14 +19,14 @@
  * MA  02110-1301  USA
  */
 
+#if PLUTT_ROOT
+
 #include <test/test.hpp>
 #include <TFile.h>
 #include <TTree.h>
 #include <config.hpp>
 #include <root.hpp>
 #include <test/test_root.hpp>
-
-#if PLUTT_ROOT
 
 namespace {
 
