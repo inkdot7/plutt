@@ -34,7 +34,18 @@ class NodeMExpr: public NodeValue {
       ADD,
       SUB,
       MUL,
-      DIV
+      DIV,
+      COS,
+      SIN,
+      TAN,
+      ACOS,
+      ASIN,
+      ATAN,
+      SQRT,
+      EXP,
+      LOG,
+      ABS,
+      POW
     };
     NodeMExpr(std::string const &, NodeValue *, double, bool, Operation);
     Value const &GetValue(uint32_t);

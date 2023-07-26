@@ -143,7 +143,11 @@ static double g_drop_old = -1.0;
 %token <str> TK_IDENT
 %token <str> TK_STRING
 
+%token TK_ABS
+%token TK_ACOS
 %token TK_APPEARANCE
+%token TK_ASIN
+%token TK_ATAN
 %token TK_BINSX
 %token TK_BINSY
 %token TK_BITFIELD
@@ -151,14 +155,17 @@ static double g_drop_old = -1.0;
 %token TK_CLUSTER
 %token TK_COARSE_FINE
 %token TK_COLORMAP
+%token TK_COS
 %token TK_CTDC
 %token TK_CUT
 %token TK_DROP_OLD
+%token TK_EXP
 %token TK_FILTER_RANGE
 %token TK_FIT
 %token TK_HIST
 %token TK_HIST2D
 %token TK_LENGTH
+%token TK_LOG
 %token TK_LOGY
 %token TK_LOGZ
 %token TK_MATCH_INDEX
@@ -169,10 +176,14 @@ static double g_drop_old = -1.0;
 %token TK_MIN
 %token TK_PAGE
 %token TK_PEDESTAL
+%token TK_POW
 %token TK_S
 %token TK_SELECT_INDEX
+%token TK_SIN
+%token TK_SQRT
 %token TK_SUB_MOD
 %token TK_TAMEX3
+%token TK_TAN
 %token TK_TOT
 %token TK_TPAT
 %token TK_TRANSFORMX
@@ -524,6 +535,22 @@ mexpr
 	| mexpr '/' const { MEXPR(@1, $$, $1, $3.GetDouble(),  true, DIV); }
 	| const '/' mexpr { MEXPR(@1, $$, $3, $1.GetDouble(), false, DIV); }
 	| '-' mexpr       { MEXPR(@1, $$, $2,            0.0, false, SUB); }
+	| TK_COS  '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true,  COS); }
+	| TK_SIN  '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true,  SIN); }
+	| TK_TAN  '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true,  TAN); }
+	| TK_ACOS '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true, ACOS); }
+	| TK_ASIN '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true, ASIN); }
+	| TK_ATAN '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true, ATAN); }
+	| TK_SQRT '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true, SQRT); }
+	| TK_EXP  '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true,  EXP); }
+	| TK_LOG  '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true,  LOG); }
+	| TK_ABS  '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true,  ABS); }
+	| TK_POW  '(' mexpr ',' const ')' {
+		MEXPR(@1, $$, $3, $5.GetDouble(), true, POW);
+	}
+	| TK_POW  '(' const ',' mexpr ')' {
+		MEXPR(@1, $$, $5, $3.GetDouble(), false, POW);
+	}
 
 bitfield_args
 	: bitfield_arg                   { $$ = $1; }

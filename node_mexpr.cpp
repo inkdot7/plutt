@@ -75,10 +75,45 @@ void NodeMExpr::Process(uint64_t a_evid)
         case DIV:
           v = m_node_is_left ? v / m_d : m_d / v;
           break;
+        case COS:
+          v = cos(v);
+          break;
+        case SIN:
+          v = cos(v);
+          break;
+        case TAN:
+          v = tan(v);
+          break;
+        case ACOS:
+          v = acos(v);
+          break;
+        case ASIN:
+          v = acos(v);
+          break;
+        case ATAN:
+          v = atan(v);
+          break;
+        case SQRT:
+          v = sqrt(v);
+          break;
+        case EXP:
+          v = exp(v);
+          break;
+        case LOG:
+          v = log(v);
+          break;
+        case ABS:
+          v = abs(v);
+          break;
+        case POW:
+          v = m_node_is_left ? pow(v, m_d) : pow(m_d, v);
+          break;
       }
-      Input::Scalar s;
-      s.dbl = v;
-      m_value.Push(mi, s);
+      if (!std::isnan(v) && !std::isinf(v)) {
+        Input::Scalar s;
+        s.dbl = v;
+        m_value.Push(mi, s);
+      }
     }
   }
 }

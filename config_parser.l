@@ -51,6 +51,10 @@ yycplloc_update()
 
 %%
 
+abs                    return TK_ABS;
+acos                   return TK_ACOS;
+asin                   return TK_ASIN;
+atan                   return TK_ATAN;
 appearance             return TK_APPEARANCE;
 binsx                  return TK_BINSX;
 binsy                  return TK_BINSY;
@@ -59,14 +63,17 @@ clock_match            return TK_CLOCK_MATCH;
 cluster                return TK_CLUSTER;
 coarse_fine            return TK_COARSE_FINE;
 colormap               return TK_COLORMAP;
+cos                    return TK_COS;
 ctdc                   return TK_CTDC;
 cut                    return TK_CUT;
 drop_old               return TK_DROP_OLD;
+exp                    return TK_EXP;
 filter_range           return TK_FILTER_RANGE;
 fit                    return TK_FIT;
 hist                   return TK_HIST;
 hist2d                 return TK_HIST2D;
 length                 return TK_LENGTH;
+log                    return TK_LOG;
 logy                   return TK_LOGY;
 logz                   return TK_LOGZ;
 match_index            return TK_MATCH_INDEX;
@@ -77,10 +84,14 @@ mean_geom              return TK_MEAN_GEOM;
 min                    return TK_MIN;
 page                   return TK_PAGE;
 pedestal               return TK_PEDESTAL;
+pow                    return TK_POW;
 s                      return TK_S;
 select_index           return TK_SELECT_INDEX;
+sin                    return TK_SIN;
+sqrt                   return TK_SQRT;
 sub_mod                return TK_SUB_MOD;
 tamex3                 return TK_TAMEX3;
+tan                    return TK_TAN;
 tot                    return TK_TOT;
 tpat                   return TK_TPAT;
 transformx             return TK_TRANSFORMX;
