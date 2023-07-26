@@ -10,8 +10,6 @@ hist2d("Zst2", Zs2y, Zs2x)
 
 // Right upper figure p. 23.
 
-// TODO: option to force histogram range.
-
 hist2d("Tf", Tfy, Tfx)
 
 // Lower figure p. 23
