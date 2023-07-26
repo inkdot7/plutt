@@ -317,6 +317,13 @@ NodeValue *Config::AddMember(NodeValue *a_node, char const *a_suffix)
   return node;
 }
 
+NodeValue *Config::AddMExpr(NodeValue *a_node, double a_d, bool
+    a_node_is_left, NodeMExpr::Operation a_op)
+{
+  auto node = new NodeMExpr(GetLocStr(), a_node, a_d, a_node_is_left, a_op);
+  return node;
+}
+
 void Config::AddPage(char const *a_label)
 {
   plot_page_create(a_label);

@@ -27,6 +27,11 @@
 
 #define LOC_SAVE(arg) g_config->SetLoc(arg.first_line, arg.first_column)
 
+#define MEXPR(arg, ret, node, d, node_is_left, op) do { \
+	LOC_SAVE(arg); \
+	ret = g_config->AddMExpr(node, d, node_is_left, NodeMExpr::op); \
+} while (0)
+
 char const *yycppath;
 Config *g_config;
 void
@@ -37,6 +42,40 @@ yycperror(char const *s)
 	abort();
 }
 int yylex(void);
+
+#define CONST_OP(l, op, r) do { \
+		Constant c_; \
+		if ((l).i64 && (r).i64) { \
+			c_.is_i64 = true; \
+			c_.i64 = (l).i64 op (r).i64; \
+		} else { \
+			c_.is_i64 = false; \
+			c_.dbl = (l).GetDouble() op (r).GetDouble(); \
+		} \
+		return c_; \
+	} while (0)
+Constant Constant::Add(Constant const &a_c) const {
+	CONST_OP(*this, +, a_c);
+}
+Constant Constant::Div(Constant const &a_c) const {
+	CONST_OP(*this, /, a_c);
+}
+Constant Constant::Mul(Constant const &a_c) const {
+	CONST_OP(*this, *, a_c);
+}
+Constant Constant::Sub(Constant const &a_c) const {
+	CONST_OP(*this, -, a_c);
+}
+double Constant::GetDouble() const {
+	return is_i64 ? i64 : dbl;
+}
+int64_t Constant::GetI64() const {
+	if (!is_i64) {
+		std::cerr << g_config->GetLocStr() << ": Must be integer!\n";
+		throw std::runtime_error(__func__);
+	}
+	return i64;
+}
 
 CutPolygon *g_cut_poly;
 
@@ -70,23 +109,37 @@ static double g_drop_old = -1.0;
 %}
 
 %locations
+%code requires {
+	struct Constant {
+		Constant Add(Constant const &) const;
+		Constant Div(Constant const &) const;
+		Constant Mul(Constant const &) const;
+		Constant Sub(Constant const &) const;
+		double GetDouble() const;
+		int64_t GetI64() const;
+		bool is_i64;
+		int64_t i64;
+		double dbl;
+	};
+}
 %define api.prefix {yycp}
 
 %union {
+	Constant c;
+	uint32_t u32;
 	double dbl;
-	int32_t i32;
 	char *str;
 	struct {
-		uint32_t first;
-		uint32_t last;
+		int64_t first;
+		int64_t last;
 	} range;
 	Node *node;
 	NodeValue *value;
 	struct BitfieldArg *bitfield;
 }
 
-%token <dbl> TK_DOUBLE
-%token <i32> TK_INTEGER
+%token <c> TK_DOUBLE
+%token <c> TK_INTEGER
 %token <str> TK_IDENT
 %token <str> TK_STRING
 
@@ -140,21 +193,19 @@ static double g_drop_old = -1.0;
 %type <value> bitfield
 %type <bitfield> bitfield_arg
 %type <bitfield> bitfield_args
-%type <i32> bitmask
-%type <i32> bitmask_item
-%type <i32> cmp_less
-%type <value> coarse_fine
+%type <u32> bitmask
+%type <u32> bitmask_item
 %type <dbl> clock_period
-%type <dbl> cut_inline_value
-%type <dbl> dbl_only
-%type <dbl> double
-%type <i32> integer
+%type <u32> cmp_less
+%type <value> coarse_fine
+%type <c> const
 %type <range> integer_range
 %type <value> length
 %type <value> max
 %type <value> mean_arith
 %type <value> mean_geom
 %type <value> member
+%type <value> mexpr
 %type <dbl> clock_range
 %type <value> select_index
 %type <value> sub_mod
@@ -198,8 +249,8 @@ appearance
 	}
 
 clock_match
-	: TK_CLOCK_MATCH '(' value ',' double ')' {
-		g_config->ClockMatch($3, $5);
+	: TK_CLOCK_MATCH '(' value ',' const ')' {
+		g_config->ClockMatch($3, $5.dbl);
 	}
 
 colormap
@@ -220,21 +271,18 @@ cut_inline_args1
 	: cut_inline_arg1
 	| cut_inline_args1 ',' cut_inline_arg1
 cut_inline_arg1
-	: cut_inline_value {
+	: const {
 		LOC_SAVE(@1);
-		g_cut_poly->AddPoint($1);
+		g_cut_poly->AddPoint($1.GetDouble());
 	}
 cut_inline_args2
 	: cut_inline_arg2
 	| cut_inline_args2 ',' cut_inline_arg2
 cut_inline_arg2
-	: '(' cut_inline_value ',' cut_inline_value ')' {
+	: '(' const ',' const ')' {
 		LOC_SAVE(@1);
-		g_cut_poly->AddPoint($2, $4);
+		g_cut_poly->AddPoint($2.GetDouble(), $4.GetDouble());
 	}
-cut_inline_value
-	: TK_DOUBLE { $$ = $1; }
-	| TK_INTEGER { $$ = $1; }
 cut_invoc
 	: TK_CUT '(' TK_STRING ')' {
 		g_cut_poly = new CutPolygon($3, true);
@@ -271,46 +319,43 @@ page
 		free($3);
 	}
 
-double
-	: dbl_only  { $$ = $1; }
-	| integer { $$ = $1; }
-dbl_only
+const
 	: TK_DOUBLE { $$ = $1; }
-	| dbl_only '+' dbl_only { $$ = $1 + $3; }
-	| dbl_only '-' dbl_only { $$ = $1 - $3; }
-	| dbl_only '*' dbl_only { $$ = $1 * $3; }
-	| dbl_only '/' dbl_only { $$ = $1 / $3; }
-	| '-' dbl_only { $$ = -$2; }
-	| '(' dbl_only ')' { $$ = $2; }
-
-integer
-	: TK_INTEGER { $$ = $1; }
-	| integer '+' integer { $$ = $1 + $3; }
-	| integer '-' integer { $$ = $1 - $3; }
-	| integer '*' integer { $$ = $1 * $3; }
-	| integer '/' integer { $$ = $1 / $3; }
-	| '-' integer { $$ = -$2; }
-	| '(' integer ')' { $$ = $2; }
+	| TK_INTEGER { $$ = $1; }
+	| const '+' const { $$ = $1.Add($3); }
+	| const '-' const { $$ = $1.Sub($3); }
+	| const '*' const { $$ = $1.Mul($3); }
+	| const '/' const { $$ = $1.Div($3); }
+	| '-' const {
+		Constant zero;
+		zero.is_i64 = true;
+		zero.i64 = 0;
+		$$ = zero.Sub($2);
+	}
+	| '(' const ')' { $$ = $2; }
 
 integer_range
-	: integer TK_OP_DDASH integer {
+	: const TK_OP_DDASH const {
 		LOC_SAVE(@1);
-		if ($1 > $3) {
+		auto l = $1.GetI64();
+		auto r = $1.GetI64();
+		if (l > r) {
 			std::cerr << g_config->GetLocStr() <<
 			    ": Integer range inverted!\n";
 			throw std::runtime_error(__func__);
 		}
-		$$.first = $1;
-		$$.last = $3;
+		$$.first = l;
+		$$.last = r;
 	}
 
 bitmask
 	: bitmask_item             { $$ = $1; }
 	| bitmask ',' bitmask_item { $$ = $1 | $3; }
 bitmask_item
-	: TK_INTEGER { $$ = 1 << $1; }
+	: TK_INTEGER { $$ = 1 << $1.i64; }
 	| TK_INTEGER TK_OP_DDASH TK_INTEGER {
-		$$ = (~(uint32_t)0 << $1) & (~(uint32_t)0 >> (31 - $3));
+		$$ = (~(uint32_t)0 << $1.i64) &
+		    (~(uint32_t)0 >> (31 - $3.i64));
 	}
 
 tpat
@@ -320,15 +365,21 @@ tpat
 	}
 
 clock_period
-	: double    { $$ = $1; }
+	: const     { $$ = $1.GetDouble(); }
 	| TK_CTDC   { $$ = 1e9 / CTDC_FREQ; }
 	| TK_TAMEX3 { $$ = 1e9 / TAMEX3_FREQ; }
 	| TK_VFTX2  { $$ = 1e9 / VFTX2_FREQ; }
 clock_range
-	: double    { $$ = $1; }
-	| TK_CTDC   { $$ = (1 << CTDC_BITS) * 1e9 / CTDC_FREQ; }
-	| TK_TAMEX3 { $$ = (1 << TAMEX3_BITS) * 1e9 / TAMEX3_FREQ; }
-	| TK_VFTX2  { $$ = (1 << VFTX2_BITS) * 1e9 / VFTX2_FREQ; }
+	: const { $$ = $1.GetDouble(); }
+	| TK_CTDC {
+		$$ = (1 << CTDC_BITS) * 1e9 / CTDC_FREQ;
+	}
+	| TK_TAMEX3 {
+		$$ = (1 << TAMEX3_BITS) * 1e9 / TAMEX3_FREQ;
+	}
+	| TK_VFTX2 {
+		$$ = (1 << VFTX2_BITS) * 1e9 / VFTX2_FREQ;
+	}
 
 unit_time
 	: TK_S   { $$ = 1.0; }
@@ -359,31 +410,31 @@ filter_range_conds
 	: filter_range_cond
 	| filter_range_conds ',' filter_range_cond
 filter_range_cond
-	: double TK_OP_EQ value {
+	: const TK_OP_EQ value {
 		g_filter_cond_vec.push_back(FilterRangeCond());
 		auto &c = g_filter_cond_vec.back();
 		c.node = $3;
-		c.lower = $1;
+		c.lower = $1.GetDouble();
 		c.lower_le = 1;
-		c.upper = $1;
+		c.upper = $1.GetDouble();
 		c.upper_le = 1;
 	}
-	| value TK_OP_EQ double {
+	| value TK_OP_EQ const {
 		g_filter_cond_vec.push_back(FilterRangeCond());
 		auto &c = g_filter_cond_vec.back();
 		c.node = $1;
-		c.lower = $3;
+		c.lower = $3.GetDouble();
 		c.lower_le = 1;
-		c.upper = $3;
+		c.upper = $3.GetDouble();
 		c.upper_le = 1;
 	}
-	| double cmp_less value cmp_less double {
+	| const cmp_less value cmp_less const {
 		g_filter_cond_vec.push_back(FilterRangeCond());
 		auto &c = g_filter_cond_vec.back();
 		c.node = $3;
-		c.lower = $1;
+		c.lower = $1.GetDouble();
 		c.lower_le = $2;
-		c.upper = $5;
+		c.upper = $5.GetDouble();
 		c.upper_le = $4;
 	}
 filter_args
@@ -415,9 +466,9 @@ fit_args
 	: fit_arg
 	| fit_args ',' fit_arg
 fit_arg
-	: '(' double ',' double ')' {
+	: '(' const ',' const ')' {
 		LOC_SAVE(@1);
-		g_fit_vec.push_back(FitEntry($2, $4));
+		g_fit_vec.push_back(FitEntry($2.GetDouble(), $4.GetDouble()));
 	}
 fit
 	: TK_IDENT '=' TK_FIT '(' fit_args ')' {
@@ -432,9 +483,9 @@ fit
 	}
 
 value
-	: alias         { $$ = $1; }
-	| bitfield      { $$ = $1; }
+	: bitfield      { $$ = $1; }
 	| coarse_fine   { $$ = $1; }
+	| mexpr         { $$ = $1; }
 	| length        { $$ = $1; }
 	| max           { $$ = $1; }
 	| mean_arith    { $$ = $1; }
@@ -461,6 +512,19 @@ assign
 		free($1);
 	}
 
+mexpr
+	: alias { $$ = $1; }
+	| '(' mexpr ')' { $$ = $2; }
+	| mexpr '+' const { MEXPR(@1, $$, $1, $3.GetDouble(),  true, ADD); }
+	| const '+' mexpr { MEXPR(@1, $$, $3, $1.GetDouble(), false, ADD); }
+	| mexpr '-' const { MEXPR(@1, $$, $1, $3.GetDouble(),  true, SUB); }
+	| const '-' mexpr { MEXPR(@1, $$, $3, $1.GetDouble(), false, SUB); }
+	| mexpr '*' const { MEXPR(@1, $$, $1, $3.GetDouble(),  true, MUL); }
+	| const '*' mexpr { MEXPR(@1, $$, $3, $1.GetDouble(), false, MUL); }
+	| mexpr '/' const { MEXPR(@1, $$, $1, $3.GetDouble(),  true, DIV); }
+	| const '/' mexpr { MEXPR(@1, $$, $3, $1.GetDouble(), false, DIV); }
+	| '-' mexpr       { MEXPR(@1, $$, $2,            0.0, false, SUB); }
+
 bitfield_args
 	: bitfield_arg                   { $$ = $1; }
 	| bitfield_args ',' bitfield_arg {
@@ -469,9 +533,9 @@ bitfield_args
 		$$ = $3;
 	}
 bitfield_arg
-	: alias ',' integer {
+	: alias ',' const {
 		LOC_SAVE(@1);
-		$$ = new BitfieldArg(g_config->GetLocStr(), $1, $3);
+		$$ = new BitfieldArg(g_config->GetLocStr(), $1, $3.GetI64());
 	}
 bitfield
 	: TK_BITFIELD '(' bitfield_args ')' {
@@ -510,8 +574,8 @@ hist_cut
 		g_cut_poly = nullptr;
 	}
 hist_drop_old
-	: TK_DROP_OLD '=' double unit_time {
-		g_drop_old = $3 * $4;
+	: TK_DROP_OLD '=' const unit_time {
+		g_drop_old = $3.GetDouble() * $4;
 	}
 
 hist_opts
@@ -523,7 +587,7 @@ hist_opt_list
 hist_opt
 	: ',' hist_arg
 hist_arg
-	: TK_BINSX '=' integer { g_binsx = $3; }
+	: TK_BINSX '=' const { g_binsx = $3.GetI64(); }
 	| TK_FIT '=' TK_STRING { g_fit = $3; }
 	| TK_LOGY { g_logy = 1; }
 	| TK_TRANSFORMX '=' TK_IDENT { g_transformx = $3; }
@@ -538,8 +602,8 @@ hist2d_opt_list
 hist2d_opt
 	: ',' hist2d_arg
 hist2d_arg
-	: TK_BINSX '=' integer { g_binsx = $3; }
-	| TK_BINSY '=' integer { g_binsy = $3; }
+	: TK_BINSX '=' const { g_binsx = $3.GetI64(); }
+	| TK_BINSY '=' const { g_binsy = $3.GetI64(); }
 	| TK_LOGZ { g_logz = 1; }
 	| TK_TRANSFORMX '=' TK_IDENT { g_transformx = $3; }
 	| TK_TRANSFORMY '=' TK_IDENT { g_transformy = $3; }
@@ -602,9 +666,9 @@ match_index
 	}
 match_value
 	: TK_IDENT ',' TK_IDENT '=' TK_MATCH_VALUE '(' value ',' value ','
-	    double ')' {
+	    const ')' {
 		LOC_SAVE(@5);
-		auto node = g_config->AddMatchValue($7, $9, $11);
+		auto node = g_config->AddMatchValue($7, $9, $11.GetDouble());
 		LOC_SAVE(@1);
 		g_config->AddAlias($1, node, 0);
 		LOC_SAVE(@3);
@@ -653,9 +717,10 @@ pedestal_arg
 	}
 pedestal
 	: TK_IDENT ',' TK_IDENT '=' TK_PEDESTAL
-	    '(' value ',' double pedestal_opts ')' {
+	    '(' value ',' const pedestal_opts ')' {
 		LOC_SAVE(@5);
-		auto node = g_config->AddPedestal($7, $9, g_pedestal_tpat);
+		auto node = g_config->AddPedestal($7, $9.GetDouble(),
+		    g_pedestal_tpat);
 		LOC_SAVE(@1);
 		g_config->AddAlias($1, node, 0);
 		LOC_SAVE(@3);
@@ -665,14 +730,14 @@ pedestal
 		free($3);
 	}
 ui_rate
-	: TK_UI_RATE '=' integer {
+	: TK_UI_RATE '=' const {
 		LOC_SAVE(@1);
-		g_config->UIRateSet($3);
+		g_config->UIRateSet($3.GetDouble());
 	}
 select_index
-	: TK_SELECT_INDEX '(' value ',' integer ')' {
+	: TK_SELECT_INDEX '(' value ',' const ')' {
 		LOC_SAVE(@1);
-		$$ = g_config->AddSelectIndex($3, $5, $5);
+		$$ = g_config->AddSelectIndex($3, $5.GetI64(), $5.GetI64());
 	}
 	| TK_SELECT_INDEX '(' value ',' integer_range ')' {
 		LOC_SAVE(@1);
@@ -701,9 +766,9 @@ zero_suppress
 		LOC_SAVE(@1);
 		$$ = g_config->AddZeroSuppress($3, 1e-15);
 	}
-	| TK_ZERO_SUPPRESS '(' value ',' double ')' {
+	| TK_ZERO_SUPPRESS '(' value ',' const ')' {
 		LOC_SAVE(@1);
-		$$ = g_config->AddZeroSuppress($3, $5);
+		$$ = g_config->AddZeroSuppress($3, $5.GetDouble());
 	}
 
 %%

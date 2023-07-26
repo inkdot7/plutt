@@ -27,6 +27,7 @@
 #include <string>
 #include <cut.hpp>
 #include <input.hpp>
+#include <node_mexpr.hpp>
 #include <trig_map.hpp>
 #include <value.hpp>
 
@@ -67,6 +68,7 @@ class Config {
     NodeValue *AddMeanArith(NodeValue *, NodeValue *);
     NodeValue *AddMeanGeom(NodeValue *, NodeValue *);
     NodeValue *AddMember(NodeValue *, char const *);
+    NodeValue *AddMExpr(NodeValue *, double, bool, NodeMExpr::Operation);
     void AddPage(char const *);
     NodeValue *AddPedestal(NodeValue *, double, NodeValue *);
     NodeValue *AddSelectIndex(NodeValue *, uint32_t, uint32_t);

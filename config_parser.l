@@ -112,7 +112,8 @@ zero_suppress          return TK_ZERO_SUPPRESS;
 }
 (([0-9]*\.[0-9]+|[0-9]+\.)([eE][-+]?[0-9]+)?|[0-9]+[eE][-+]?[0-9]+) {
 	char *end;
-	yycplval.dbl = strtod(yycptext, &end);
+	yycplval.c.is_i64 = false;
+	yycplval.c.dbl = strtod(yycptext, &end);
 	if (end == yycptext) {
 		yycperror("Invalid double.");
 	}
@@ -120,7 +121,8 @@ zero_suppress          return TK_ZERO_SUPPRESS;
 }
 [0-9]+ {
 	char *end;
-	yycplval.i32 = strtol(yycptext, &end, 10);
+	yycplval.c.is_i64 = true;
+	yycplval.c.i64 = strtoll(yycptext, &end, 10);
 	if (end == yycptext) {
 		yycperror("Invalid integer.");
 	}
@@ -131,7 +133,7 @@ zero_suppress          return TK_ZERO_SUPPRESS;
 	return TK_IDENT;
 }
 
-[\+\-*(),\.:=\[\]] return *yycptext;
+[\+\-*\/(),\.:=\[\]] return *yycptext;
 
 [ \t\n] ;
 
