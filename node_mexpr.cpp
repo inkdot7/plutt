@@ -103,7 +103,7 @@ void NodeMExpr::Process(uint64_t a_evid)
           v = log(v);
           break;
         case ABS:
-          v = abs(v);
+          v = std::abs(v);
           break;
         case POW:
           v = m_node_is_left ? pow(v, m_d) : pow(m_d, v);
