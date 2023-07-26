@@ -20,4 +20,4 @@
 ifeq (,$(BUILD_MODE))
  BUILD_MODE=debug
 endif
-BUILD_DIR:=build_$(shell $(CXX) -dumpversion)_$(shell $(CXX) -dumpmachine)_$(BUILD_MODE)
+BUILD_DIR:=build_$(shell $(CXX) -dumpmachine)_$(shell $(CXX) -dumpversion)_$(BUILD_MODE)
