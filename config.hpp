@@ -102,6 +102,8 @@ class Config {
     void CutListBind(std::string const &);
     void NodeCutAdd(NodeCut *);
     void NodeCuttableAdd(NodeCuttable *);
+    void NodeValueAdd(std::string const &, NodeValue *);
+    NodeValue *NodeValueGet(std::string const &);
 
     struct FitEntry {
       double k;
@@ -110,11 +112,18 @@ class Config {
     std::string m_path;
     int m_line, m_col;
     TrigMap m_trig_map;
+    // For de-duplicating nodes.
+    // The key is "__LINE__,arg_0,...,arg_n".
+    std::map<std::string, NodeValue *> m_node_value_map;
+    // config_parser identifiers start out as unassigned aliases, are then
+    // assigned by assignment operations, and unassigned ones at the end are
+    // considered signals that an Input must provide.
     std::map<std::string, NodeAlias *> m_alias_map;
+    // Unassigned aliases are moved here.
     std::map<std::string, NodeSignal *> m_signal_map;
+    // Cutting is special due to "soft" name-based dependencies.
     std::list<NodeCut *> m_cut_node_list;
     std::map<std::string, NodeCuttable *> m_cuttable_map;
-    std::map<std::string, CutPolygon *> m_cut_poly_map;
     // Temps to keep cut-links to be resolved when all histograms exist.
     typedef std::list<CutPolygon *> CutPolyList;
     CutPolyList m_cut_poly_list;

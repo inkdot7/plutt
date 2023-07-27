@@ -66,11 +66,11 @@ Config::Config(char const *a_path):
   m_line(),
   m_col(),
   m_trig_map(),
+  m_node_value_map(),
   m_alias_map(),
   m_signal_map(),
   m_cut_node_list(),
   m_cuttable_map(),
-  m_cut_poly_map(),
   m_cut_poly_list(),
   m_cut_ref_map(),
   m_fit_map(),
@@ -162,49 +162,93 @@ Config::~Config()
 NodeValue *Config::AddAlias(char const *a_name, NodeValue *a_value, uint32_t
     a_ret_i)
 {
-  NodeAlias *alias;
-  auto it = m_alias_map.find(a_name);
-  if (m_alias_map.end() == it) {
-    alias = new NodeAlias(GetLocStr(), a_value, a_ret_i);
-    m_alias_map.insert(std::make_pair(a_name, alias));
-  } else {
-    alias = it->second;
-    alias->SetSource(GetLocStr(), a_value);
+  std::ostringstream oss;
+  oss << __LINE__ << ',' << a_name << ',' << a_value << ',' << a_ret_i;
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    auto it = m_alias_map.find(a_name);
+    NodeAlias *alias;
+    if (m_alias_map.end() == it) {
+      alias = new NodeAlias(GetLocStr(), a_value, a_ret_i);
+      m_alias_map.insert(std::make_pair(a_name, alias));
+    } else {
+      alias = it->second;
+      alias->SetSource(GetLocStr(), a_value);
+    }
+    NodeValueAdd(key, node = alias);
   }
-  return alias;
+  return node;
 }
 
 NodeValue *Config::AddBitfield(BitfieldArg *a_arg)
 {
-  auto node = new NodeBitfield(GetLocStr(), a_arg);
+  std::ostringstream oss;
+  oss << __LINE__;
+  for (auto arg = a_arg; arg; arg = arg->next) {
+    oss << ',' << arg->node << ',' << arg->bits;
+  }
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    NodeValueAdd(key, node = new NodeBitfield(GetLocStr(), a_arg));
+  }
   return node;
 }
 
 NodeValue *Config::AddCluster(NodeValue *a_node)
 {
-  auto node = new NodeCluster(GetLocStr(), a_node);
+  std::ostringstream oss;
+  oss << __LINE__ << ',' << a_node;
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    NodeValueAdd(key, node = new NodeCluster(GetLocStr(), a_node));
+  }
   return node;
 }
 
 NodeValue *Config::AddCoarseFine(NodeValue *a_coarse, NodeValue *a_fine,
     double a_fine_range)
 {
-  auto node = new NodeCoarseFine(GetLocStr(), a_coarse, a_fine, a_fine_range);
+  std::ostringstream oss;
+  oss << __LINE__ << ',' << a_coarse << ',' << a_fine << ',' << a_fine_range;
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    NodeValueAdd(key, node = new NodeCoarseFine(GetLocStr(), a_coarse, a_fine,
+        a_fine_range));
+  }
   return node;
 }
 
 NodeValue *Config::AddCut(CutPolygon *a_poly)
 {
-  auto node = new NodeCut(GetLocStr(), a_poly);
-  NodeCutAdd(node);
-  return node;
+  // TODO: De-duplicate this properly...
+  auto node_cut = new NodeCut(GetLocStr(), a_poly);
+  NodeCutAdd(node_cut);
+  return node_cut;
 }
 
 NodeValue *Config::AddFilterRange(
     std::vector<FilterRangeCond> const &a_cond_vec,
     std::vector<NodeValue *> const &a_arg_vec)
 {
-  auto node = new NodeFilterRange(GetLocStr(), a_cond_vec, a_arg_vec);
+  std::ostringstream oss;
+  oss << __LINE__;
+  for (auto it = a_cond_vec.begin(); a_cond_vec.end() != it; ++it) {
+    oss << ',' << it->node << ',' << it->lower << ',' << it->lower_le << ',' <<
+        it->upper << ',' << it->upper_le;
+  }
+  for (auto it = a_arg_vec.begin(); a_arg_vec.end() != it; ++it) {
+    oss << ',' << *it;
+  }
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    NodeValueAdd(key,
+        node = new NodeFilterRange(GetLocStr(), a_cond_vec, a_arg_vec));
+  }
   return node;
 }
 
@@ -276,51 +320,100 @@ void Config::AddHist2(char const *a_title, NodeValue *a_y, NodeValue *a_x,
 
 NodeValue *Config::AddLength(NodeValue *a_value)
 {
-  auto node = new NodeLength(GetLocStr(), a_value);
+  std::ostringstream oss;
+  oss << __LINE__ << ',' << a_value;
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    NodeValueAdd(key, node = new NodeLength(GetLocStr(), a_value));
+  }
   return node;
 }
 
 NodeValue *Config::AddMatchIndex(NodeValue *a_l, NodeValue *a_r)
 {
-  auto node = new NodeMatchIndex(GetLocStr(), a_l, a_r);
+  std::ostringstream oss;
+  oss << __LINE__ << ',' << a_l << ',' << a_r;
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    NodeValueAdd(key, node = new NodeMatchIndex(GetLocStr(), a_l, a_r));
+  }
   return node;
 }
 
 NodeValue *Config::AddMatchValue(NodeValue *a_l, NodeValue *a_r, double
     a_cutoff)
 {
-  auto node = new NodeMatchValue(GetLocStr(), a_l, a_r, a_cutoff);
+  std::ostringstream oss;
+  oss << __LINE__ << ',' << a_l << ',' << a_r << ',' << a_cutoff;
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    NodeValueAdd(key,
+        node = new NodeMatchValue(GetLocStr(), a_l, a_r, a_cutoff));
+  }
   return node;
 }
 
 NodeValue *Config::AddMax(NodeValue *a_value)
 {
-  auto node = new NodeMax(GetLocStr(), a_value);
+  std::ostringstream oss;
+  oss << __LINE__ << ',' << a_value;
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    NodeValueAdd(key, node = new NodeMax(GetLocStr(), a_value));
+  }
   return node;
 }
 
 NodeValue *Config::AddMeanArith(NodeValue *a_l, NodeValue *a_r)
 {
-  auto node = new NodeMeanArith(GetLocStr(), a_l, a_r);
+  std::ostringstream oss;
+  oss << __LINE__ << ',' << a_l << ',' << a_r;
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    NodeValueAdd(key, node = new NodeMeanArith(GetLocStr(), a_l, a_r));
+  }
   return node;
 }
 
 NodeValue *Config::AddMeanGeom(NodeValue *a_l, NodeValue *a_r)
 {
-  auto node = new NodeMeanGeom(GetLocStr(), a_l, a_r);
+  std::ostringstream oss;
+  oss << __LINE__ << ',' << a_l << ',' << a_r;
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    NodeValueAdd(key, node = new NodeMeanGeom(GetLocStr(), a_l, a_r));
+  }
   return node;
 }
 
 NodeValue *Config::AddMember(NodeValue *a_node, char const *a_suffix)
 {
-  auto node = new NodeMember(GetLocStr(), a_node, a_suffix);
+  std::ostringstream oss;
+  oss << __LINE__ << ',' << a_node << ',' << a_suffix;
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    NodeValueAdd(key, node = new NodeMember(GetLocStr(), a_node, a_suffix));
+  }
   return node;
 }
 
 NodeValue *Config::AddMExpr(NodeValue *a_l, NodeValue *a_r, double a_d,
     NodeMExpr::Operation a_op)
 {
-  auto node = new NodeMExpr(GetLocStr(), a_l, a_r, a_d, a_op);
+  std::ostringstream oss;
+  oss << __LINE__ << ',' << a_l << ',' << a_r << ',' << a_d << ',' << a_op;
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    NodeValueAdd(key, node = new NodeMExpr(GetLocStr(), a_l, a_r, a_d, a_op));
+  }
   return node;
 }
 
@@ -332,48 +425,97 @@ void Config::AddPage(char const *a_label)
 NodeValue *Config::AddPedestal(NodeValue *a_value, double a_cutoff, NodeValue
     *a_tpat)
 {
-  auto node = new NodePedestal(GetLocStr(), a_value, a_cutoff, a_tpat);
+  std::ostringstream oss;
+  oss << __LINE__ << ',' << a_value << ',' << a_cutoff << ',' << a_tpat;
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    NodeValueAdd(key,
+        node = new NodePedestal(GetLocStr(), a_value, a_cutoff, a_tpat));
+  }
   return node;
 }
 
 NodeValue *Config::AddSelectIndex(NodeValue *a_child, uint32_t a_first,
     uint32_t a_last)
 {
-  auto node = new NodeSelectIndex(GetLocStr(), a_child, a_first, a_last);
+  std::ostringstream oss;
+  oss << __LINE__ << ',' << a_child << ',' << a_first << ',' << a_last;
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    NodeValueAdd(key,
+        node = new NodeSelectIndex(GetLocStr(), a_child, a_first, a_last));
+  }
   return node;
 }
 
 NodeValue *Config::AddSubMod(NodeValue *a_left, NodeValue *a_right, double
     a_range)
 {
-  auto node = new NodeSubMod(GetLocStr(), a_left, a_right, a_range);
+  std::ostringstream oss;
+  oss << __LINE__ << ',' << a_left << ',' << a_right << ',' << a_range;
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    NodeValueAdd(key,
+        node = new NodeSubMod(GetLocStr(), a_left, a_right, a_range));
+  }
   return node;
 }
 
 NodeValue *Config::AddTot(NodeValue *a_leading, NodeValue *a_trailing, double
     a_range)
 {
-  auto node = new NodeTot(GetLocStr(), a_leading, a_trailing, a_range);
+  std::ostringstream oss;
+  oss << __LINE__ << ',' << a_leading << ',' << a_trailing << ',' << a_range;
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    NodeValueAdd(key,
+        node = new NodeTot(GetLocStr(), a_leading, a_trailing, a_range));
+  }
   return node;
 }
 
 NodeValue *Config::AddTpat(NodeValue *a_tpat, uint32_t a_mask)
 {
-  auto node = new NodeTpat(GetLocStr(), a_tpat, a_mask);
+  std::ostringstream oss;
+  oss << __LINE__ << ',' << a_tpat << ',' << a_mask;
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    NodeValueAdd(key, node = new NodeTpat(GetLocStr(), a_tpat, a_mask));
+  }
   return node;
 }
 
 NodeValue *Config::AddTrigMap(char const *a_path, char const *a_prefix,
     NodeValue *a_left, NodeValue *a_right, double a_range)
 {
-  auto prefix = m_trig_map.LoadPrefix(a_path, a_prefix);
-  auto node = new NodeTrigMap(GetLocStr(), prefix, a_left, a_right, a_range);
+  std::ostringstream oss;
+  oss << __LINE__ << ',' << a_path << ',' << a_prefix << ',' << a_left <<
+      ',' << a_right << ',' << a_range;
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    auto prefix = m_trig_map.LoadPrefix(a_path, a_prefix);
+    NodeValueAdd(key, node = new NodeTrigMap(GetLocStr(), prefix, a_left,
+        a_right, a_range));
+  }
   return node;
 }
 
 NodeValue *Config::AddZeroSuppress(NodeValue *a_value, double a_cutoff)
 {
-  auto node = new NodeZeroSuppress(GetLocStr(), a_value, a_cutoff);
+  std::ostringstream oss;
+  oss << __LINE__ << ',' << a_value << ',' << a_cutoff;
+  auto key = oss.str();
+  auto node = NodeValueGet(key);
+  if (!node) {
+    NodeValueAdd(key,
+        node = new NodeZeroSuppress(GetLocStr(), a_value, a_cutoff));
+  }
   return node;
 }
 
@@ -459,6 +601,21 @@ void Config::NodeCuttableAdd(NodeCuttable *a_node)
   }
   m_cuttable_map.insert(std::make_pair(a_node->GetTitle(), a_node));
   CutListBind(a_node->GetTitle());
+}
+
+void Config::NodeValueAdd(std::string const &a_key, NodeValue *a_node)
+{
+  m_node_value_map.insert(std::make_pair(a_key, a_node));
+}
+
+NodeValue *Config::NodeValueGet(std::string const &a_key)
+{
+  auto it = m_node_value_map.find(a_key);
+  if (m_node_value_map.end() == it) {
+    return nullptr;
+  }
+  // std::cout << "Re-using node _" << a_key << "_\n";
+  return it->second;
 }
 
 void Config::DoEvent(Input *a_input)
