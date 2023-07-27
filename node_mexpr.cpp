@@ -52,9 +52,9 @@ Value const &NodeMExpr::GetValue(uint32_t a_ret_i)
 void NodeMExpr::Process(uint64_t a_evid)
 {
   NODE_PROCESS_GUARD(a_evid);
-  Value const *val_l;
-  Value const *val_r;
-  Value const *val;
+  Value const *val_l = nullptr;
+  Value const *val_r = nullptr;
+  Value const *val = nullptr;
   if (m_l) {
     NODE_PROCESS(m_l, a_evid);
     val = val_l = &m_l->GetValue();
@@ -88,7 +88,7 @@ void NodeMExpr::Process(uint64_t a_evid)
     uint32_t mi = miv[i];
     uint32_t me = mev[i];
     for (; vi < me; ++vi) {
-      double v, l, r;
+      double v, l = 0.0, r = 0.0;
       switch (m_mix) {
         case 0:
           l = val_l->GetV(vi, true);
@@ -102,6 +102,8 @@ void NodeMExpr::Process(uint64_t a_evid)
           l = m_d;
           r = val_r->GetV(vi, true);
           break;
+        default:
+          throw std::runtime_error(__func__);
       }
       switch (m_op) {
         case ADD:  v = l + r; break;
