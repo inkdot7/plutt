@@ -26,6 +26,7 @@ hist2d("Tot vs. Toe", Tot, Toe)
 
 // TODO: Expressions, and (single-direction) filtering?
 
+hist2d("Tot vs. Toe II", 1/((Tot-Po02t)*(Tot-Po02t)), Toe)
 // hist2d("Tot vs. Toe II", 1/((Tot-Po02t)*(Tot-Po02t)), Toe,
 //   filter(Tot-Po02t>25))
 

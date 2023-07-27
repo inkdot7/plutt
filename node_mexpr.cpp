@@ -54,18 +54,19 @@ void NodeMExpr::Process(uint64_t a_evid)
   NODE_PROCESS_GUARD(a_evid);
   Value const *val_l = nullptr;
   Value const *val_r = nullptr;
-  Value const *val = nullptr;
   if (m_l) {
     NODE_PROCESS(m_l, a_evid);
-    val = val_l = &m_l->GetValue();
-    if (Input::kNone == val_l->GetType()) {
+    val_l = &m_l->GetValue();
+    if (Input::kNone == val_l->GetType() ||
+        val_l->GetMI().empty()) {
       return;
     }
   }
   if (m_r) {
     NODE_PROCESS(m_r, a_evid);
-    val = val_r = &m_r->GetValue();
-    if (Input::kNone == val_r->GetType()) {
+    val_r = &m_r->GetValue();
+    if (Input::kNone == val_r->GetType() ||
+        val_r->GetMI().empty()) {
       return;
     }
   }
@@ -73,37 +74,60 @@ void NodeMExpr::Process(uint64_t a_evid)
   m_value.Clear();
   m_value.SetType(Input::kDouble);
 
-  auto const &miv = val->GetMI();
-  auto const &mev = val->GetME();
-  uint32_t vi = 0;
-  for (uint32_t i = 0; i < miv.size(); ++i) {
+  uint32_t vi_l = 0;
+  uint32_t vi_r = 0;
+  for (uint32_t i = 0;; ++i) {
+    uint32_t mi;
+    uint32_t me_l = 1;
+    uint32_t me_r = 1;
     if (0 == m_mix) {
-      if (val_l->GetMI().at(i) != val_r->GetMI().at(i) ||
-          val_l->GetME().at(i) != val_r->GetME().at(i)) {
-        std::cerr << GetLocStr() <<
-            ": Data operands must have identical structure!\n";
+      auto done_l = i == val_l->GetMI().size();
+      auto done_r = i == val_r->GetMI().size();
+      if (done_l && done_r) {
+        break;
+      }
+      if (done_l || done_r) {
+        std::cerr << GetLocStr() << ": Data operands not index-matched!\n";
         throw std::runtime_error(__func__);
       }
+      auto mi_l = val_l->GetMI().at(i);
+      auto mi_r = val_r->GetMI().at(i);
+      if (mi_l != mi_r) {
+        std::cerr << GetLocStr() << ": Data operands not index-matched!\n";
+        throw std::runtime_error(__func__);
+      }
+      mi = mi_l;
+      me_l = val_l->GetME().at(i);
+      me_r = val_r->GetME().at(i);
+    } else if (1 == m_mix) {
+      if (i == val_l->GetMI().size()) {
+        break;
+      }
+      mi = val_l->GetMI().at(i);
+      me_l = val_l->GetME().at(i);
+    } else {
+      if (i == val_r->GetMI().size()) {
+        break;
+      }
+      mi = val_r->GetMI().at(i);
+      me_r = val_r->GetME().at(i);
     }
-    uint32_t mi = miv[i];
-    uint32_t me = mev[i];
-    for (; vi < me; ++vi) {
+    for (;;) {
       double v, l = 0.0, r = 0.0;
-      switch (m_mix) {
-        case 0:
-          l = val_l->GetV(vi, true);
-          r = val_r->GetV(vi, true);
-          break;
-        case 1:
-          l = val_l->GetV(vi, true);
-          r = m_d;
-          break;
-        case 2:
-          l = m_d;
-          r = val_r->GetV(vi, true);
-          break;
-        default:
-          throw std::runtime_error(__func__);
+      auto done_l = vi_l == me_l;
+      auto done_r = vi_r == me_r;
+      if (done_l || done_r) {
+        break;
+      }
+      if (0 == m_mix) {
+        l = val_l->GetV(vi_l++, true);
+        r = val_r->GetV(vi_r++, true);
+      } else if (1 == m_mix) {
+        l = val_l->GetV(vi_l++, true);
+        r = m_d;
+      } else {
+        l = m_d;
+        r = val_r->GetV(vi_r++, true);
       }
       switch (m_op) {
         case ADD:  v = l + r; break;
@@ -128,5 +152,7 @@ void NodeMExpr::Process(uint64_t a_evid)
         m_value.Push(mi, s);
       }
     }
+    vi_l = me_l;
+    vi_r = me_r;
   }
 }
