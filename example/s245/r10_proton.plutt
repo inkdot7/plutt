@@ -10,8 +10,7 @@ hist2d("inz vs. inbeta", inz, inbeta)
 
 // Figure p. 18 (expr. p. 17).
 
-// hist2d("inz vs. inbeta II", inz, 9.5*300./931.5*sqrt(1/(inbeta*inbeta)-1))
-hist2d("inz vs. inbeta II", inz, 9.5*300./931.5*sqrt(1/(pow(inbeta,2))-1))
+hist2d("inz vs. inbeta II 1", inz, 9.5*300./931.5*sqrt(1/(inbeta*inbeta)-1))
 
 // Figure p. 20 (simple B/W version)
 

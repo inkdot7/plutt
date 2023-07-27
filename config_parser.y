@@ -27,9 +27,9 @@
 
 #define LOC_SAVE(arg) g_config->SetLoc(arg.first_line, arg.first_column)
 
-#define MEXPR(arg, ret, node, d, node_is_left, op) do { \
+#define MEXPR(arg, ret, l, r, d, op) do { \
 	LOC_SAVE(arg); \
-	ret = g_config->AddMExpr(node, d, node_is_left, NodeMExpr::op); \
+	ret = g_config->AddMExpr(l, r, d, NodeMExpr::op); \
 } while (0)
 
 char const *yycppath;
@@ -526,30 +526,34 @@ assign
 mexpr
 	: alias { $$ = $1; }
 	| '(' mexpr ')' { $$ = $2; }
-	| mexpr '+' const { MEXPR(@1, $$, $1, $3.GetDouble(),  true, ADD); }
-	| const '+' mexpr { MEXPR(@1, $$, $3, $1.GetDouble(), false, ADD); }
-	| mexpr '-' const { MEXPR(@1, $$, $1, $3.GetDouble(),  true, SUB); }
-	| const '-' mexpr { MEXPR(@1, $$, $3, $1.GetDouble(), false, SUB); }
-	| mexpr '*' const { MEXPR(@1, $$, $1, $3.GetDouble(),  true, MUL); }
-	| const '*' mexpr { MEXPR(@1, $$, $3, $1.GetDouble(), false, MUL); }
-	| mexpr '/' const { MEXPR(@1, $$, $1, $3.GetDouble(),  true, DIV); }
-	| const '/' mexpr { MEXPR(@1, $$, $3, $1.GetDouble(), false, DIV); }
-	| '-' mexpr       { MEXPR(@1, $$, $2,            0.0, false, SUB); }
-	| TK_COS  '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true,  COS); }
-	| TK_SIN  '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true,  SIN); }
-	| TK_TAN  '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true,  TAN); }
-	| TK_ACOS '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true, ACOS); }
-	| TK_ASIN '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true, ASIN); }
-	| TK_ATAN '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true, ATAN); }
-	| TK_SQRT '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true, SQRT); }
-	| TK_EXP  '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true,  EXP); }
-	| TK_LOG  '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true,  LOG); }
-	| TK_ABS  '(' mexpr ')' { MEXPR(@1, $$, $3, 0.0, true,  ABS); }
+	| mexpr '+' const { MEXPR(@1, $$, $1, nullptr, $3.GetDouble(), ADD); }
+	| const '+' mexpr { MEXPR(@1, $$, nullptr, $3, $1.GetDouble(), ADD); }
+	| mexpr '+' mexpr { MEXPR(@1, $$, $1,      $3,            0.0, ADD); }
+	| mexpr '-' const { MEXPR(@1, $$, $1, nullptr, $3.GetDouble(), SUB); }
+	| const '-' mexpr { MEXPR(@1, $$, nullptr, $3, $1.GetDouble(), SUB); }
+	| mexpr '-' mexpr { MEXPR(@1, $$, $1,      $3,            0.0, SUB); }
+	| mexpr '*' const { MEXPR(@1, $$, $1, nullptr, $3.GetDouble(), MUL); }
+	| const '*' mexpr { MEXPR(@1, $$, nullptr, $3, $1.GetDouble(), MUL); }
+	| mexpr '*' mexpr { MEXPR(@1, $$, $1,      $3,            0.0, MUL); }
+	| mexpr '/' const { MEXPR(@1, $$, $1, nullptr, $3.GetDouble(), DIV); }
+	| const '/' mexpr { MEXPR(@1, $$, nullptr, $3, $1.GetDouble(), DIV); }
+	| mexpr '/' mexpr { MEXPR(@1, $$, $1,      $3,            0.0, DIV); }
+	| '-' mexpr       { MEXPR(@1, $$, nullptr, $2,            0.0, SUB); }
+	| TK_COS  '(' mexpr ')' { MEXPR(@1, $$, $3, nullptr, 0.0,  COS); }
+	| TK_SIN  '(' mexpr ')' { MEXPR(@1, $$, $3, nullptr, 0.0,  SIN); }
+	| TK_TAN  '(' mexpr ')' { MEXPR(@1, $$, $3, nullptr, 0.0,  TAN); }
+	| TK_ACOS '(' mexpr ')' { MEXPR(@1, $$, $3, nullptr, 0.0, ACOS); }
+	| TK_ASIN '(' mexpr ')' { MEXPR(@1, $$, $3, nullptr, 0.0, ASIN); }
+	| TK_ATAN '(' mexpr ')' { MEXPR(@1, $$, $3, nullptr, 0.0, ATAN); }
+	| TK_SQRT '(' mexpr ')' { MEXPR(@1, $$, $3, nullptr, 0.0, SQRT); }
+	| TK_EXP  '(' mexpr ')' { MEXPR(@1, $$, $3, nullptr, 0.0,  EXP); }
+	| TK_LOG  '(' mexpr ')' { MEXPR(@1, $$, $3, nullptr, 0.0,  LOG); }
+	| TK_ABS  '(' mexpr ')' { MEXPR(@1, $$, $3, nullptr, 0.0,  ABS); }
 	| TK_POW  '(' mexpr ',' const ')' {
-		MEXPR(@1, $$, $3, $5.GetDouble(), true, POW);
+		MEXPR(@1, $$, $3, nullptr, $5.GetDouble(), POW);
 	}
 	| TK_POW  '(' const ',' mexpr ')' {
-		MEXPR(@1, $$, $5, $3.GetDouble(), false, POW);
+		MEXPR(@1, $$, $5, nullptr, $3.GetDouble(), POW);
 	}
 
 bitfield_args

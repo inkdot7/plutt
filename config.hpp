@@ -68,7 +68,8 @@ class Config {
     NodeValue *AddMeanArith(NodeValue *, NodeValue *);
     NodeValue *AddMeanGeom(NodeValue *, NodeValue *);
     NodeValue *AddMember(NodeValue *, char const *);
-    NodeValue *AddMExpr(NodeValue *, double, bool, NodeMExpr::Operation);
+    NodeValue *AddMExpr(NodeValue *, NodeValue *, double,
+        NodeMExpr::Operation);
     void AddPage(char const *);
     NodeValue *AddPedestal(NodeValue *, double, NodeValue *);
     NodeValue *AddSelectIndex(NodeValue *, uint32_t, uint32_t);

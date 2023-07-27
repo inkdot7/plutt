@@ -47,7 +47,8 @@ class NodeMExpr: public NodeValue {
       ABS,
       POW
     };
-    NodeMExpr(std::string const &, NodeValue *, double, bool, Operation);
+    NodeMExpr(std::string const &, NodeValue *, NodeValue *, double,
+        Operation);
     Value const &GetValue(uint32_t);
     void Process(uint64_t);
 
@@ -55,9 +56,10 @@ class NodeMExpr: public NodeValue {
     NodeMExpr(NodeMExpr const &);
     NodeMExpr &operator=(NodeMExpr const &);
 
-    NodeValue *m_node;
+    NodeValue *m_l;
+    NodeValue *m_r;
     double m_d;
-    bool m_node_is_left;
+    int m_mix;
     Operation m_op;
     Value m_value;
 };

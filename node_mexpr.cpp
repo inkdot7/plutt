@@ -24,15 +24,23 @@
 #include <cmath>
 #include <util.hpp>
 
-NodeMExpr::NodeMExpr(std::string const &a_loc, NodeValue *a_node, double a_d,
-    bool a_node_is_left, Operation a_op):
+NodeMExpr::NodeMExpr(std::string const &a_loc, NodeValue *a_l, NodeValue *a_r,
+    double a_d, Operation a_op):
   NodeValue(a_loc),
-  m_node(a_node),
+  m_l(a_l),
+  m_r(a_r),
   m_d(a_d),
-  m_node_is_left(a_node_is_left),
+  m_mix(),
   m_op(a_op),
   m_value()
 {
+  if (a_l && a_r) {
+    m_mix = 0;
+  } else if (a_l) {
+    m_mix = 1;
+  } else {
+    m_mix = 2;
+  }
 }
 
 Value const &NodeMExpr::GetValue(uint32_t a_ret_i)
@@ -44,70 +52,73 @@ Value const &NodeMExpr::GetValue(uint32_t a_ret_i)
 void NodeMExpr::Process(uint64_t a_evid)
 {
   NODE_PROCESS_GUARD(a_evid);
-  NODE_PROCESS(m_node, a_evid);
+  Value const *val_l;
+  Value const *val_r;
+  Value const *val;
+  if (m_l) {
+    NODE_PROCESS(m_l, a_evid);
+    val = val_l = &m_l->GetValue();
+    if (Input::kNone == val_l->GetType()) {
+      return;
+    }
+  }
+  if (m_r) {
+    NODE_PROCESS(m_r, a_evid);
+    val = val_r = &m_r->GetValue();
+    if (Input::kNone == val_r->GetType()) {
+      return;
+    }
+  }
 
   m_value.Clear();
-
-  auto const &val = m_node->GetValue();
-  if (Input::kNone == val.GetType()) {
-    return;
-  }
   m_value.SetType(Input::kDouble);
 
-  auto const &miv = val.GetMI();
-  auto const &mev = val.GetME();
+  auto const &miv = val->GetMI();
+  auto const &mev = val->GetME();
   uint32_t vi = 0;
   for (uint32_t i = 0; i < miv.size(); ++i) {
+    if (0 == m_mix) {
+      if (val_l->GetMI().at(i) != val_r->GetMI().at(i) ||
+          val_l->GetME().at(i) != val_r->GetME().at(i)) {
+        std::cerr << GetLocStr() <<
+            ": Data operands must have identical structure!\n";
+        throw std::runtime_error(__func__);
+      }
+    }
     uint32_t mi = miv[i];
     uint32_t me = mev[i];
     for (; vi < me; ++vi) {
-      auto v = val.GetV(vi, true);
+      double v, l, r;
+      switch (m_mix) {
+        case 0:
+          l = val_l->GetV(vi, true);
+          r = val_r->GetV(vi, true);
+          break;
+        case 1:
+          l = val_l->GetV(vi, true);
+          r = m_d;
+          break;
+        case 2:
+          l = m_d;
+          r = val_r->GetV(vi, true);
+          break;
+      }
       switch (m_op) {
-        case ADD:
-          v += m_d;
-          break;
-        case SUB:
-          v = m_node_is_left ? v - m_d : m_d - v;
-          break;
-        case MUL:
-          v *= m_d;
-          break;
-        case DIV:
-          v = m_node_is_left ? v / m_d : m_d / v;
-          break;
-        case COS:
-          v = cos(v);
-          break;
-        case SIN:
-          v = cos(v);
-          break;
-        case TAN:
-          v = tan(v);
-          break;
-        case ACOS:
-          v = acos(v);
-          break;
-        case ASIN:
-          v = acos(v);
-          break;
-        case ATAN:
-          v = atan(v);
-          break;
-        case SQRT:
-          v = sqrt(v);
-          break;
-        case EXP:
-          v = exp(v);
-          break;
-        case LOG:
-          v = log(v);
-          break;
-        case ABS:
-          v = std::abs(v);
-          break;
-        case POW:
-          v = m_node_is_left ? pow(v, m_d) : pow(m_d, v);
-          break;
+        case ADD:  v = l + r; break;
+        case SUB:  v = l - r; break;
+        case MUL:  v = l * r; break;
+        case DIV:  v = l / r; break;
+        case COS:  v = cos(l); break;
+        case SIN:  v = sin(l); break;
+        case TAN:  v = tan(l); break;
+        case ACOS: v = acos(l); break;
+        case ASIN: v = asin(l); break;
+        case ATAN: v = atan(l); break;
+        case SQRT: v = sqrt(l); break;
+        case EXP:  v = exp(l); break;
+        case LOG:  v = log(l); break;
+        case ABS:  v = std::abs(l); break;
+        case POW:  v = pow(l, r); break;
       }
       if (!std::isnan(v) && !std::isinf(v)) {
         Input::Scalar s;
