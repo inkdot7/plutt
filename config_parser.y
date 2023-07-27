@@ -349,7 +349,7 @@ integer_range
 	: const TK_OP_DDASH const {
 		LOC_SAVE(@1);
 		auto l = $1.GetI64();
-		auto r = $1.GetI64();
+		auto r = $3.GetI64();
 		if (l > r) {
 			std::cerr << g_config->GetLocStr() <<
 			    ": Integer range inverted!\n";
