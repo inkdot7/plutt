@@ -47,6 +47,9 @@
 // Padding insite a widget, eg between a button and its label.
 #define PAD_INT 2
 #define PAD (PAD_EXT + PAD_INT)
+// Padding between cursor and text box.
+#define PAD_CURSOR_TEXT_ABOVE 10
+#define PAD_CURSOR_TEXT_BELOW 30
 // Time to stay in "tension" display mode, eg zoomed in.
 #define TENSION_TIMEOUT_MS (60 * 1000)
 // Zoom factor per scroll wheel step.
@@ -2392,9 +2395,15 @@ namespace ImPlutt {
         a_plot->PosFromPointY(a_pos.y));
     switch (a_align) {
       case TEXT_ABOVE:
+	{
         pos.x -= size.x / 2;
-        pos.y -= size.y + PAD_INT;
+	auto pos_y_above = pos.y - size.y + PAD_INT - PAD_CURSOR_TEXT_ABOVE;
+	if (pos_y_above >= 0)
+	  pos.y = pos_y_above;
+	else
+	  pos.y += PAD_CURSOR_TEXT_BELOW;
         break;
+	}
       case TEXT_LEFT:
         pos.x -= size.x + PAD_INT;
         break;
