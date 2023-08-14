@@ -73,6 +73,16 @@ else
 $(info UCESB: no)
 endif
 
+# --version prints info to stdout if the -W flags are accepted, else stderr.
+BISON_SUPPORTS_WERROR := $(shell bison -Werror -Wcounterexamples --version 2>/dev/null)
+ifneq ($(BISON_SUPPORTS_WERROR),)
+ifeq ($(NO_BISON_WERROR),)
+BISON_WERROR_FLAG=-Werror -Wcounterexamples
+endif
+else
+$(warning *** Using bison without -W flags. ***)
+endif
+
 BUILD_MODE=debug
 ifeq (debug,$(BUILD_MODE))
 CXXFLAGS+=-ggdb
@@ -141,7 +151,7 @@ $(BUILD_DIR)/%.tab.o: $(BUILD_DIR)/%.tab.c
 $(BUILD_DIR)/%.tab.c: %.y Makefile
 	@echo TABC $@
 	$(QUIET)$(MKDIR)
-	$(QUIET)bison -Werror -Wcounterexamples -d -o $@ $<
+	$(QUIET)bison $(BISON_WERROR_FLAG) -d -o $@ $<
 
 # These cannot be generalized...
 $(BUILD_DIR)/config_parser.yy.h: $(BUILD_DIR)/config_parser.yy.c
