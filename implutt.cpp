@@ -1923,22 +1923,21 @@ namespace ImPlutt {
       }
     }
     if (m_window->ContainsLocal(m_rect_graph, m_window->m_pointer)) {
-      char buf[100];
       // Draw pointer coordinates.
       auto px = PointFromPosX(curr.x);
       auto py = PointFromPosY(curr.y);
-      // Only use as many digits as needed to represent the difference
-      // on screen with the actual value being printed.
+      // Only use as many digits as needed to represent the difference on
+      // screen with the actual value being printed.
       int x_digits = 2 -
-	  (int) log10((m_max.x - m_min.x) / m_rect_graph.w) +
-	  (int) log10(fabs(px));
+          (int) log10((m_max.x - m_min.x) / m_rect_graph.w) +
+          (int) log10(fabs(px));
       int y_digits = 2 -
-	  (int) log10((m_max.y - m_min.y) / m_rect_graph.h) +
-	  (int) log10(fabs(py));
+          (int) log10((m_max.y - m_min.y) / m_rect_graph.h) +
+          (int) log10(fabs(py));
+      char buf[100];
       snprintf(buf, sizeof buf, "%.*g, %.*g",
-	       x_digits, px, y_digits, py);
-      m_window->PlotText(this, buf, Point(px, py), TEXT_ABOVE, true,
-          true);
+          x_digits, px, y_digits, py);
+      m_window->PlotText(this, buf, Point(px, py), TEXT_ABOVE, true, true);
     }
     // Transparent projection band.
     m_window->RenderColor(g_style[g_style_i][STYLE_PLOT_USER_PROJ]);
