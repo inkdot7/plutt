@@ -25,6 +25,19 @@
 #include <cstdint>
 #include <config.hpp>
 #include <node.hpp>
+
+struct Constant {
+	Constant Add(Constant const &) const;
+	Constant Div(Constant const &) const;
+	Constant Mul(Constant const &) const;
+	Constant Sub(Constant const &) const;
+	double GetDouble() const;
+	int64_t GetI64() const;
+	bool is_i64;
+	int64_t i64;
+	double dbl;
+};
+
 #include <config_parser.tab.h>
 
 #endif

@@ -73,14 +73,18 @@ else
 $(info UCESB: no)
 endif
 
+# Bison flags.
+
 # --version prints info to stdout if the -W flags are accepted, else stderr.
-BISON_SUPPORTS_WERROR := $(shell bison -Werror -Wcounterexamples --version 2>/dev/null)
+BISON_SUPPORTS_WERROR:=$(shell bison -Werror -Wcounterexamples --version 2>/dev/null)
 ifneq ($(BISON_SUPPORTS_WERROR),)
-ifeq ($(NO_BISON_WERROR),)
-BISON_WERROR_FLAG=-Werror -Wcounterexamples
-endif
+BISON_FLAGS=-Werror -Wcounterexamples
+# name-prefix -> api.prefix happened around the same time...
+BISON_PREFIX_YYCP:=-Dapi.prefix={yycp}
+BISON_PREFIX_YYTM:=-Dapi.prefix={yytm}
 else
-$(warning *** Using bison without -W flags. ***)
+BISON_PREFIX_YYCP:=--name-prefix=yycp
+BISON_PREFIX_YYTM:=--name-prefix=yytm
 endif
 
 BUILD_MODE=debug
@@ -148,10 +152,14 @@ $(BUILD_DIR)/%.yy.c: %.l
 $(BUILD_DIR)/%.tab.o: $(BUILD_DIR)/%.tab.c
 	@echo TABO $@
 	$(QUIET)$(CXX) -c -o $@ $< $(CPPFLAGS) $(CXXFLAGS_UNSAFE)
-$(BUILD_DIR)/%.tab.c: %.y Makefile
+$(BUILD_DIR)/config_parser.tab.c: config_parser.y Makefile
 	@echo TABC $@
 	$(QUIET)$(MKDIR)
-	$(QUIET)bison $(BISON_WERROR_FLAG) -d -o $@ $<
+	$(QUIET)bison $(BISON_FLAGS) $(BISON_PREFIX_YYCP) -d -o $@ $<
+$(BUILD_DIR)/trig_map_parser.tab.c: trig_map_parser.y Makefile
+	@echo TABC $@
+	$(QUIET)$(MKDIR)
+	$(QUIET)bison $(BISON_FLAGS) $(BISON_PREFIX_YYTM) -d -o $@ $<
 
 # These cannot be generalized...
 $(BUILD_DIR)/config_parser.yy.h: $(BUILD_DIR)/config_parser.yy.c

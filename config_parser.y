@@ -109,20 +109,6 @@ static double g_drop_old = -1.0;
 %}
 
 %locations
-%code requires {
-	struct Constant {
-		Constant Add(Constant const &) const;
-		Constant Div(Constant const &) const;
-		Constant Mul(Constant const &) const;
-		Constant Sub(Constant const &) const;
-		double GetDouble() const;
-		int64_t GetI64() const;
-		bool is_i64;
-		int64_t i64;
-		double dbl;
-	};
-}
-%define api.prefix {yycp}
 
 %union {
 	Constant c;

@@ -24,6 +24,8 @@
 #include <iostream>
 #include <trig_map_parser.tab.h>
 
+extern int yytmparse();
+
 extern FILE *yytmin;
 extern char const *yytmpath;
 extern TrigMap *yytm_trig_map;

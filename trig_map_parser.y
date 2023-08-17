@@ -38,7 +38,6 @@ int yytmlex(void);
 %}
 
 %locations
-%define api.prefix {yytm}
 
 %union {
 	uint32_t u32;
