@@ -4,6 +4,7 @@
  * Copyright (C) 2023
  * Hans Toshihide Toernqvist <hans.tornqvist@chalmers.se>
  * Bastian Loeher <b.loeher@gsi.de>
+ * Håkan T Johansson <f96hajo@chalmers.se>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -2395,15 +2396,16 @@ namespace ImPlutt {
         a_plot->PosFromPointY(a_pos.y));
     switch (a_align) {
       case TEXT_ABOVE:
-	{
-        pos.x -= size.x / 2;
-	auto pos_y_above = pos.y - size.y + PAD_INT - PAD_CURSOR_TEXT_ABOVE;
-	if (pos_y_above >= 0)
-	  pos.y = pos_y_above;
-	else
-	  pos.y += PAD_CURSOR_TEXT_BELOW;
+        {
+          pos.x -= size.x / 2;
+          auto pos_y_above = pos.y - size.y + PAD_INT - PAD_CURSOR_TEXT_ABOVE;
+          if (pos_y_above >= 0) {
+            pos.y = pos_y_above;
+          } else {
+            pos.y += PAD_CURSOR_TEXT_BELOW;
+          }
+        }
         break;
-	}
       case TEXT_LEFT:
         pos.x -= size.x + PAD_INT;
         break;
