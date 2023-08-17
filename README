@@ -468,6 +468,10 @@ colormap("name")
 		"../ScientificColourMaps7/lajolla/lajolla.lut"
 	is loaded.
 
+ui_rate(a)
+	Throttles the UI update rate to 'a' times per second, default and
+	maximum is 20.
+
 Licence
 =======
 

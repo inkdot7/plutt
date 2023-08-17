@@ -747,7 +747,7 @@ pedestal
 		free($3);
 	}
 ui_rate
-	: TK_UI_RATE '=' const {
+	: TK_UI_RATE '(' const ')' {
 		LOC_SAVE(@1);
 		g_config->UIRateSet($3.GetDouble());
 	}
