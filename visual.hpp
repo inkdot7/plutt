@@ -112,7 +112,7 @@ class VisualHist: public Visual {
     std::vector<uint32_t> m_hist;
     Gui::Axis m_axis_copy;
     std::vector<uint32_t> m_hist_copy;
-    //ImPlutt::CheckboxState m_is_log_y;
+    bool m_is_log_y;
     std::vector<Peak> m_peak_vec;
     //ImPlutt::PlotState m_plot_state;
 };
@@ -146,7 +146,7 @@ class VisualHist2: public Visual {
     Gui::Axis m_axis_x_copy;
     Gui::Axis m_axis_y_copy;
     std::vector<uint32_t> m_hist_copy;
-    //ImPlutt::CheckboxState m_is_log_z;
+    bool m_is_log_z;
     //ImPlutt::PlotState m_plot_state;
     std::vector<uint8_t> m_pixels;
 };

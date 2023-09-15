@@ -66,7 +66,7 @@ endif
 
 # SDL2?
 
-ifeq ($(shell (pkg-config freetype2 sdl2 a 2>/dev/null && echo Yes) | grep Yes),Yes)
+ifeq ($(shell (pkg-config freetype2 sdl2 2>/dev/null && echo Yes) | grep Yes),Yes)
 CPPFLAGS+=-DPLUTT_SDL2=1
 CXXFLAGS:=$(CXXFLAGS) $(shell pkg-config freetype2 sdl2 --cflags)
 LIBS+=$(shell pkg-config freetype2 sdl2 --libs)

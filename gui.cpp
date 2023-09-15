@@ -28,6 +28,10 @@ void Gui::Axis::Clear()
   max = 0.0;
 }
 
+Gui::Plot::~Plot()
+{
+}
+
 Gui::~Gui()
 {
 }

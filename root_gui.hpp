@@ -40,11 +40,11 @@ class RootGui: public Gui {
     void AddPage(std::string const &);
     uint32_t AddPlot(std::string const &, Plot *);
 
-    bool Draw();
+    bool Draw(double);
 
-    void SetHist1(uint32_t, Axis const &,
+    void SetHist1(uint32_t, Axis const &, bool,
         std::vector<uint32_t> const &);
-    void SetHist2(uint32_t, Axis const &, Axis const &,
+    void SetHist2(uint32_t, Axis const &, Axis const &, bool,
         std::vector<uint32_t> const &);
 
   private:

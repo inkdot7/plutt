@@ -306,36 +306,37 @@ int main(int argc, char **argv)
     switch (gui_type) {
 #if PLUTT_SDL2
       case GUI_SDL:
-        // Use event timeout to cap UI rate.
-        auto t_end = SDL_GETTICKS() + 1000 / g_config->UIRateGet();
-        for (;;) {
-          auto t_cur = SDL_GETTICKS();
-          if (t_cur > t_end) {
-            break;
+        {
+          // Use event timeout to cap UI rate.
+          auto t_end = SDL_GETTICKS() + 1000 / g_config->UIRateGet();
+          for (;;) {
+            auto t_cur = SDL_GETTICKS();
+            if (t_cur > t_end) {
+              break;
+            }
+            auto timeout = (int)(t_end - t_cur);
+            SDL_Event event;
+            if (!SDL_WaitEventTimeout(&event, timeout)) {
+              break;
+            }
+            ImPlutt::ProcessEvent(event);
           }
-          auto timeout = (int)(t_end - t_cur);
-          SDL_Event event;
-          if (!SDL_WaitEventTimeout(&event, timeout)) {
-            break;
-          }
-          ImPlutt::ProcessEvent(event);
-          if (g_gui->DoClose() || ImPlutt::DoQuit()) {
-            is_running = false;
-          }
+          Time_set_ms(t_end);
         }
-        Time_set_ms(t_end);
+        break;
 #endif
 #if PLUTT_ROOT
       case GUI_ROOT:
-        sleep(1);
+        // This is medium-latency presentation, let's take it easy.
+        sleep(3);
         break;
 #endif
       default:
         abort();
     }
 
-    if (!g_gui->Draw()) {
-      is_running = true;
+    if (!g_gui->Draw(event_rate)) {
+      is_running = false;
     }
 
     ++loop_n;
@@ -346,7 +347,6 @@ int main(int argc, char **argv)
       event_i0 = event_i1;
       loop_n = 0;
     }
-(void)event_rate;
   }
   std::cout << "Exiting main loop...\n";
   g_data_running = false;
@@ -355,12 +355,21 @@ int main(int argc, char **argv)
   thread_input.join();
   thread_event.join();
 
+  switch (gui_type) {
 #if PLUTT_SDL2
-  delete sdl_gui;
+    case GUI_SDL:
+      delete sdl_gui;
+      ImPlutt::Destroy();
+      break;
 #endif
 #if PLUTT_ROOT
-  delete root_gui;
+    case GUI_ROOT:
+      delete root_gui;
+      break;
 #endif
+    default:
+      break;
+  }
 
   delete g_input;
   delete g_config;

@@ -25,34 +25,40 @@
 #if PLUTT_SDL2
 
 #include <gui.hpp>
+#include <implutt.hpp>
 
 class SdlGui: public Gui {
   public:
     SdlGui(char const *, unsigned, unsigned);
     ~SdlGui();
 
-    void AddPage(char const *);
-    uint32_t AddPlot(char const *);
+    void AddPage(std::string const &);
+    uint32_t AddPlot(std::string const &, Plot *);
 
-    void SetHist1(uint32_t, Axis const &,
+    bool Draw(double);
+
+    void SetHist1(uint32_t, Axis const &, bool,
         std::vector<uint32_t> const &);
-    void SetHist2(uint32_t, Axis const &, Axis const &,
+    void SetHist2(uint32_t, Axis const &, Axis const &, bool,
         std::vector<uint32_t> const &);
 
-    bool Begin();
-    void End();
+    bool DoClose();
 
   private:
-    struct Plot {
+    struct PlotWrap {
+      PlotWrap();
       std::string name;
-      TH1I *h1;
-      TH2I *h2;
+      Plot *plot;
+      ImPlutt::PlotState plot_state;
+      std::vector<uint8_t> pixels;
     };
     struct Page {
       std::string name;
-      std::vector<Plot *> plot_vec;
+      std::vector<PlotWrap *> plot_wrap_vec;
     };
+    ImPlutt::Window *m_window;
     std::vector<Page *> m_page_vec;
+    Page *m_page_sel;
 };
 
 #endif

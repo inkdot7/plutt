@@ -278,11 +278,9 @@ VisualHist::VisualHist(Gui *a_gui, std::string const &a_title, uint32_t a_xb,
   m_axis(),
   m_hist_mutex(),
   m_hist(),
-  //m_axis_copy(),
+  m_axis_copy(),
   m_hist_copy(),
-#if 0
-  m_is_log_y(),
-#endif
+  m_is_log_y(a_log_y),
   m_peak_vec()
 #if 0
   m_plot_state(0)
@@ -296,9 +294,6 @@ VisualHist::VisualHist(Gui *a_gui, std::string const &a_title, uint32_t a_xb,
     std::cerr << a_fitter << ": Fitter not implemented.\n";
     throw std::runtime_error(__func__);
   }
-#if 0
-  m_is_log_y.is_on = a_log_y;
-#endif
 }
 
 void VisualHist::Draw(Gui *a_gui)
@@ -339,37 +334,9 @@ void VisualHist::Draw(Gui *a_gui)
     default:
       throw std::runtime_error(__func__);
   }
-
-  // Header.
-  a_window->Checkbox("Log-y", &m_is_log_y);
-  a_window->Text(ImPlutt::Window::TEXT_NORMAL,
-      ", x=%.3g(%.3g)", m_range.GetMean(), m_range.GetSigma());
-
-  // Visual.
-  auto dy = a_window->Newline();
-  ImPlutt::Pos size(a_size.x, a_size.y - dy);
-
-  auto minx = m_transform.ApplyAbs(m_axis_copy.min);
-  auto maxx = m_transform.ApplyAbs(m_axis_copy.max);
-
-  uint32_t max_y = 1;
-  for (auto it = m_hist_copy.begin(); m_hist_copy.end() != it; ++it) {
-    max_y = std::max(max_y, *it);
-  }
 #endif
 
-  a_gui->SetHist1(m_gui_id, m_axis_copy, m_hist_copy);
-
-#if 0
-  ImPlutt::Visual plot(a_window, &m_plot_state, m_title.c_str(), size,
-      ImPlutt::Point(minx, 0.0),
-      ImPlutt::Point(maxx, max_y * 1.1),
-      false, m_is_log_y.is_on, false, false);
-
-  a_window->VisualHist1(&plot,
-      minx, maxx,
-      m_hist_copy, (size_t)m_axis_copy.bins);
-#endif
+  a_gui->SetHist1(m_gui_id, m_axis_copy, m_is_log_y, m_hist_copy);
 
 #if 0
   // Draw fits.
@@ -547,18 +514,15 @@ VisualHist2::VisualHist2(Gui *a_gui, std::string const &a_title, size_t
   m_axis_y(),
   m_hist_mutex(),
   m_hist(),
-  //m_axis_x_copy(),
-  //m_axis_y_copy(),
+  m_axis_x_copy(),
+  m_axis_y_copy(),
   m_hist_copy(),
+  m_is_log_z(a_log_z),
 #if 0
-  m_is_log_z(),
   m_plot_state(0),
 #endif
   m_pixels()
 {
-#if 0
-  m_is_log_z.is_on = a_log_z;
-#endif
 }
 
 void VisualHist2::Draw(Gui *a_gui)
@@ -587,36 +551,8 @@ void VisualHist2::Draw(Gui *a_gui)
     return;
   }
 
-#if 0
-  // Header.
-  a_window->Checkbox("Log-z", &m_is_log_z);
-  a_window->Text(ImPlutt::Window::TEXT_NORMAL,
-      ", x=%.1g(%.1g), y=%.1g(%.1g)",
-      m_range_x.GetMean(), m_range_x.GetSigma(),
-      m_range_y.GetMean(), m_range_y.GetSigma());
-
-  // Visual.
-  auto dy = a_window->Newline();
-  ImPlutt::Pos size(a_size.x, a_size.y - dy);
-
-  auto minx = m_transformx.ApplyAbs(m_axis_x_copy.min);
-  auto miny = m_transformy.ApplyAbs(m_axis_y_copy.min);
-  auto maxx = m_transformx.ApplyAbs(m_axis_x_copy.max);
-  auto maxy = m_transformy.ApplyAbs(m_axis_y_copy.max);
-
-  ImPlutt::Visual plot(a_window, &m_plot_state, m_title.c_str(), size,
-      ImPlutt::Point(minx, miny),
-      ImPlutt::Point(maxx, maxy),
-      false, false, m_is_log_z.is_on, true);
-
-  a_window->VisualHist2(&plot, m_colormap,
-      ImPlutt::Point(minx, miny),
-      ImPlutt::Point(maxx, maxy),
-      m_hist_copy, m_axis_y_copy.bins, m_axis_x_copy.bins,
-      m_pixels);
-#endif
-
-  a_gui->SetHist2(m_gui_id, m_axis_x_copy, m_axis_y_copy, m_hist_copy);
+  a_gui->SetHist2(m_gui_id, m_axis_x_copy, m_axis_y_copy, m_is_log_z,
+      m_hist_copy);
 }
 
 void VisualHist2::Fill(Input::Type a_type_y, Input::Scalar const &a_y,
@@ -693,64 +629,5 @@ void VisualHist2::Prefill(Input::Type a_type_y, Input::Scalar const &a_y,
 }
 
 #if 0
-void plot(Gui *a_gui, double a_event_rate)
-{
-  if (g_page_list.empty()) {
-    return;
-  }
-  if (g_page_list.size() > 1) {
-    for (auto it = g_page_list.begin(); g_page_list.end() != it; ++it) {
-      if (a_window->Button(it->GetLabel().c_str())) {
-        g_page_sel = &*it;
-      }
-    }
-    a_window->Newline();
-    a_window->HorizontalLine();
-  }
-  if (!g_page_sel) {
-    g_page_sel = &g_page_list.front();
-  }
 
-  // Measure status bar.
-  std::ostringstream oss;
-  oss << "Events/s: ";
-  if (a_event_rate < 1e3) {
-    oss << a_event_rate;
-  } else {
-    oss << a_event_rate * 1e-3 << "k";
-  }
-  auto size1 = a_window->TextMeasure(ImPlutt::Window::TEXT_BOLD,
-      oss.str().c_str());
-
-  auto status = Status_get();
-  auto size2 = a_window->TextMeasure(ImPlutt::Window::TEXT_BOLD,
-      status.c_str());
-
-  // Get max an pad a little.
-  auto h = std::max(size1.y, size2.y);
-  h += h / 5;
-
-  // Draw selected page.
-  auto size = a_window->GetSize();
-  size.y = std::max(0, size.y - h);
-  g_page_sel->Draw(a_window, size);
-
-  // Draw status line.
-  a_window->Newline();
-  a_window->HorizontalLine();
-
-  ImPlutt::Rect r;
-  r.x = 0;
-  r.y = 0;
-  r.w = 20 * h;
-  r.h = h;
-  a_window->Push(r);
-
-  a_window->Advance(ImPlutt::Pos(h, 0));
-  a_window->Text(ImPlutt::Window::TEXT_BOLD, oss.str().c_str());
-
-  a_window->Pop();
-
-  a_window->Text(ImPlutt::Window::TEXT_BOLD, status.c_str());
-}
 #endif

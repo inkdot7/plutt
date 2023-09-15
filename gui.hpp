@@ -39,8 +39,8 @@ class Gui {
     };
     class Plot {
       public:
-        virtual ~Plot() {}
-        virtual void Draw(Gui *) {}
+        virtual ~Plot();
+        virtual void Draw(Gui *) = 0;
     };
 
     virtual ~Gui();
@@ -48,11 +48,11 @@ class Gui {
     virtual void AddPage(std::string const &) = 0;
     virtual uint32_t AddPlot(std::string const &, Plot *) = 0;
 
-    virtual bool Draw() = 0;
+    virtual bool Draw(double) = 0;
 
-    virtual void SetHist1(uint32_t, Axis const &,
+    virtual void SetHist1(uint32_t, Axis const &, bool,
         std::vector<uint32_t> const &) = 0;
-    virtual void SetHist2(uint32_t, Axis const &, Axis const &,
+    virtual void SetHist2(uint32_t, Axis const &, Axis const &, bool,
         std::vector<uint32_t> const &) = 0;
 };
 

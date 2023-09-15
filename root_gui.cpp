@@ -20,6 +20,7 @@
  */
 
 #include <root_gui.hpp>
+#include <iostream>
 #include <sstream>
 #include <TCanvas.h>
 #include <TH1I.h>
@@ -32,7 +33,7 @@ RootGui::RootGui(uint16_t a_port):
   m_page_vec()
 {
   std::ostringstream oss;
-  oss << "http:" << a_port;
+  oss << "http:" << a_port << ";noglobal";
   m_server = new THttpServer(oss.str().c_str());
 }
 
@@ -75,8 +76,9 @@ uint32_t RootGui::AddPlot(std::string const &a_name, Plot *a_plot)
   return ((uint32_t)m_page_vec.size() - 1) << 16 | ((uint32_t)vec.size() - 1);
 }
 
-bool RootGui::Draw()
+bool RootGui::Draw(double a_event_rate)
 {
+  std::cout << "\rEvent-rate: " << a_event_rate << "              ";
   for (auto it = m_page_vec.begin(); m_page_vec.end() != it; ++it) {
     auto page = *it;
     auto &vec = page->plot_wrap_vec;
@@ -85,7 +87,7 @@ bool RootGui::Draw()
       auto cols = ((int)vec.size() + rows - 1) / rows;
       page->canvas = new TCanvas(page->name.c_str(), page->name.c_str());
       page->canvas->Divide(cols, rows);
-      m_server->Register(page->name.c_str(), page->canvas);
+      m_server->Register("/", page->canvas);
     }
     int i = 1;
     for (auto it2 = vec.begin(); vec.end() != it2; ++it2) {
@@ -94,10 +96,10 @@ bool RootGui::Draw()
       plot_wrap->plot->Draw(this);
     }
   }
-  return gSystem->ProcessEvents();
+  return !gSystem->ProcessEvents();
 }
 
-void RootGui::SetHist1(uint32_t a_id, Axis const &a_axis,
+void RootGui::SetHist1(uint32_t a_id, Axis const &a_axis, bool a_is_log_y,
     std::vector<uint32_t> const &a_v)
 {
   auto page_i = a_id >> 16;
@@ -107,12 +109,12 @@ void RootGui::SetHist1(uint32_t a_id, Axis const &a_axis,
   if (plot->h2) {
     throw std::runtime_error(__func__);
   }
+  auto pad = page->canvas->cd(1 + (int)plot_i);
   if (plot->h1) {
     auto axis = plot->h1->GetXaxis();
     if (axis->GetNbins() != a_axis.bins ||
         axis->GetXmin()  != a_axis.min ||
         axis->GetXmax()  != a_axis.max) {
-      m_server->Unregister(plot->h1);
       delete plot->h1;
       plot->h1 = nullptr;
     }
@@ -120,7 +122,7 @@ void RootGui::SetHist1(uint32_t a_id, Axis const &a_axis,
   if (!plot->h1) {
     plot->h1 = new TH1I(plot->name.c_str(), plot->name.c_str(),
         (int)a_axis.bins, a_axis.min, a_axis.max);
-    page->canvas->cd(1 + (int)plot_i);
+    pad->SetLogy(a_is_log_y);
     plot->h1->Draw();
   }
   for (size_t i = 0; i < a_axis.bins; ++i) {
@@ -129,7 +131,7 @@ void RootGui::SetHist1(uint32_t a_id, Axis const &a_axis,
 }
 
 void RootGui::SetHist2(uint32_t a_id, Axis const &a_axis_x, Axis const
-    &a_axis_y, std::vector<uint32_t> const &a_v)
+    &a_axis_y, bool a_is_log_z, std::vector<uint32_t> const &a_v)
 {
   auto page_i = a_id >> 16;
   auto plot_i = a_id & 0xffff;
@@ -138,6 +140,7 @@ void RootGui::SetHist2(uint32_t a_id, Axis const &a_axis_x, Axis const
   if (plot->h1) {
     throw std::runtime_error(__func__);
   }
+  auto pad = page->canvas->cd(1 + (int)plot_i);
   if (plot->h2) {
     auto axis_x = plot->h2->GetXaxis();
     auto axis_y = plot->h2->GetYaxis();
@@ -147,7 +150,6 @@ void RootGui::SetHist2(uint32_t a_id, Axis const &a_axis_x, Axis const
         axis_y->GetNbins() != a_axis_y.bins ||
         axis_y->GetXmin()  != a_axis_y.min ||
         axis_y->GetXmax()  != a_axis_y.max) {
-      m_server->Unregister(plot->h2);
       delete plot->h2;
       plot->h2 = nullptr;
     }
@@ -156,7 +158,7 @@ void RootGui::SetHist2(uint32_t a_id, Axis const &a_axis_x, Axis const
     plot->h2 = new TH2I(plot->name.c_str(), plot->name.c_str(),
         (int)a_axis_x.bins, a_axis_x.min, a_axis_x.max,
         (int)a_axis_y.bins, a_axis_y.min, a_axis_y.max);
-    page->canvas->cd(1 + (int)plot_i);
+    pad->SetLogz(a_is_log_z);
     plot->h2->Draw("colz");
   }
   size_t k = 0;
