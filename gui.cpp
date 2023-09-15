@@ -19,28 +19,15 @@
  * MA  02110-1301  USA
  */
 
-#ifndef NODE_HIST1_HPP
-#define NODE_HIST1_HPP
+#include <gui.hpp>
 
-#include <node.hpp>
-#include <visual.hpp>
+void Gui::Axis::Clear()
+{
+  bins = 0;
+  min = 0.0;
+  max = 0.0;
+}
 
-/*
- * Collects in a 1D histogram, actual histogramming is performed in visual.*.
- */
-class NodeHist1: public NodeCuttable {
-  public:
-    NodeHist1(Gui *, std::string const &, char const *, NodeValue *, uint32_t,
-        LinearTransform const &, char const *, bool, double);
-    void Process(uint64_t);
-
-  private:
-    NodeHist1(NodeHist1 const &);
-    NodeHist1 &operator=(NodeHist1 const &);
-
-    NodeValue *m_x;
-    uint32_t m_xb;
-    VisualHist m_visual_hist;
-};
-
-#endif
+Gui::~Gui()
+{
+}

@@ -19,7 +19,7 @@
  * MA  02110-1301  USA
  */
 
-#include <plot.hpp>
+#include <visual.hpp>
 #include <cassert>
 #include <cmath>
 #include <cstring>
@@ -29,68 +29,6 @@
 #include <fit.hpp>
 
 #define LENGTH(x) (sizeof x / sizeof *x)
-
-namespace {
-  std::list<Page> g_page_list;
-  Page *g_page_sel;
-}
-
-Page::Page(std::string const &a_label):
-  m_label(a_label),
-  m_plot_list(),
-  m_textinput_state()
-{
-}
-
-Page::Page(Page const &a_page):
-  m_label(a_page.m_label),
-  m_plot_list(a_page.m_plot_list),
-  // TODO: Well this is ugly, keep track of this ownership!
-  m_textinput_state(a_page.m_textinput_state)
-{
-}
-
-void Page::AddPlot(Plot *a_plot)
-{
-  m_plot_list.push_back(a_plot);
-}
-
-void Page::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
-{
-  if (m_plot_list.empty()) {
-    return;
-  }
-  int rows = (int)sqrt((double)m_plot_list.size());
-  int cols = ((int)m_plot_list.size() + rows - 1) / rows;
-  ImPlutt::Pos elem_size(a_size.x / cols, a_size.y / rows);
-  ImPlutt::Rect elem_rect;
-  elem_rect.x = 0;
-  elem_rect.y = 0;
-  elem_rect.w = elem_size.x;
-  elem_rect.h = elem_size.y;
-  int i = 0;
-  for (auto it2 = m_plot_list.begin(); m_plot_list.end() != it2; ++it2) {
-    a_window->Push(elem_rect);
-    (*it2)->Draw(a_window, elem_size);
-    a_window->Pop();
-    if (cols == ++i) {
-      a_window->Newline();
-      i = 0;
-    }
-  }
-}
-
-std::string const &Page::GetLabel() const
-{
-  return m_label;
-}
-
-void Axis::Clear()
-{
-  bins = 0;
-  min = 0.0;
-  max = 0.0;
-}
 
 Range::Range(double a_drop_old_s):
   m_mode(MODE_ALL),
@@ -155,7 +93,7 @@ void Range::Clear()
   m_stat_i = 0;
 }
 
-Axis Range::GetExtents(uint32_t a_bins) const
+Gui::Axis Range::GetExtents(uint32_t a_bins) const
 {
   double l, r;
   switch (m_mode) {
@@ -239,7 +177,7 @@ Axis Range::GetExtents(uint32_t a_bins) const
     }
   }
 
-  Axis a;
+  Gui::Axis a;
   a.bins = bins;
   a.min = l;
   a.max = r;
@@ -310,7 +248,7 @@ double Range::GetSigma() const
   return sqrt((sum2 - sum * sum / num) / num);
 }
 
-Plot::Peak::Peak(double a_peak_x, double a_ofs_y, double a_amp_y, double
+Visual::Peak::Peak(double a_peak_x, double a_ofs_y, double a_amp_y, double
     a_std_x):
   peak_x(a_peak_x),
   ofs_y(a_ofs_y),
@@ -319,16 +257,20 @@ Plot::Peak::Peak(double a_peak_x, double a_ofs_y, double a_amp_y, double
 {
 }
 
-Plot::Plot(Page *a_page)
+Visual::Visual(Gui *a_gui, std::string const &a_name):
+  m_name(a_name),
+  m_gui_id(a_gui->AddPlot(m_name, this))
 {
-  a_page->AddPlot(this);
 }
 
-PlotHist::PlotHist(Page *a_page, std::string const &a_title, uint32_t a_xb,
+Visual::~Visual()
+{
+}
+
+VisualHist::VisualHist(Gui *a_gui, std::string const &a_title, uint32_t a_xb,
     LinearTransform const &a_transform, char const *a_fitter, bool a_log_y,
     double a_drop_old_s):
-  Plot(a_page),
-  m_title(a_title),
+  Visual(a_gui, a_title),
   m_xb(a_xb),
   m_transform(a_transform),
   m_fitter(),
@@ -336,11 +278,15 @@ PlotHist::PlotHist(Page *a_page, std::string const &a_title, uint32_t a_xb,
   m_axis(),
   m_hist_mutex(),
   m_hist(),
-  m_axis_copy(),
+  //m_axis_copy(),
   m_hist_copy(),
+#if 0
   m_is_log_y(),
-  m_peak_vec(),
+#endif
+  m_peak_vec()
+#if 0
   m_plot_state(0)
+#endif
 {
   if (!a_fitter) {
     m_fitter = FITTER_NONE;
@@ -350,15 +296,18 @@ PlotHist::PlotHist(Page *a_page, std::string const &a_title, uint32_t a_xb,
     std::cerr << a_fitter << ": Fitter not implemented.\n";
     throw std::runtime_error(__func__);
   }
+#if 0
   m_is_log_y.is_on = a_log_y;
+#endif
 }
 
-void PlotHist::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
+void VisualHist::Draw(Gui *a_gui)
 {
   // The data thread will keep filling and modifying m_hist while the plotter
   // tries to figure out ranges, so a locked copy is important!
   {
     const std::lock_guard<std::mutex> lock(m_hist_mutex);
+#if 0
     if (m_plot_state.do_clear) {
       // We should clear.
       // TODO: Clear all, or just histogram contents?
@@ -367,6 +316,7 @@ void PlotHist::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
       m_hist.clear();
       m_plot_state.do_clear = false;
     }
+#endif
     m_axis_copy = m_axis;
     if (m_hist_copy.size() != m_hist.size()) {
       m_hist_copy.resize(m_hist.size());
@@ -378,6 +328,7 @@ void PlotHist::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
     return;
   }
 
+#if 0
   // Fitting at 1 Hz should be fine?
   switch (m_fitter) {
     case FITTER_NONE:
@@ -394,7 +345,7 @@ void PlotHist::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
   a_window->Text(ImPlutt::Window::TEXT_NORMAL,
       ", x=%.3g(%.3g)", m_range.GetMean(), m_range.GetSigma());
 
-  // Plot.
+  // Visual.
   auto dy = a_window->Newline();
   ImPlutt::Pos size(a_size.x, a_size.y - dy);
 
@@ -405,16 +356,22 @@ void PlotHist::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
   for (auto it = m_hist_copy.begin(); m_hist_copy.end() != it; ++it) {
     max_y = std::max(max_y, *it);
   }
+#endif
 
-  ImPlutt::Plot plot(a_window, &m_plot_state, m_title.c_str(), size,
+  a_gui->SetHist1(m_gui_id, m_axis_copy, m_hist_copy);
+
+#if 0
+  ImPlutt::Visual plot(a_window, &m_plot_state, m_title.c_str(), size,
       ImPlutt::Point(minx, 0.0),
       ImPlutt::Point(maxx, max_y * 1.1),
       false, m_is_log_y.is_on, false, false);
 
-  a_window->PlotHist1(&plot,
+  a_window->VisualHist1(&plot,
       minx, maxx,
       m_hist_copy, (size_t)m_axis_copy.bins);
+#endif
 
+#if 0
   // Draw fits.
   for (auto it = m_peak_vec.begin(); m_peak_vec.end() != it; ++it) {
     std::vector<ImPlutt::Point> l(20);
@@ -429,16 +386,17 @@ void PlotHist::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
       auto d = l[i].x - x;
       l[i].y = it->ofs_y + it->amp_y * exp(-d*d * denom);
     }
-    a_window->PlotLines(&plot, l);
+    a_window->VisualLines(&plot, l);
     char buf[256];
     snprintf(buf, sizeof buf, "%.3f/%.3f", x, std);
     auto text_y = it->ofs_y + it->amp_y;
-    a_window->PlotText(&plot, buf, ImPlutt::Point(x, text_y),
+    a_window->VisualText(&plot, buf, ImPlutt::Point(x, text_y),
         ImPlutt::TEXT_RIGHT, false, true);
   }
+#endif
 }
 
-void PlotHist::Fill(Input::Type a_type, Input::Scalar const &a_x)
+void VisualHist::Fill(Input::Type a_type, Input::Scalar const &a_x)
 {
   const std::lock_guard<std::mutex> lock(m_hist_mutex);
 
@@ -460,7 +418,7 @@ void PlotHist::Fill(Input::Type a_type, Input::Scalar const &a_x)
   ++m_hist.at(i);
 }
 
-void PlotHist::Fit()
+void VisualHist::Fit()
 {
   const std::lock_guard<std::mutex> lock(m_hist_mutex);
 
@@ -477,7 +435,7 @@ void PlotHist::Fit()
   }
 }
 
-void PlotHist::Prefill(Input::Type a_type, Input::Scalar const &a_x)
+void VisualHist::Prefill(Input::Type a_type, Input::Scalar const &a_x)
 {
   const std::lock_guard<std::mutex> lock(m_hist_mutex);
 
@@ -485,7 +443,7 @@ void PlotHist::Prefill(Input::Type a_type, Input::Scalar const &a_x)
 }
 
 // Fitters must work on given copy and not look at the ever-changing m_hist!
-void PlotHist::FitGauss(std::vector<uint32_t> const &a_hist, Axis const
+void VisualHist::FitGauss(std::vector<uint32_t> const &a_hist, Gui::Axis const
     &a_axis)
 {
   m_peak_vec.clear();
@@ -573,13 +531,12 @@ void PlotHist::FitGauss(std::vector<uint32_t> const &a_hist, Axis const
   }
 }
 
-PlotHist2::PlotHist2(Page *a_page, std::string const &a_title, size_t
+VisualHist2::VisualHist2(Gui *a_gui, std::string const &a_title, size_t
     a_colormap, uint32_t a_yb, uint32_t a_xb, LinearTransform const &a_ty,
     LinearTransform const &a_tx, char const *a_fitter, bool a_log_z, double
     a_drop_old_s):
-  Plot(a_page),
-  m_title(a_title),
-  m_colormap(a_colormap),
+  Visual(a_gui, a_title),
+  //m_colormap(a_colormap),
   m_xb(a_xb),
   m_yb(a_yb),
   m_transformx(a_tx),
@@ -590,20 +547,25 @@ PlotHist2::PlotHist2(Page *a_page, std::string const &a_title, size_t
   m_axis_y(),
   m_hist_mutex(),
   m_hist(),
-  m_axis_x_copy(),
-  m_axis_y_copy(),
+  //m_axis_x_copy(),
+  //m_axis_y_copy(),
   m_hist_copy(),
+#if 0
   m_is_log_z(),
   m_plot_state(0),
+#endif
   m_pixels()
 {
+#if 0
   m_is_log_z.is_on = a_log_z;
+#endif
 }
 
-void PlotHist2::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
+void VisualHist2::Draw(Gui *a_gui)
 {
   {
     const std::lock_guard<std::mutex> lock(m_hist_mutex);
+#if 0
     if (m_plot_state.do_clear) {
       m_range_x.Clear();
       m_range_y.Clear();
@@ -612,6 +574,7 @@ void PlotHist2::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
       m_hist.clear();
       m_plot_state.do_clear = false;
     }
+#endif
     m_axis_x_copy = m_axis_x;
     m_axis_y_copy = m_axis_y;
     if (m_hist_copy.size() != m_hist.size()) {
@@ -624,6 +587,7 @@ void PlotHist2::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
     return;
   }
 
+#if 0
   // Header.
   a_window->Checkbox("Log-z", &m_is_log_z);
   a_window->Text(ImPlutt::Window::TEXT_NORMAL,
@@ -631,7 +595,7 @@ void PlotHist2::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
       m_range_x.GetMean(), m_range_x.GetSigma(),
       m_range_y.GetMean(), m_range_y.GetSigma());
 
-  // Plot.
+  // Visual.
   auto dy = a_window->Newline();
   ImPlutt::Pos size(a_size.x, a_size.y - dy);
 
@@ -640,19 +604,22 @@ void PlotHist2::Draw(ImPlutt::Window *a_window, ImPlutt::Pos const &a_size)
   auto maxx = m_transformx.ApplyAbs(m_axis_x_copy.max);
   auto maxy = m_transformy.ApplyAbs(m_axis_y_copy.max);
 
-  ImPlutt::Plot plot(a_window, &m_plot_state, m_title.c_str(), size,
+  ImPlutt::Visual plot(a_window, &m_plot_state, m_title.c_str(), size,
       ImPlutt::Point(minx, miny),
       ImPlutt::Point(maxx, maxy),
       false, false, m_is_log_z.is_on, true);
 
-  a_window->PlotHist2(&plot, m_colormap,
+  a_window->VisualHist2(&plot, m_colormap,
       ImPlutt::Point(minx, miny),
       ImPlutt::Point(maxx, maxy),
       m_hist_copy, m_axis_y_copy.bins, m_axis_x_copy.bins,
       m_pixels);
+#endif
+
+  a_gui->SetHist2(m_gui_id, m_axis_x_copy, m_axis_y_copy, m_hist_copy);
 }
 
-void PlotHist2::Fill(Input::Type a_type_y, Input::Scalar const &a_y,
+void VisualHist2::Fill(Input::Type a_type_y, Input::Scalar const &a_y,
     Input::Type a_type_x, Input::Scalar const &a_x)
 {
   const std::lock_guard<std::mutex> lock(m_hist_mutex);
@@ -689,7 +656,7 @@ void PlotHist2::Fill(Input::Type a_type_y, Input::Scalar const &a_y,
   ++m_hist.at(i * m_axis_x.bins + j);
 }
 
-void PlotHist2::Fit()
+void VisualHist2::Fit()
 {
   const std::lock_guard<std::mutex> lock(m_hist_mutex);
 
@@ -716,7 +683,7 @@ void PlotHist2::Fit()
   }
 }
 
-void PlotHist2::Prefill(Input::Type a_type_y, Input::Scalar const &a_y,
+void VisualHist2::Prefill(Input::Type a_type_y, Input::Scalar const &a_y,
     Input::Type a_type_x, Input::Scalar const &a_x)
 {
   const std::lock_guard<std::mutex> lock(m_hist_mutex);
@@ -725,7 +692,8 @@ void PlotHist2::Prefill(Input::Type a_type_y, Input::Scalar const &a_y,
   m_range_y.Add(a_type_y, a_y);
 }
 
-void plot(ImPlutt::Window *a_window, double a_event_rate)
+#if 0
+void plot(Gui *a_gui, double a_event_rate)
 {
   if (g_page_list.empty()) {
     return;
@@ -785,16 +753,4 @@ void plot(ImPlutt::Window *a_window, double a_event_rate)
 
   a_window->Text(ImPlutt::Window::TEXT_BOLD, status.c_str());
 }
-
-Page *plot_page_add()
-{
-  if (g_page_list.empty()) {
-    plot_page_create("Default");
-  }
-  return &g_page_list.back();
-}
-
-void plot_page_create(char const *a_label)
-{
-  g_page_list.push_back(Page(a_label));
-}
+#endif

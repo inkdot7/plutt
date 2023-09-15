@@ -21,16 +21,15 @@
 
 #include <node_hist1.hpp>
 #include <cut.hpp>
-#include <plot.hpp>
 #include <value.hpp>
 
-NodeHist1::NodeHist1(std::string const &a_loc, char const *a_title, NodeValue
-    *a_x, uint32_t a_xb, LinearTransform const &a_transform, char const
-    *a_fit, bool a_log_y, double a_drop_old_s):
+NodeHist1::NodeHist1(Gui *a_gui, std::string const &a_loc, char const
+    *a_title, NodeValue *a_x, uint32_t a_xb, LinearTransform const
+    &a_transform, char const *a_fit, bool a_log_y, double a_drop_old_s):
   NodeCuttable(a_loc, a_title),
   m_x(a_x),
   m_xb(a_xb),
-  m_plot_hist(plot_page_add(), a_title, m_xb, a_transform, a_fit, a_log_y,
+  m_visual_hist(a_gui, a_title, m_xb, a_transform, a_fit, a_log_y,
       a_drop_old_s)
 {
 }
@@ -51,12 +50,12 @@ void NodeHist1::Process(uint64_t a_evid)
   for (uint32_t i = 0; i < v.size(); ++i) {
     auto const &x = v.at(i);
     m_cut_producer.Test(val_x.GetType(), x);
-    m_plot_hist.Prefill(val_x.GetType(), x);
+    m_visual_hist.Prefill(val_x.GetType(), x);
   }
-  m_plot_hist.Fit();
+  m_visual_hist.Fit();
   // Fill.
   for (uint32_t i = 0; i < v.size(); ++i) {
     auto const &x = v.at(i);
-    m_plot_hist.Fill(val_x.GetType(), x);
+    m_visual_hist.Fill(val_x.GetType(), x);
   }
 }

@@ -19,28 +19,41 @@
  * MA  02110-1301  USA
  */
 
-#ifndef NODE_HIST1_HPP
-#define NODE_HIST1_HPP
+#ifndef GUI_HPP
+#define GUI_HPP
 
-#include <node.hpp>
-#include <visual.hpp>
+#include <string>
+#include <vector>
 
 /*
- * Collects in a 1D histogram, actual histogramming is performed in visual.*.
+ * GUI interface for plots and such.
  */
-class NodeHist1: public NodeCuttable {
+
+class Gui {
   public:
-    NodeHist1(Gui *, std::string const &, char const *, NodeValue *, uint32_t,
-        LinearTransform const &, char const *, bool, double);
-    void Process(uint64_t);
+    struct Axis {
+      void Clear();
+      uint32_t bins;
+      double min;
+      double max;
+    };
+    class Plot {
+      public:
+        virtual ~Plot() {}
+        virtual void Draw(Gui *) {}
+    };
 
-  private:
-    NodeHist1(NodeHist1 const &);
-    NodeHist1 &operator=(NodeHist1 const &);
+    virtual ~Gui();
 
-    NodeValue *m_x;
-    uint32_t m_xb;
-    VisualHist m_visual_hist;
+    virtual void AddPage(std::string const &) = 0;
+    virtual uint32_t AddPlot(std::string const &, Plot *) = 0;
+
+    virtual bool Draw() = 0;
+
+    virtual void SetHist1(uint32_t, Axis const &,
+        std::vector<uint32_t> const &) = 0;
+    virtual void SetHist2(uint32_t, Axis const &, Axis const &,
+        std::vector<uint32_t> const &) = 0;
 };
 
 #endif

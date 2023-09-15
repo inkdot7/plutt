@@ -19,7 +19,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301  USA
 
+#DB=lldb --
+
 scriptdir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 build_dir=$(make -s -C $scriptdir -f build_dir_echo.mk)
-$scriptdir/$build_dir/plutt $*
+$DB $scriptdir/$build_dir/plutt $*

@@ -23,6 +23,7 @@
 #include <config_parser.hpp>
 #include <node_bitfield.hpp>
 #include <node_filter_range.hpp>
+#include <gui.hpp>
 #include <util.hpp>
 
 #define LOC_SAVE(arg) g_config->SetLoc(arg.first_line, arg.first_column)
@@ -34,6 +35,7 @@
 
 char const *yycppath;
 Config *g_config;
+Gui *g_gui;
 void
 yycperror(char const *s)
 {
@@ -312,7 +314,7 @@ cut
 
 page
 	: TK_PAGE '(' TK_STRING ')' {
-		g_config->AddPage($3);
+		g_gui->AddPage($3);
 		free($3);
 	}
 

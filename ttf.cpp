@@ -21,6 +21,8 @@
  * MA  02110-1301  USA
  */
 
+#ifdef PLUTT_SDL2
+
 #include <ttf.hpp>
 #include <cassert>
 #include <iostream>
@@ -274,3 +276,5 @@ void TtfShutdown()
 {
   FT_CALL(FT_Done_FreeType, (g_lib));
 }
+
+#endif

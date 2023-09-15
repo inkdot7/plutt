@@ -22,6 +22,8 @@
  * MA  02110-1301  USA
  */
 
+#ifdef PLUTT_SDL2
+
 #include <implutt.hpp>
 #include <sys/stat.h>
 #include <cassert>
@@ -2440,3 +2442,5 @@ namespace ImPlutt {
   }
 
 }
+
+#endif

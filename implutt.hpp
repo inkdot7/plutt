@@ -21,6 +21,12 @@
  * MA  02110-1301  USA
  */
 
+/*
+ * SDL2 and FreeType2 based immediate mode gui hackjob.
+ */
+
+#ifdef PLUTT_SDL2
+
 #ifndef IMPLUTT_HPP
 #define IMPLUTT_HPP
 
@@ -30,6 +36,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <SDL_compat.h>
 #include <SDL.h>
 #include <vector.hpp>
 
@@ -331,5 +338,7 @@ namespace ImPlutt {
   };
 
 }
+
+#endif
 
 #endif

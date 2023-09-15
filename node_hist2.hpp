@@ -22,22 +22,18 @@
 #ifndef NODE_HIST2_HPP
 #define NODE_HIST2_HPP
 
-#include <cut.hpp>
 #include <node.hpp>
-#include <plot.hpp>
-#include <util.hpp>
+#include <visual.hpp>
 
 /*
  * Collects a vs b in a 2D histogram, actual histogramming is performed in
- * plot.*.
+ * visual.*.
  */
 class NodeHist2: public NodeCuttable {
   public:
-    NodeHist2(std::string const &, char const *, size_t, NodeValue *,
+    NodeHist2(Gui *, std::string const &, char const *, size_t, NodeValue *,
         NodeValue *, uint32_t, uint32_t, LinearTransform const &,
         LinearTransform const &, char const *, bool, double);
-    void CutConsumerAdd(NodeCuttable *, CutProducerList *);
-    void CutProducerAdd(CutPolygon *);
     void Process(uint64_t);
 
   private:
@@ -48,7 +44,7 @@ class NodeHist2: public NodeCuttable {
     NodeValue *m_y;
     uint32_t m_xb;
     uint32_t m_yb;
-    PlotHist2 m_plot_hist2;
+    VisualHist2 m_visual_hist2;
 };
 
 #endif

@@ -19,42 +19,19 @@
  * MA  02110-1301  USA
  */
 
-#ifndef PLOT_HPP
-#define PLOT_HPP
+#ifndef VISUAL_HPP
+#define VISUAL_HPP
 
-#include <cstdint>
-#include <cstdlib>
-#include <list>
+/*
+ * Visual representations of data, eg histograms.
+ * Not really visual until they're drawn, just a bunch of numbers, but
+ * 'visual' is a nice short word...
+ */
+
 #include <mutex>
-#include <string>
-#include <vector>
-#include <implutt.hpp>
+#include <gui.hpp>
 #include <input.hpp>
 #include <util.hpp>
-
-class Plot;
-
-class Page {
-  public:
-    Page(std::string const &);
-    Page(Page const &);
-    void AddPlot(Plot *);
-    void Draw(ImPlutt::Window *, ImPlutt::Pos const &);
-    std::string const &GetLabel() const;
-
-  private:
-    Page &operator=(Page const &);
-    std::string m_label;
-    std::list<Plot *> m_plot_list;
-    ImPlutt::TextInputState *m_textinput_state;
-};
-
-struct Axis {
-  void Clear();
-  uint32_t bins;
-  double min;
-  double max;
-};
 
 /*
  * Tries to guess the kind of data and its range, eg:
@@ -70,7 +47,7 @@ class Range {
     Range(double);
     void Add(Input::Type, Input::Scalar const &);
     void Clear();
-    Axis GetExtents(uint32_t) const;
+    Gui::Axis GetExtents(uint32_t) const;
     double GetMax() const;
     double GetMean() const;
     double GetMin() const;
@@ -91,7 +68,7 @@ class Range {
     size_t m_stat_i;
 };
 
-class Plot {
+class Visual: public Gui::Plot {
   public:
     struct Peak {
       Peak(double, double, double, double);
@@ -101,49 +78,51 @@ class Plot {
       double std_x;
     };
 
-    Plot(Page *);
-    virtual ~Plot() {}
-    virtual void Draw(ImPlutt::Window *, ImPlutt::Pos const &) = 0;
+    Visual(Gui *, std::string const &);
+    virtual ~Visual();
+    virtual void Draw(Gui *) = 0;
+
+    std::string m_name;
+    uint32_t m_gui_id;
 };
 
-class PlotHist: public Plot {
+class VisualHist: public Visual {
   public:
     enum Fitter {
       FITTER_NONE,
       FITTER_GAUSS
     };
 
-    PlotHist(Page *, std::string const &, uint32_t, LinearTransform const &,
+    VisualHist(Gui *, std::string const &, uint32_t, LinearTransform const &,
         char const *, bool, double);
-    void Draw(ImPlutt::Window *, ImPlutt::Pos const &);
+    void Draw(Gui *);
     void Fill(Input::Type, Input::Scalar const &);
     void Fit();
     void Prefill(Input::Type, Input::Scalar const &);
 
   private:
-    void FitGauss(std::vector<uint32_t> const &, Axis const &);
+    void FitGauss(std::vector<uint32_t> const &, Gui::Axis const &);
 
-    std::string m_title;
     uint32_t m_xb;
     LinearTransform m_transform;
     Fitter m_fitter;
     Range m_range;
-    Axis m_axis;
+    Gui::Axis m_axis;
     std::mutex m_hist_mutex;
     std::vector<uint32_t> m_hist;
-    Axis m_axis_copy;
+    Gui::Axis m_axis_copy;
     std::vector<uint32_t> m_hist_copy;
-    ImPlutt::CheckboxState m_is_log_y;
+    //ImPlutt::CheckboxState m_is_log_y;
     std::vector<Peak> m_peak_vec;
-    ImPlutt::PlotState m_plot_state;
+    //ImPlutt::PlotState m_plot_state;
 };
 
-class PlotHist2: public Plot {
+class VisualHist2: public Visual {
   public:
-    PlotHist2(Page *, std::string const &, size_t, uint32_t, uint32_t,
+    VisualHist2(Gui *, std::string const &, size_t, uint32_t, uint32_t,
         LinearTransform const &, LinearTransform const &, char const *, bool,
         double);
-    void Draw(ImPlutt::Window *, ImPlutt::Pos const &);
+    void Draw(Gui *);
     void Fill(
         Input::Type, Input::Scalar const &,
         Input::Type, Input::Scalar const &);
@@ -153,30 +132,23 @@ class PlotHist2: public Plot {
         Input::Type, Input::Scalar const &);
 
   private:
-    std::string m_title;
-    size_t m_colormap;
+    //size_t m_colormap;
     uint32_t m_xb;
     uint32_t m_yb;
     LinearTransform m_transformx;
     LinearTransform m_transformy;
     Range m_range_x;
     Range m_range_y;
-    Axis m_axis_x;
-    Axis m_axis_y;
+    Gui::Axis m_axis_x;
+    Gui::Axis m_axis_y;
     std::mutex m_hist_mutex;
     std::vector<uint32_t> m_hist;
-    Axis m_axis_x_copy;
-    Axis m_axis_y_copy;
+    Gui::Axis m_axis_x_copy;
+    Gui::Axis m_axis_y_copy;
     std::vector<uint32_t> m_hist_copy;
-    ImPlutt::CheckboxState m_is_log_z;
-    ImPlutt::PlotState m_plot_state;
+    //ImPlutt::CheckboxState m_is_log_z;
+    //ImPlutt::PlotState m_plot_state;
     std::vector<uint8_t> m_pixels;
 };
-
-// TODO: Should all this be global?
-void plot(ImPlutt::Window *, double);
-// TODO: Change name...
-Page *plot_page_add();
-void plot_page_create(char const *);
 
 #endif

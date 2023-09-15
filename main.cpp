@@ -26,16 +26,20 @@
 #include <condition_variable>
 #include <iostream>
 #include <thread>
-#include <SDL_compat.h>
-#include <SDL.h>
+#if PLUTT_SDL2
+# include <implutt.hpp>
+# include <sdl_gui.hpp>
+#endif
 #include <config.hpp>
-#include <implutt.hpp>
-#include <plot.hpp>
-#include <root.hpp>
+#if PLUTT_ROOT
+# include <root.hpp>
+# include <root_gui.hpp>
+#endif
 #include <unpacker.hpp>
 #include <util.hpp>
 
 extern Config *g_config;
+extern Gui *g_gui;
 
 namespace {
 
@@ -54,6 +58,15 @@ namespace {
 #endif
     INPUT_NONE
   };
+  enum GuiType {
+#if PLUTT_SDL2
+    GUI_SDL,
+#endif
+#if PLUTT_ROOT
+    GUI_ROOT,
+#endif
+    GUI_NONE
+  };
 
   char const *g_arg0;
   char const *g_conf_path;
@@ -67,17 +80,21 @@ namespace {
       std::cerr << a_msg << '\n';
     }
     std::cout << "Usage: " << g_arg0 <<
-        " -f config -j jobs input...\n";
+        " -f config [-g gui] [-j jobs] input...\n";
+    std::cout << "-g values:";
+#if PLUTT_SDL2
+    std::cout << " sdl";
+#endif
+#if PLUTT_ROOT
+    std::cout << " root";
+#endif
+    std::cout << "\n";
     std::cout << "Input options:\n";
 #if PLUTT_ROOT
     std::cout << " -r tree-name root-files...\n";
-#else
-    std::cout << " -r ROOT not compiled in.\n";
 #endif
 #if PLUTT_UCESB
     std::cout << " -u unpacker args...\n";
-#else
-    std::cout << " -u ucesb not compiled in.\n";
 #endif
     exit(a_msg ? EXIT_FAILURE : EXIT_SUCCESS);
   }
@@ -144,27 +161,55 @@ int main(int argc, char **argv)
   g_arg0 = argv[0];
 
   // Print some niceties.
-  printf("Built with: SDL2,freetype2");
+  std::cout << "Built with:";
+#if PLUTT_SDL2
+  std::cout << " SDL2,freetype2";
+#endif
 #if PLUTT_NLOPT
-  printf(",nlopt");
+  std::cout << " nlopt";
 #endif
 #if PLUTT_ROOT
-  printf(",ROOT");
+  std::cout << " ROOT";
 #endif
 #if PLUTT_UCESB
-  printf(",ucesb");
+  std::cout << " ucesb";
 #endif
-  printf(".\n");
+  std::cout << ".\n";
 
   // Handle arguments.
   enum InputType input_type = INPUT_NONE;
+  enum GuiType gui_type = GUI_NONE;
+#if PLUTT_ROOT
+  gui_type = GUI_ROOT;
+  RootGui *root_gui = nullptr;
+#endif
+#if PLUTT_SDL2
+  gui_type = GUI_SDL;
+  SdlGui *sdl_gui = nullptr;
+#endif
   int c;
-  while ((c = getopt(argc, argv, "hf:j:" ROOT_ARGOPT UCESB_ARGOPT)) != -1) {
+  while ((c = getopt(argc, argv, "hf:g:j:" ROOT_ARGOPT UCESB_ARGOPT)) != -1) {
     switch (c) {
       case 'h':
         help(nullptr);
       case 'f':
         g_conf_path = optarg;
+        break;
+      case 'g':
+        gui_type = GUI_NONE;
+#if PLUTT_SDL2
+        if (0 == strcmp(optarg, "sdl")) {
+          gui_type = GUI_SDL;
+        }
+#endif
+#if PLUTT_ROOT
+        if (0 == strcmp(optarg, "root")) {
+          gui_type = GUI_ROOT;
+        }
+#endif
+        if (GUI_NONE == gui_type) {
+          help("Invalid GUI type for -g.");
+        }
         break;
       case 'j':
         {
@@ -208,6 +253,23 @@ int main(int argc, char **argv)
     help("I need an input!");
   }
 
+  // Start GUI.
+  switch (gui_type) {
+#if PLUTT_SDL2
+    case GUI_SDL:
+      ImPlutt::Setup();
+      g_gui = sdl_gui = new SdlGui("plutt", 800, 600);
+      break;
+#endif
+#if PLUTT_ROOT
+    case GUI_ROOT:
+      g_gui = root_gui = new RootGui(8080);
+      break;
+#endif
+    default:
+      help("ROOT GUI not built in.");
+  }
+
   // Config figures out requested signals and asks the input to deliver blobs
   // of arrays.
   // The ctor sets g_config by itself, nice hack bro.
@@ -234,10 +296,6 @@ int main(int argc, char **argv)
   std::thread thread_input(main_input, argc, argv);
   std::thread thread_event(main_event, argc, argv);
 
-  ImPlutt::Setup();
-
-  auto window = new ImPlutt::Window("plutt", 800, 600);
-
   uint64_t event_i0 = 0;
   unsigned loop_n = 0;
   double event_rate = 0.0;
@@ -245,24 +303,40 @@ int main(int argc, char **argv)
   std::cout << "Entering main loop...\n";
   for (bool is_running = true; is_running;) {
 
-    // Use event timeout to cap UI rate.
-    auto t_end = SDL_GETTICKS() + 1000 / g_config->UIRateGet();
-    for (;;) {
-      auto t_cur = SDL_GETTICKS();
-      if (t_cur > t_end) {
+    switch (gui_type) {
+#if PLUTT_SDL2
+      case GUI_SDL:
+        // Use event timeout to cap UI rate.
+        auto t_end = SDL_GETTICKS() + 1000 / g_config->UIRateGet();
+        for (;;) {
+          auto t_cur = SDL_GETTICKS();
+          if (t_cur > t_end) {
+            break;
+          }
+          auto timeout = (int)(t_end - t_cur);
+          SDL_Event event;
+          if (!SDL_WaitEventTimeout(&event, timeout)) {
+            break;
+          }
+          ImPlutt::ProcessEvent(event);
+          if (g_gui->DoClose() || ImPlutt::DoQuit()) {
+            is_running = false;
+          }
+        }
+        Time_set_ms(t_end);
+#endif
+#if PLUTT_ROOT
+      case GUI_ROOT:
+        sleep(1);
         break;
-      }
-      auto timeout = (int)(t_end - t_cur);
-      SDL_Event event;
-      if (!SDL_WaitEventTimeout(&event, timeout)) {
-        break;
-      }
-      ImPlutt::ProcessEvent(event);
-      if (window->DoClose() || ImPlutt::DoQuit()) {
-        is_running = false;
-      }
+#endif
+      default:
+        abort();
     }
-    Time_set_ms(t_end);
+
+    if (!g_gui->Draw()) {
+      is_running = true;
+    }
 
     ++loop_n;
 #define RATE_PER_SECOND 2
@@ -272,10 +346,7 @@ int main(int argc, char **argv)
       event_i0 = event_i1;
       loop_n = 0;
     }
-
-    window->Begin();
-    plot(window, event_rate);
-    window->End();
+(void)event_rate;
   }
   std::cout << "Exiting main loop...\n";
   g_data_running = false;
@@ -284,9 +355,12 @@ int main(int argc, char **argv)
   thread_input.join();
   thread_event.join();
 
-  delete window;
-
-  ImPlutt::Destroy();
+#if PLUTT_SDL2
+  delete sdl_gui;
+#endif
+#if PLUTT_ROOT
+  delete root_gui;
+#endif
 
   delete g_input;
   delete g_config;

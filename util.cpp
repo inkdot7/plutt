@@ -20,6 +20,7 @@
  */
 
 #include <util.hpp>
+#include <sys/select.h>
 #include <dirent.h>
 #include <err.h>
 #include <cassert>
@@ -27,7 +28,6 @@
 #include <mutex>
 #include <string>
 #include <thread>
-#include <SDL_timer.h>
 
 namespace {
   uint64_t g_time_ms;
@@ -475,7 +475,12 @@ void Time_set_ms(uint64_t a_time_ms)
 
 void Time_wait_ms(uint32_t a_time_ms)
 {
-  SDL_Delay(a_time_ms);
+  struct timeval tv;
+  tv.tv_sec = a_time_ms / 1000;
+  tv.tv_usec = a_time_ms % 1000;
+  if (-1 == select(0, NULL, NULL, NULL, &tv)) {
+    warn("select");
+  }
 }
 
 double U64SubDouble(uint64_t a_u64, double a_dbl)

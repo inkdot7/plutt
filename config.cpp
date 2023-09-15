@@ -24,7 +24,9 @@
 #include <sstream>
 #include <err.h>
 #include <config_parser.hpp>
-#include <implutt.hpp>
+#if PLUTT_SDL2
+# include <implutt.hpp>
+#endif
 #include <util.hpp>
 
 #include <node_alias.hpp>
@@ -55,6 +57,7 @@
 
 extern FILE *yycpin;
 extern Config *g_config;
+extern Gui *g_gui;
 
 extern void yycperror(char const *);
 extern int yycpparse();
@@ -75,13 +78,17 @@ Config::Config(char const *a_path):
   m_cut_ref_map(),
   m_fit_map(),
   m_clock_match(),
-  m_colormap(ImPlutt::ColormapGet(nullptr)),
+  m_colormap(),
   m_ui_rate(DEFAULT_UI_RATE),
   m_evid(),
   m_input()
 {
   // config_parser relies on this global!
   g_config = this;
+
+#if PLUTT_SDL2
+  m_colormap = ImPlutt::ColormapGet(nullptr);
+#endif
 
   // Let the bison roam.
   yycpin = fopen(a_path, "rb");
@@ -279,8 +286,8 @@ void Config::AddHist1(char const *a_title, NodeValue *a_x, uint32_t a_xb, char
     k = it->second.k;
     m = it->second.m;
   }
-  auto node = new NodeHist1(GetLocStr(), a_title,
-      a_x, a_xb, LinearTransform(k, m), a_fit, a_log_y, a_drop_old_s);
+  auto node = new NodeHist1(g_gui, GetLocStr(), a_title, a_x, a_xb,
+      LinearTransform(k, m), a_fit, a_log_y, a_drop_old_s);
   NodeCuttableAdd(node);
 }
 
@@ -312,9 +319,9 @@ void Config::AddHist2(char const *a_title, NodeValue *a_y, NodeValue *a_x,
     ky = it->second.k;
     my = it->second.m;
   }
-  auto node = new NodeHist2(GetLocStr(), a_title, m_colormap,
-      a_y, a_x, a_yb, a_xb, LinearTransform(ky, my), LinearTransform(kx, mx),
-      a_fit, a_log_z, a_drop_old_s);
+  auto node = new NodeHist2(g_gui, GetLocStr(), a_title, m_colormap, a_y, a_x,
+      a_yb, a_xb, LinearTransform(ky, my), LinearTransform(kx, mx), a_fit,
+      a_log_z, a_drop_old_s);
   NodeCuttableAdd(node);
 }
 
@@ -415,11 +422,6 @@ NodeValue *Config::AddMExpr(NodeValue *a_l, NodeValue *a_r, double a_d,
     NodeValueAdd(key, node = new NodeMExpr(GetLocStr(), a_l, a_r, a_d, a_op));
   }
   return node;
-}
-
-void Config::AddPage(char const *a_label)
-{
-  plot_page_create(a_label);
 }
 
 NodeValue *Config::AddPedestal(NodeValue *a_value, double a_cutoff, NodeValue
@@ -534,6 +536,7 @@ void Config::BindSignal(std::string const &a_name, char const *a_suffix,
 
 void Config::AppearanceSet(char const *a_name)
 {
+#if PLUTT_SDL2
   ImPlutt::Style style;
   if (0 == strcmp("light", a_name)) {
     style = ImPlutt::STYLE_LIGHT;
@@ -544,6 +547,7 @@ void Config::AppearanceSet(char const *a_name)
     throw std::runtime_error(__func__);
   }
   ImPlutt::StyleSet(style);
+#endif
 }
 
 void Config::ClockMatch(NodeValue *a_value, double a_s_from_ts)
@@ -554,12 +558,14 @@ void Config::ClockMatch(NodeValue *a_value, double a_s_from_ts)
 
 void Config::ColormapSet(char const *a_name)
 {
+#if PLUTT_SDL2
   try {
     m_colormap = ImPlutt::ColormapGet(a_name);
   } catch (...) {
     std::cerr << GetLocStr() << ": Could not set palette.\n";
     throw std::runtime_error(__func__);
   }
+#endif
 }
 
 void Config::HistCutAdd(CutPolygon *a_poly)

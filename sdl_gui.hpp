@@ -19,28 +19,42 @@
  * MA  02110-1301  USA
  */
 
-#ifndef NODE_HIST1_HPP
-#define NODE_HIST1_HPP
+#ifndef SDL_GUI_HPP
+#define SDL_GUI_HPP
 
-#include <node.hpp>
-#include <visual.hpp>
+#if PLUTT_SDL2
 
-/*
- * Collects in a 1D histogram, actual histogramming is performed in visual.*.
- */
-class NodeHist1: public NodeCuttable {
+#include <gui.hpp>
+
+class SdlGui: public Gui {
   public:
-    NodeHist1(Gui *, std::string const &, char const *, NodeValue *, uint32_t,
-        LinearTransform const &, char const *, bool, double);
-    void Process(uint64_t);
+    SdlGui(char const *, unsigned, unsigned);
+    ~SdlGui();
+
+    void AddPage(char const *);
+    uint32_t AddPlot(char const *);
+
+    void SetHist1(uint32_t, Axis const &,
+        std::vector<uint32_t> const &);
+    void SetHist2(uint32_t, Axis const &, Axis const &,
+        std::vector<uint32_t> const &);
+
+    bool Begin();
+    void End();
 
   private:
-    NodeHist1(NodeHist1 const &);
-    NodeHist1 &operator=(NodeHist1 const &);
-
-    NodeValue *m_x;
-    uint32_t m_xb;
-    VisualHist m_visual_hist;
+    struct Plot {
+      std::string name;
+      TH1I *h1;
+      TH2I *h2;
+    };
+    struct Page {
+      std::string name;
+      std::vector<Plot *> plot_vec;
+    };
+    std::vector<Page *> m_page_vec;
 };
+
+#endif
 
 #endif

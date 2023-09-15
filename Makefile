@@ -56,12 +56,23 @@ endif
 ifeq ($(shell ($(ROOT_CONFIG) --version 2>/dev/null && echo Yes) | grep Yes),Yes)
 CPPFLAGS+=-DPLUTT_ROOT=1
 ROOT_CFLAGS:=$(shell $(ROOT_CONFIG) --cflags | sed 's/-I/-isystem/')
-LIBS+=$(shell $(ROOT_CONFIG) --libs)
+LIBS+=$(shell $(ROOT_CONFIG) --libs) -lRHTTP
 ROOT_DICT_O:=$(BUILD_DIR)/test/test_root_dict.o
 ROOT_DICT_PCM:=$(BUILD_DIR)/test_root_dict_rdict.pcm
 $(info ROOT: yes)
 else
 $(info ROOT: no)
+endif
+
+# SDL2?
+
+ifeq ($(shell (pkg-config freetype2 sdl2 a 2>/dev/null && echo Yes) | grep Yes),Yes)
+CPPFLAGS+=-DPLUTT_SDL2=1
+CXXFLAGS:=$(CXXFLAGS) $(shell pkg-config freetype2 sdl2 --cflags)
+LIBS+=$(shell pkg-config freetype2 sdl2 --libs)
+$(info SDL2: yes)
+else
+$(info SDL2: no)
 endif
 
 # UCESB?
@@ -97,12 +108,8 @@ ifeq (release,$(BUILD_MODE))
 CXXFLAGS+=-O3
 endif
 
-BASE_CFLAGS:=$(shell pkg-config freetype2 sdl2 --cflags)
-LIBS+=$(shell pkg-config freetype2 sdl2 --libs)
-
 CPPFLAGS:=$(CPPFLAGS) -MMD \
-	-I$(BUILD_DIR) -I. \
-	$(BASE_CFLAGS)
+	-I$(BUILD_DIR) -I.
 CXXFLAGS_UNSAFE:=$(CXXFLAGS) -fPIC -std=c++11
 CXXFLAGS:=$(CXXFLAGS_UNSAFE) -Wall -Wconversion -Weffc++ -Werror -Wshadow
 LDFLAGS:=$(LDFLAGS) -fPIC
@@ -172,6 +179,8 @@ $(BUILD_DIR)/trig_map_parser.yy.c: $(BUILD_DIR)/trig_map_parser.tab.h
 $(BUILD_DIR)/trig_map_parser.tab.h: $(BUILD_DIR)/trig_map_parser.tab.c
 
 $(BUILD_DIR)/root.o: root.cpp Makefile
+$(BUILD_DIR)/root_gui.o: root_gui.cpp Makefile
+$(BUILD_DIR)/root.o $(BUILD_DIR)/root_gui.o:
 	@echo ROOTO $@
 	$(QUIET)$(MKDIR)
 	$(QUIET)$(CXX) -c -o $@ $< $(CPPFLAGS) $(CXXFLAGS) $(ROOT_CFLAGS)
