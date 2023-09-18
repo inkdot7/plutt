@@ -1470,7 +1470,6 @@ namespace ImPlutt {
   Plot::Plot(Window *a_window, PlotState *a_state,
       char const *a_title, Pos const &a_size,
       Point const &a_min_lin, Point const &a_max_lin,
-      bool a_is_log_x, bool a_is_log_y, bool a_is_log_z,
       bool a_is_2d):
     m_window(a_window),
     m_state(a_state),
@@ -1478,19 +1477,22 @@ namespace ImPlutt {
     m_rect_graph(),
     m_min(a_min_lin),
     m_max(a_max_lin),
-    m_is_log(),
     m_is_2d(a_is_2d)
   {
+#if 0
     m_is_log.x = a_is_log_x;
     m_is_log.y = a_is_log_y;
     m_is_log.z = a_is_log_z;
+#endif
 
-    // Render title.
-    FontSetBold(g_font, true);
+    // Render title and log option.
     auto title_size = m_window->RenderTextMeasure(a_title, Window::TEXT_BOLD);
     auto dx = (a_size.x - title_size.x) / 2;
     m_window->RenderText(a_title, Window::TEXT_BOLD, STYLE_TEXT,
         Pos(dx, PAD_EXT));
+
+    m_window->Checkbox("Log", &a_state->is_log);
+
     m_rect_tot.x = 0;
     m_rect_tot.y = PAD_EXT + title_size.y + PAD_INT;
     m_rect_tot.w = a_size.x;
@@ -1530,7 +1532,8 @@ namespace ImPlutt {
     m_max.y = LinOrLogFromLinY(m_max.y);
 
     // Y-axis first, depends on label widths.
-    auto r_y = PlotYaxis(m_rect_tot, m_min.y, m_max.y, a_is_log_y);
+    auto r_y = PlotYaxis(m_rect_tot, m_min.y, m_max.y,
+        m_is_2d ? false : a_state->is_log.is_on);
 
     // Construct X-axis.
     Rect r_x;
@@ -1961,32 +1964,50 @@ namespace ImPlutt {
 
   double Plot::LinFromLinOrLogX(double a_x) const
   {
+#if 0
     return m_is_log.x ? pow(10, a_x) : a_x;
+#endif
+    return a_x;
   }
 
   double Plot::LinFromLinOrLogY(double a_y) const
   {
+#if 0
     return m_is_log.y ? pow(10, a_y) : a_y;
+#endif
+    return m_is_2d || !m_state->is_log.is_on ? a_y : pow(10, a_y);
   }
 
   double Plot::LinFromLinOrLogZ(double a_z) const
   {
+#if 0
     return m_is_log.z ? pow(10, a_z) : a_z;
+#endif
+    return !m_state->is_log.is_on ? a_z : pow(10, a_z);
   }
 
   double Plot::LinOrLogFromLinX(double a_x) const
   {
+#if 0
     return m_is_log.x ? log10(std::max(a_x, 1e-1)) : a_x;
+#endif
+    return a_x;
   }
 
   double Plot::LinOrLogFromLinY(double a_y) const
   {
+#if 0
     return m_is_log.y ? log10(std::max(a_y, 1e-1)) : a_y;
+#endif
+    return m_is_2d || !m_state->is_log.is_on ? a_y : log10(std::max(a_y, 1e-1));
   }
 
   double Plot::LinOrLogFromLinZ(double a_z) const
   {
+#if 0
     return m_is_log.z ? log10(std::max(a_z, 1e-1)) : a_z;
+#endif
+    return !m_state->is_log.is_on ? a_z : log10(std::max(a_z, 1e-1));
   }
 
   double Plot::PointFromPosX(int a_x) const
@@ -2064,7 +2085,7 @@ namespace ImPlutt {
     RenderColor(g_style[g_style_i][STYLE_PLOT_BG]);
     RenderRect(r, false);
 
-    // TODO: Plot texture and render that, faster?
+    // TODO: Plot texture and render that, faster? Does it matter?
 
     RenderColor(g_style[g_style_i][STYLE_PLOT_FG]);
     // Figure out how many pixels the histogram covers.
@@ -2148,7 +2169,7 @@ namespace ImPlutt {
         r_col.h = b.min - b.max;
         RenderRect(r_col, false);
       }
-    a_plot->m_window->RenderTransparent(false);
+      a_plot->m_window->RenderTransparent(false);
     }
   }
   PLOT_TMPL_INSTANTIATE;
@@ -2360,11 +2381,12 @@ namespace ImPlutt {
           max_y = std::max(max_y, state->proj.vec.at(i));
         }
         auto size = win->GetSize();
+        state->proj.plot_state->is_log.is_on = a_plot->m_state->is_log.is_on;
         ImPlutt::Plot plot(win, state->proj.plot_state,
             state->proj.title.c_str(), size,
             ImPlutt::Point(min_x, 0.0),
             ImPlutt::Point(max_x, max_y * 1.1),
-            false, a_plot->m_is_log.z, false, false);
+            false);
         win->PlotHist1(&plot, min_x, max_x, state->proj.vec,
             state->proj.vec.size());
       }

@@ -130,6 +130,7 @@ namespace ImPlutt {
     };
     uint32_t state_mask;
     UserState user_state;
+    struct CheckboxState is_log;
     Point min_lin;
     Point max_lin;
     struct Cut {
@@ -178,7 +179,7 @@ namespace ImPlutt {
   class Plot {
     public:
       Plot(Window *, PlotState *, char const *, Pos const &, Point const &,
-          Point const &, bool, bool, bool, bool);
+          Point const &, bool);
       ~Plot();
       void DrawOverlay(PlotState const &);
       double LinFromLinOrLogX(double) const;
@@ -200,11 +201,6 @@ namespace ImPlutt {
       Rect m_rect_graph;
       Point m_min;
       Point m_max;
-      struct {
-        bool x;
-        bool y;
-        bool z;
-      } m_is_log;
       bool m_is_2d;
 
     private:
