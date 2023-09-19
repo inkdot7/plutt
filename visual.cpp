@@ -416,7 +416,7 @@ void VisualHist::FitGauss(std::vector<uint32_t> const &a_hist, Gui::Axis const
   m_peak_vec.clear();
   auto b = Snip(a_hist, 4);
   for (size_t i = 0; i < a_hist.size(); ++i) {
-    b.at(i) = ((float)a_hist.at(i) - b.at(i)) / sqrt(b.at(i) + 1);
+    b.at(i) = ((float)a_hist.at(i) - b.at(i)) / (float)sqrt(b.at(i) + 1);
   }
   // 2nd diffs make peaks look like:
   // ___/\  /\___

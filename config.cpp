@@ -61,6 +61,7 @@ extern Gui *g_gui;
 
 extern void yycperror(char const *);
 extern int yycpparse();
+extern int yycplex_destroy();
 
 extern char const *yycppath;
 
@@ -101,8 +102,9 @@ Config::Config(char const *a_path):
   yycplloc.last_column = 1;
   std::cout << a_path << ": Parsing...\n";
   yycpparse();
-  std::cout << a_path << ": Done!\n";
   fclose(yycpin);
+  yycplex_destroy();
+  std::cout << a_path << ": Done!\n";
 
   // Link unassigned aliases to signal-map, should be ucesb signals.
   for (auto it = m_alias_map.begin(); m_alias_map.end() != it; ++it) {

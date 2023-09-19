@@ -48,16 +48,27 @@ class RootGui: public Gui {
         std::vector<uint32_t> const &);
 
   private:
+    RootGui(RootGui const &);
+    RootGui &operator=(RootGui const &);
+
     struct PlotWrap {
+      PlotWrap();
       std::string name;
       Plot *plot;
       TH1I *h1;
       TH2I *h2;
+      private:
+        PlotWrap(PlotWrap const &);
+        PlotWrap &operator=(PlotWrap const &);
     };
     struct Page {
+      Page();
       std::string name;
       TCanvas *canvas;
       std::vector<PlotWrap *> plot_wrap_vec;
+      private:
+        Page(Page const &);
+        Page &operator=(Page const &);
     };
     THttpServer *m_server;
     std::vector<Page *> m_page_vec;

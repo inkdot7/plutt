@@ -23,6 +23,7 @@
 #include <sys/select.h>
 #include <dirent.h>
 #include <err.h>
+#include <stdarg.h>
 #include <cassert>
 #include <cmath>
 #include <mutex>
@@ -318,7 +319,7 @@ std::vector<float> Snip(std::vector<uint32_t> const &a_v, uint32_t a_exp)
   // Undo LLS.
   auto &v_src = v[src_i];
   for (size_t i = 0; i < a_v.size(); ++i) {
-    v_src[i] = exp(v_src[i]) - 2;
+    v_src[i] = (float)exp(v_src[i]) - 2;
   }
   return 0 == src_i ? buf0 : buf1;
 }
@@ -360,7 +361,7 @@ std::vector<float> Snip2(std::vector<uint32_t> const &a_v, size_t a_w, size_t
   }
   auto &v_src = v[src_i];
   for (size_t i = 0; i < a_v.size(); ++i) {
-    v_src[i] = exp(v_src[i]) - 2;
+    v_src[i] = (float)exp(v_src[i]) - 2;
   }
   return 0 == src_i ? buf0 : buf1;
 }

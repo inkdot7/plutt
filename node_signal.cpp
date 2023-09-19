@@ -44,8 +44,6 @@ NodeSignal::NodeSignal(Config &a_config, char const *a_name):
 void NodeSignal::BindSignal(std::string const &a_suffix, size_t a_id,
     Input::Type a_type)
 {
-std::cout << m_name << '.' << a_suffix << " id=" << a_id << " type=" << a_type
-    << '\n';
 #define BIND_SIGNAL_ASSERT_INT do { \
     if (Input::kUint64 != a_type) { \
       std::cerr << GetLocStr() << ": 'M' member not integer!\n"; \

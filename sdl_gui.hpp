@@ -45,14 +45,20 @@ class SdlGui: public Gui {
     bool DoClose();
 
   private:
+    SdlGui(SdlGui const &);
+    SdlGui &operator=(SdlGui const &);
     struct PlotWrap {
       PlotWrap();
       std::string name;
       Plot *plot;
       ImPlutt::PlotState plot_state;
       std::vector<uint8_t> pixels;
+      private:
+        PlotWrap(PlotWrap const &);
+        PlotWrap &operator=(PlotWrap const &);
     };
     struct Page {
+      Page();
       std::string name;
       std::vector<PlotWrap *> plot_wrap_vec;
     };

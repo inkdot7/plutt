@@ -25,6 +25,7 @@
 #include <trig_map_parser.tab.h>
 
 extern int yytmparse();
+extern int yytmlex_destroy();
 
 extern FILE *yytmin;
 extern char const *yytmpath;
@@ -99,9 +100,10 @@ TrigMap::Prefix const *TrigMap::LoadPrefix(char const *a_path, char const
     yytm_trig_map = this;
     std::cout << a_path << ": Parsing...\n";
     yytmparse();
+    fclose(yytmin);
+    yytmlex_destroy();
     std::cout << a_path << ": Done!\n";
     yytm_trig_map = nullptr;
-    fclose(yytmin);
   }
   auto &prefix_map = path_it->second;
   auto prefix_it = prefix_map.find(a_prefix_name);

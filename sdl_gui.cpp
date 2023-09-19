@@ -34,6 +34,12 @@ SdlGui::PlotWrap::PlotWrap():
 {
 }
 
+SdlGui::Page::Page():
+  name(),
+  plot_wrap_vec()
+{
+}
+
 SdlGui::SdlGui(char const *a_title, unsigned a_width, unsigned a_height):
   m_window(new ImPlutt::Window(a_title, (int)a_width, (int)a_height)),
   m_page_vec(),

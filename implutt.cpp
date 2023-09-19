@@ -1257,6 +1257,7 @@ namespace ImPlutt {
   PlotState::PlotState(uint32_t a_mask):
     state_mask(a_mask),
     user_state(),
+    is_log(),
     min_lin(),
     max_lin(),
     cut(),

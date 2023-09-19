@@ -34,8 +34,6 @@
 #include <vector>
 #include <config.hpp>
 
-#include <iostream>
-
 #define MATCH_WORD(p, str) (0 == strncmp(p, str, sizeof str - 1) && \
     !isalnum(p[sizeof str - 1]) && '_' != p[sizeof str - 1])
 
@@ -293,30 +291,30 @@ void Unpacker::BindSignal(Config &a_config, std::vector<char> const
   a_event_buf_i = (a_event_buf_i + 3U) & ~3U;
   a_config.BindSignal(a_name, a_config_suffix, m_map.size(), output_type);
 
-  std::cout << full_name << ": " << a_event_buf_i << ' ' << in_type_bytes <<
-      '*' << arr_n << '\n';
+  // std::cout << full_name << ": " << a_event_buf_i << ' ' << in_type_bytes <<
+  //     '*' << arr_n << '\n';
 
   // Setup links.
   int ok = 1;
   if (MATCH_WORD(macro, "EXT_STR_ITEM_INFO") ||
       MATCH_WORD(macro, "EXT_STR_ITEM_INFO2")) {
     // Unlimited scalar.
-std::cout << "0: " << a_event_buf_i << ' ' << in_bytes << ' ' <<
-struct_info_type << ' ' << full_name << '\n';
+// std::cout << "0: " << a_event_buf_i << ' ' << in_bytes << ' ' <<
+// struct_info_type << ' ' << full_name << '\n';
     ok &= 0 == ext_data_struct_info_item(m_struct_info, a_event_buf_i,
         in_bytes, struct_info_type, "", -1, full_name.c_str(), "", -1, 0);
   } else if (MATCH_WORD(macro, "EXT_STR_ITEM_INFO_LIM") ||
       MATCH_WORD(macro, "EXT_STR_ITEM_INFO2_LIM")) {
     // Limited scalar.
-std::cout << "1: " << a_event_buf_i << ' ' << in_bytes << ' ' <<
-struct_info_type << ' ' << full_name << ' ' << ret.first->second << '\n';
+// std::cout << "1: " << a_event_buf_i << ' ' << in_bytes << ' ' <<
+// struct_info_type << ' ' << full_name << ' ' << ret.first->second << '\n';
     ok &= 0 == ext_data_struct_info_item(m_struct_info, a_event_buf_i,
         in_bytes, struct_info_type, "", -1, full_name.c_str(), "",
         static_cast<int>(ret.first->second), 0);
   } else if (MATCH_WORD(macro, "EXT_STR_ITEM_INFO_ZZP") ||
       MATCH_WORD(macro, "EXT_STR_ITEM_INFO2_ZZP")) {
-std::cout << "2: " << a_event_buf_i << ' ' << in_bytes << ' ' <<
-struct_info_type << ' ' << full_name << ' ' << ctrl << '\n';
+// std::cout << "2: " << a_event_buf_i << ' ' << in_bytes << ' ' <<
+// struct_info_type << ' ' << full_name << ' ' << ctrl << '\n';
     ok &= 0 == ext_data_struct_info_item(m_struct_info, a_event_buf_i,
         in_bytes, struct_info_type, "", -1, full_name.c_str(), ctrl.c_str(),
         -1, 0);
@@ -330,10 +328,11 @@ struct_info_type << ' ' << full_name << ' ' << ctrl << '\n';
     throw std::runtime_error(__func__);
   }
 
-  m_map.push_back(Entry(struct_info_type, a_event_buf_i, m_out_size, arr_n));
+  m_map.push_back(
+      Entry(full_name, struct_info_type, a_event_buf_i, m_out_size, arr_n));
 
   a_event_buf_i += in_bytes;
-  ++m_out_size;
+  m_out_size += arr_n;
 }
 
 void Unpacker::Buffer()

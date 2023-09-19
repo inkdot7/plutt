@@ -19,6 +19,8 @@
  * MA  02110-1301  USA
  */
 
+#if PLUTT_ROOT
+
 #include <root_gui.hpp>
 #include <iostream>
 #include <sstream>
@@ -27,6 +29,21 @@
 #include <TH2I.h>
 #include <THttpServer.h>
 #include <TSystem.h>
+
+RootGui::PlotWrap::PlotWrap():
+  name(),
+  plot(),
+  h1(),
+  h2()
+{
+}
+
+RootGui::Page::Page():
+  name(),
+  canvas(),
+  plot_wrap_vec()
+{
+}
 
 RootGui::RootGui(uint16_t a_port):
   m_server(),
@@ -83,10 +100,10 @@ bool RootGui::Draw(double a_event_rate)
     auto page = *it;
     auto &vec = page->plot_wrap_vec;
     if (!page->canvas) {
-      auto rows = (int)sqrt(vec.size());
+      auto rows = (int)sqrt((double)vec.size());
       auto cols = ((int)vec.size() + rows - 1) / rows;
       page->canvas = new TCanvas(page->name.c_str(), page->name.c_str());
-      page->canvas->Divide(cols, rows);
+      page->canvas->Divide(cols, rows, 0.01f, 0.01f);
       m_server->Register("/", page->canvas);
     }
     int i = 1;
@@ -112,9 +129,9 @@ void RootGui::SetHist1(uint32_t a_id, Axis const &a_axis, bool a_is_log_y,
   auto pad = page->canvas->cd(1 + (int)plot_i);
   if (plot->h1) {
     auto axis = plot->h1->GetXaxis();
-    if (axis->GetNbins() != a_axis.bins ||
-        axis->GetXmin()  != a_axis.min ||
-        axis->GetXmax()  != a_axis.max) {
+    if (axis->GetNbins() != (int)a_axis.bins ||
+        axis->GetXmin()  != (int)a_axis.min ||
+        axis->GetXmax()  != (int)a_axis.max) {
       delete plot->h1;
       plot->h1 = nullptr;
     }
@@ -144,12 +161,12 @@ void RootGui::SetHist2(uint32_t a_id, Axis const &a_axis_x, Axis const
   if (plot->h2) {
     auto axis_x = plot->h2->GetXaxis();
     auto axis_y = plot->h2->GetYaxis();
-    if (axis_x->GetNbins() != a_axis_x.bins ||
-        axis_x->GetXmin()  != a_axis_x.min ||
-        axis_x->GetXmax()  != a_axis_x.max ||
-        axis_y->GetNbins() != a_axis_y.bins ||
-        axis_y->GetXmin()  != a_axis_y.min ||
-        axis_y->GetXmax()  != a_axis_y.max) {
+    if (axis_x->GetNbins() != (int)a_axis_x.bins ||
+        axis_x->GetXmin()  != (int)a_axis_x.min ||
+        axis_x->GetXmax()  != (int)a_axis_x.max ||
+        axis_y->GetNbins() != (int)a_axis_y.bins ||
+        axis_y->GetXmin()  != (int)a_axis_y.min ||
+        axis_y->GetXmax()  != (int)a_axis_y.max) {
       delete plot->h2;
       plot->h2 = nullptr;
     }
@@ -168,3 +185,5 @@ void RootGui::SetHist2(uint32_t a_id, Axis const &a_axis_x, Axis const
     }
   }
 }
+
+#endif

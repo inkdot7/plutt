@@ -65,13 +65,16 @@ class Unpacker: public Input {
     FILE *m_pip;
     ext_data_struct_info m_struct_info;
     struct Entry {
-      Entry(int a_ext_type, size_t a_in_ofs, size_t a_out_ofs, size_t a_len):
+      Entry(std::string const &a_name, int a_ext_type, size_t a_in_ofs, size_t
+          a_out_ofs, size_t a_len):
+        name(a_name),
         ext_type(a_ext_type),
         in_ofs(a_in_ofs),
         out_ofs(a_out_ofs),
         len(a_len)
       {
       }
+      std::string name;
       int ext_type;
       size_t in_ofs;
       size_t out_ofs;
