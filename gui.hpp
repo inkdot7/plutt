@@ -22,6 +22,7 @@
 #ifndef GUI_HPP
 #define GUI_HPP
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -41,19 +42,46 @@ class Gui {
       public:
         virtual ~Plot();
         virtual void Draw(Gui *) = 0;
+        virtual void Latch() = 0;
     };
 
     virtual ~Gui();
 
+  protected:
     virtual void AddPage(std::string const &) = 0;
     virtual uint32_t AddPlot(std::string const &, Plot *) = 0;
 
     virtual bool Draw(double) = 0;
 
-    virtual void SetHist1(uint32_t, Axis const &, bool,
+    virtual void DrawHist1(uint32_t, Axis const &, bool,
         std::vector<uint32_t> const &) = 0;
-    virtual void SetHist2(uint32_t, Axis const &, Axis const &, bool,
+    virtual void DrawHist2(uint32_t, Axis const &, Axis const &, bool,
         std::vector<uint32_t> const &) = 0;
+
+    friend class GuiCollection;
+};
+
+class GuiCollection {
+  public:
+    void AddGui(Gui *);
+
+    void AddPage(std::string const &);
+    uint32_t AddPlot(std::string const &, Gui::Plot *);
+
+    bool Draw(double);
+
+    void DrawHist1(Gui *, uint32_t, Gui::Axis const &,
+        bool, std::vector<uint32_t> const &);
+    void DrawHist2(Gui *, uint32_t, Gui::Axis const &, Gui::Axis const &,
+        bool, std::vector<uint32_t> const &);
+
+  private:
+    std::map<Gui *, uint32_t> m_gui_map;
+    struct Entry {
+      Gui::Plot *plot;
+      std::vector<uint32_t> id_vec;
+    };
+    std::vector<Entry> m_plot_vec;
 };
 
 #endif

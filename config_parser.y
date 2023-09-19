@@ -35,7 +35,7 @@
 
 char const *yycppath;
 Config *g_config;
-Gui *g_gui;
+GuiCollection g_gui;
 void
 yycperror(char const *s)
 {
@@ -314,7 +314,7 @@ cut
 
 page
 	: TK_PAGE '(' TK_STRING ')' {
-		g_gui->AddPage($3);
+		g_gui.AddPage($3);
 		free($3);
 	}
 

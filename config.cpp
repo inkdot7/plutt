@@ -57,7 +57,6 @@
 
 extern FILE *yycpin;
 extern Config *g_config;
-extern Gui *g_gui;
 
 extern void yycperror(char const *);
 extern int yycpparse();
@@ -288,7 +287,7 @@ void Config::AddHist1(char const *a_title, NodeValue *a_x, uint32_t a_xb, char
     k = it->second.k;
     m = it->second.m;
   }
-  auto node = new NodeHist1(g_gui, GetLocStr(), a_title, a_x, a_xb,
+  auto node = new NodeHist1(GetLocStr(), a_title, a_x, a_xb,
       LinearTransform(k, m), a_fit, a_log_y, a_drop_old_s);
   NodeCuttableAdd(node);
 }
@@ -321,7 +320,7 @@ void Config::AddHist2(char const *a_title, NodeValue *a_y, NodeValue *a_x,
     ky = it->second.k;
     my = it->second.m;
   }
-  auto node = new NodeHist2(g_gui, GetLocStr(), a_title, m_colormap, a_y, a_x,
+  auto node = new NodeHist2(GetLocStr(), a_title, m_colormap, a_y, a_x,
       a_yb, a_xb, LinearTransform(ky, my), LinearTransform(kx, mx), a_fit,
       a_log_z, a_drop_old_s);
   NodeCuttableAdd(node);

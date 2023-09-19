@@ -176,24 +176,18 @@ bool SdlGui::Draw(double a_event_rate)
   return true;
 }
 
-void SdlGui::SetHist1(uint32_t a_id, Axis const &a_axis, bool a_is_log_y,
+void SdlGui::DrawHist1(uint32_t a_id, Axis const &a_axis, bool a_is_log_y,
     std::vector<uint32_t> const &a_v)
 {
   auto page = m_page_vec.at(a_id >> 16);
   auto plot_wrap = page->plot_wrap_vec.at(a_id & 0xffff);
-
-#if 0
-  // Header.
-  m_window->Checkbox("Log-y", &m_is_log_y);
-  m_window->Text(ImPlutt::Window::TEXT_NORMAL,
-      ", x=%.3g(%.3g)", m_range.GetMean(), m_range.GetSigma());
-#endif
 
   auto dy = m_window->Newline();
   auto size_tot = m_window->GetSize();
   ImPlutt::Pos size(size_tot.x, size_tot.y - dy);
 
 #if 0
+  /* TODO. */
   auto minx = m_transform.ApplyAbs(m_axis_copy.min);
   auto maxx = m_transform.ApplyAbs(m_axis_copy.max);
 #endif
@@ -216,26 +210,18 @@ void SdlGui::SetHist1(uint32_t a_id, Axis const &a_axis, bool a_is_log_y,
       a_v, (size_t)a_axis.bins);
 }
 
-void SdlGui::SetHist2(uint32_t a_id, Axis const &a_axis_x, Axis const
+void SdlGui::DrawHist2(uint32_t a_id, Axis const &a_axis_x, Axis const
     &a_axis_y, bool a_is_log_z, std::vector<uint32_t> const &a_v)
 {
   auto page = m_page_vec.at(a_id >> 16);
   auto plot_wrap = page->plot_wrap_vec.at(a_id & 0xffff);
-
-#if 0
-  // Header.
-  m_window->Checkbox("Log-z", &m_is_log_z);
-  m_window->Text(ImPlutt::Window::TEXT_NORMAL,
-      ", x=%.1g(%.1g), y=%.1g(%.1g)",
-      m_range_x.GetMean(), m_range_x.GetSigma(),
-      m_range_y.GetMean(), m_range_y.GetSigma());
-#endif
 
   auto dy = m_window->Newline();
   auto size_tot = m_window->GetSize();
   ImPlutt::Pos size(size_tot.x, size_tot.y - dy);
 
 #if 0
+  /* TODO. */
   auto minx = m_transformx.ApplyAbs(m_axis_x_copy.min);
   auto miny = m_transformy.ApplyAbs(m_axis_y_copy.min);
   auto maxx = m_transformx.ApplyAbs(m_axis_x_copy.max);

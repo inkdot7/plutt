@@ -20,6 +20,7 @@
  */
 
 #include <gui.hpp>
+#include <cassert>
 
 void Gui::Axis::Clear()
 {
@@ -34,4 +35,68 @@ Gui::Plot::~Plot()
 
 Gui::~Gui()
 {
+}
+
+void GuiCollection::AddGui(Gui *a_gui)
+{
+  m_gui_map.insert(std::make_pair(a_gui, m_gui_map.size()));
+}
+
+#define FOR_GUI \
+  for (auto it = m_gui_map.begin(); m_gui_map.end() != it; ++it)
+
+void GuiCollection::AddPage(std::string const &a_name)
+{
+  FOR_GUI {
+    auto gui = it->first;
+    gui->AddPage(a_name);
+  }
+}
+
+uint32_t GuiCollection::AddPlot(std::string const &a_name, Gui::Plot *a_plot)
+{
+  m_plot_vec.push_back(Entry());
+  auto &pe = m_plot_vec.back();
+  pe.plot = a_plot;
+  FOR_GUI {
+    auto gui = it->first;
+    auto id = gui->AddPlot(a_name, a_plot);
+    pe.id_vec.push_back(id);
+  }
+  return (uint32_t)m_plot_vec.size() - 1;
+}
+
+bool GuiCollection::Draw(double a_event_rate)
+{
+  for (auto it = m_plot_vec.begin(); m_plot_vec.end() != it; ++it) {
+    auto plot = it->plot;
+    plot->Latch();
+  }
+  bool ok = true;
+  FOR_GUI {
+    auto gui = it->first;
+    ok &= gui->Draw(a_event_rate);
+  }
+  return ok;
+}
+
+void GuiCollection::DrawHist1(Gui *a_gui, uint32_t a_id, Gui::Axis const
+    &a_axis, bool a_is_log_y, std::vector<uint32_t> const &a_v)
+{
+  auto it = m_gui_map.find(a_gui);
+  assert(m_gui_map.end() != it);
+  auto id = it->second;
+  auto const &pe = m_plot_vec.at(a_id);
+  a_gui->DrawHist1(pe.id_vec.at(id), a_axis, a_is_log_y, a_v);
+}
+
+void GuiCollection::DrawHist2(Gui *a_gui, uint32_t a_id, Gui::Axis const
+    &a_axis_x, Gui::Axis const &a_axis_y, bool a_is_log_z,
+    std::vector<uint32_t> const &a_v)
+{
+  auto it = m_gui_map.find(a_gui);
+  assert(m_gui_map.end() != it);
+  auto id = it->second;
+  auto const &pe = m_plot_vec.at(a_id);
+  a_gui->DrawHist2(pe.id_vec.at(id), a_axis_x, a_axis_y, a_is_log_z, a_v);
 }

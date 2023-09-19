@@ -78,9 +78,10 @@ class Visual: public Gui::Plot {
       double std_x;
     };
 
-    Visual(Gui *, std::string const &);
+    Visual(std::string const &);
     virtual ~Visual();
     virtual void Draw(Gui *) = 0;
+    virtual void Latch() = 0;
 
     std::string m_name;
     uint32_t m_gui_id;
@@ -93,11 +94,12 @@ class VisualHist: public Visual {
       FITTER_GAUSS
     };
 
-    VisualHist(Gui *, std::string const &, uint32_t, LinearTransform const &,
-        char const *, bool, double);
+    VisualHist(std::string const &, uint32_t, LinearTransform const &, char
+        const *, bool, double);
     void Draw(Gui *);
     void Fill(Input::Type, Input::Scalar const &);
     void Fit();
+    void Latch();
     void Prefill(Input::Type, Input::Scalar const &);
 
   private:
@@ -118,7 +120,7 @@ class VisualHist: public Visual {
 
 class VisualHist2: public Visual {
   public:
-    VisualHist2(Gui *, std::string const &, size_t, uint32_t, uint32_t,
+    VisualHist2(std::string const &, size_t, uint32_t, uint32_t,
         LinearTransform const &, LinearTransform const &, char const *, bool,
         double);
     void Draw(Gui *);
@@ -126,6 +128,7 @@ class VisualHist2: public Visual {
         Input::Type, Input::Scalar const &,
         Input::Type, Input::Scalar const &);
     void Fit();
+    void Latch();
     void Prefill(
         Input::Type, Input::Scalar const &,
         Input::Type, Input::Scalar const &);

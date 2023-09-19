@@ -31,7 +31,7 @@
  */
 class NodeHist2: public NodeCuttable {
   public:
-    NodeHist2(Gui *, std::string const &, char const *, size_t, NodeValue *,
+    NodeHist2(std::string const &, char const *, size_t, NodeValue *,
         NodeValue *, uint32_t, uint32_t, LinearTransform const &,
         LinearTransform const &, char const *, bool, double);
     void Process(uint64_t);

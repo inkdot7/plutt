@@ -37,9 +37,9 @@ class SdlGui: public Gui {
 
     bool Draw(double);
 
-    void SetHist1(uint32_t, Axis const &, bool,
+    void DrawHist1(uint32_t, Axis const &, bool,
         std::vector<uint32_t> const &);
-    void SetHist2(uint32_t, Axis const &, Axis const &, bool,
+    void DrawHist2(uint32_t, Axis const &, Axis const &, bool,
         std::vector<uint32_t> const &);
 
     bool DoClose();

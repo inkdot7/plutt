@@ -30,6 +30,8 @@
 
 #define LENGTH(x) (sizeof x / sizeof *x)
 
+extern GuiCollection g_gui;
+
 Range::Range(double a_drop_old_s):
   m_mode(MODE_ALL),
   m_type(Input::kNone),
@@ -257,9 +259,9 @@ Visual::Peak::Peak(double a_peak_x, double a_ofs_y, double a_amp_y, double
 {
 }
 
-Visual::Visual(Gui *a_gui, std::string const &a_name):
+Visual::Visual(std::string const &a_name):
   m_name(a_name),
-  m_gui_id(a_gui->AddPlot(m_name, this))
+  m_gui_id(g_gui.AddPlot(m_name, this))
 {
 }
 
@@ -267,10 +269,10 @@ Visual::~Visual()
 {
 }
 
-VisualHist::VisualHist(Gui *a_gui, std::string const &a_title, uint32_t a_xb,
+VisualHist::VisualHist(std::string const &a_title, uint32_t a_xb,
     LinearTransform const &a_transform, char const *a_fitter, bool a_log_y,
     double a_drop_old_s):
-  Visual(a_gui, a_title),
+  Visual(a_title),
   m_xb(a_xb),
   m_transform(a_transform),
   m_fitter(),
@@ -298,27 +300,6 @@ VisualHist::VisualHist(Gui *a_gui, std::string const &a_title, uint32_t a_xb,
 
 void VisualHist::Draw(Gui *a_gui)
 {
-  // The data thread will keep filling and modifying m_hist while the plotter
-  // tries to figure out ranges, so a locked copy is important!
-  {
-    const std::lock_guard<std::mutex> lock(m_hist_mutex);
-#if 0
-    if (m_plot_state.do_clear) {
-      // We should clear.
-      // TODO: Clear all, or just histogram contents?
-      m_range.Clear();
-      m_axis.Clear();
-      m_hist.clear();
-      m_plot_state.do_clear = false;
-    }
-#endif
-    m_axis_copy = m_axis;
-    if (m_hist_copy.size() != m_hist.size()) {
-      m_hist_copy.resize(m_hist.size());
-    }
-    memcpy(m_hist_copy.data(), m_hist.data(),
-        m_hist.size() * sizeof m_hist[0]);
-  }
   if (m_hist_copy.empty()) {
     return;
   }
@@ -336,7 +317,7 @@ void VisualHist::Draw(Gui *a_gui)
   }
 #endif
 
-  a_gui->SetHist1(m_gui_id, m_axis_copy, m_is_log_y, m_hist_copy);
+  g_gui.DrawHist1(a_gui, m_gui_id, m_axis_copy, m_is_log_y, m_hist_copy);
 
 #if 0
   // Draw fits.
@@ -400,6 +381,29 @@ void VisualHist::Fit()
       m_axis = axis;
     }
   }
+}
+
+void VisualHist::Latch()
+{
+  // The data thread will keep filling and modifying m_hist while the plotter
+  // tries to figure out ranges, so a locked copy is important!
+  const std::lock_guard<std::mutex> lock(m_hist_mutex);
+#if 0
+  if (m_plot_state.do_clear) {
+    // We should clear.
+    // TODO: Clear all, or just histogram contents?
+    m_range.Clear();
+    m_axis.Clear();
+    m_hist.clear();
+    m_plot_state.do_clear = false;
+  }
+#endif
+  m_axis_copy = m_axis;
+  if (m_hist_copy.size() != m_hist.size()) {
+    m_hist_copy.resize(m_hist.size());
+  }
+  memcpy(m_hist_copy.data(), m_hist.data(),
+      m_hist.size() * sizeof m_hist[0]);
 }
 
 void VisualHist::Prefill(Input::Type a_type, Input::Scalar const &a_x)
@@ -498,11 +502,10 @@ void VisualHist::FitGauss(std::vector<uint32_t> const &a_hist, Gui::Axis const
   }
 }
 
-VisualHist2::VisualHist2(Gui *a_gui, std::string const &a_title, size_t
-    a_colormap, uint32_t a_yb, uint32_t a_xb, LinearTransform const &a_ty,
-    LinearTransform const &a_tx, char const *a_fitter, bool a_log_z, double
-    a_drop_old_s):
-  Visual(a_gui, a_title),
+VisualHist2::VisualHist2(std::string const &a_title, size_t a_colormap,
+    uint32_t a_yb, uint32_t a_xb, LinearTransform const &a_ty, LinearTransform
+    const &a_tx, char const *a_fitter, bool a_log_z, double a_drop_old_s):
+  Visual(a_title),
   //m_colormap(a_colormap),
   m_xb(a_xb),
   m_yb(a_yb),
@@ -527,31 +530,10 @@ VisualHist2::VisualHist2(Gui *a_gui, std::string const &a_title, size_t
 
 void VisualHist2::Draw(Gui *a_gui)
 {
-  {
-    const std::lock_guard<std::mutex> lock(m_hist_mutex);
-#if 0
-    if (m_plot_state.do_clear) {
-      m_range_x.Clear();
-      m_range_y.Clear();
-      m_axis_x.Clear();
-      m_axis_y.Clear();
-      m_hist.clear();
-      m_plot_state.do_clear = false;
-    }
-#endif
-    m_axis_x_copy = m_axis_x;
-    m_axis_y_copy = m_axis_y;
-    if (m_hist_copy.size() != m_hist.size()) {
-      m_hist_copy.resize(m_hist.size());
-    }
-    memcpy(m_hist_copy.data(), m_hist.data(),
-        m_hist.size() * sizeof m_hist[0]);
-  }
   if (m_hist_copy.empty()) {
     return;
   }
-
-  a_gui->SetHist2(m_gui_id, m_axis_x_copy, m_axis_y_copy, m_is_log_z,
+  g_gui.DrawHist2(a_gui, m_gui_id, m_axis_x_copy, m_axis_y_copy, m_is_log_z,
       m_hist_copy);
 }
 
@@ -617,6 +599,28 @@ void VisualHist2::Fit()
       m_axis_y = axis_y;
     }
   }
+}
+
+void VisualHist2::Latch()
+{
+  const std::lock_guard<std::mutex> lock(m_hist_mutex);
+#if 0
+  if (m_plot_state.do_clear) {
+    m_range_x.Clear();
+    m_range_y.Clear();
+    m_axis_x.Clear();
+    m_axis_y.Clear();
+    m_hist.clear();
+    m_plot_state.do_clear = false;
+  }
+#endif
+  m_axis_x_copy = m_axis_x;
+  m_axis_y_copy = m_axis_y;
+  if (m_hist_copy.size() != m_hist.size()) {
+    m_hist_copy.resize(m_hist.size());
+  }
+  memcpy(m_hist_copy.data(), m_hist.data(),
+      m_hist.size() * sizeof m_hist[0]);
 }
 
 void VisualHist2::Prefill(Input::Type a_type_y, Input::Scalar const &a_y,
