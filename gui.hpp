@@ -78,8 +78,12 @@ class GuiCollection {
   private:
     std::map<Gui *, uint32_t> m_gui_map;
     struct Entry {
+      Entry();
+      Entry(Entry const &);
       Gui::Plot *plot;
       std::vector<uint32_t> id_vec;
+      private:
+        Entry &operator=(Entry const &);
     };
     std::vector<Entry> m_plot_vec;
 };

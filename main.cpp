@@ -24,6 +24,7 @@
 #include <getopt.h>
 #include <unistd.h>
 #include <condition_variable>
+#include <csignal>
 #include <iostream>
 #include <thread>
 #if PLUTT_SDL2
@@ -317,6 +318,7 @@ int main(int argc, char **argv)
   std::cout << "Entering main loop...\n";
   while (g_event_running) {
     bool is_throttled = false;
+    (void)is_throttled;
 
 #if PLUTT_SDL2
     if (GUI_SDL & gui_type) {

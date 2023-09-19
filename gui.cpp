@@ -37,6 +37,18 @@ Gui::~Gui()
 {
 }
 
+GuiCollection::Entry::Entry():
+  plot(),
+  id_vec()
+{
+}
+
+GuiCollection::Entry::Entry(Entry const &a_entry):
+  plot(a_entry.plot),
+  id_vec(a_entry.id_vec)
+{
+}
+
 void GuiCollection::AddGui(Gui *a_gui)
 {
   m_gui_map.insert(std::make_pair(a_gui, m_gui_map.size()));
