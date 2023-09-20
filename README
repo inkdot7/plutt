@@ -48,8 +48,52 @@ Now, even if plutt will provide something like the pseudo-code, don't forget
 that computers don't have brains! Don't put yours on the shelf just yet,
 there's a couple of things to go through!
 
-Some user commands
-------------------
+Running
+-------
+
+make -jN
+./plutt
+
+Make builds a version based on the compiler and build mode, eg debug or
+release.
+The latter is a script that chooses the binary the same way the Makefile
+chooses the build directory.
+
+Examples:
+
+	./plutt -f myconf.plutt -r mytree myfile1.root myfile2.root
+		Loads script 'myconf.plutt', and the input will be two root
+		files, both with a TTree named 'mytree'. A default GUI will be
+		chosen, depending on what's built in.
+
+	./plutt -f myconf.plutt -g sdl \
+	    -u ../upexps/myunp/myunp --stream=localhost
+		The input will be structures from the 'myunp' unpacker which
+		reads event-data from a stream server. The GUI will be the
+		sdl2-driven ImPlutt.
+
+	./plutt -f myconf.plutt -g sdl -g root -r myfiles...root
+		Plots with both ImPlutt and THttpServer.
+
+GUI's
+-----
+
+There are currently two GUI's available, depending on built-in support:
+
+1) If SDL2 and FreeType2 are available via pkg-config, the low-latency
+client-side ImPlutt plotting will be built.
+
+2) If root-config is available, THttpServer support will be built.
+
+The default GUI is chosen from top to bottom in the above list.
+
+ROOT GUI
+--------
+
+Will open a local server on port 8080, connect there with your browser.
+
+ImPlutt GUI
+-----------
 
 Scroll-wheel in a plot:
 	Zoom around the pointer in X and Y.
@@ -225,6 +269,29 @@ signal:v
 		E = [signal:v.length]
 		v = [signal:v_1, ..., signal:v_n]
 
+y = f(x)
+	Chainable mathematical operations are available with signals and
+	constants, which acts on each value individually in a scalar or array.
+	Currently supported operations:
+		(x)
+		x+y
+		x-y
+		x*y
+		x/y
+		-x
+		cos(x)
+		sin(x)
+		tan(x)
+		acos(x)
+		asin(x)
+		atan(x)
+		sqrt(x)
+		exp(x)
+		log(x)
+		abs(x)
+		pow(x, const)
+		pow(const, x)
+
 cut(path)
 	"path" points to a file which has a histogram title and an x, y pair
 	per line which makes a cutting polygon:
@@ -386,7 +453,6 @@ b = mean_geom(a)
 c = mean_geom(a, b)
 	Same as mean_arith except does (v_1 + ... + v_n)^(1/n).
 
-
 c, d = pedestal(a, b [, args])
 	Calculates pedestals of 'a' on-the-fly and cuts "a:v < std * b".
 	'args' can be:
@@ -461,16 +527,20 @@ clock_match(a, b)
 	then b=1e-9.
 
 colormap("name")
-	plutt only has "batlow" built-in, which can be chosen by leaving out
-	the argument, but you can use Scientific Colourmaps if that resides
-	under your current working dir.
+	plutt only has "roma" built-in, which can be chosen by leaving out the
+	argument, but you can use Scientific Colourmaps if that resides under
+	your current working dir.
 	If 'name' is eg "lajolla", the file:
 		"../ScientificColourMaps7/lajolla/lajolla.lut"
 	is loaded.
 
+page("name")
+	Starts a new named page for plots. If the user did not create one
+	before the first plot, a default named "Default" is made.
+
 ui_rate(a)
-	Throttles the UI update rate to 'a' times per second, default and
-	maximum is 20.
+	Throttles the ImPlutt UI update rate to 'a' times per second, default
+	and maximum is 20.
 
 Licence
 =======
