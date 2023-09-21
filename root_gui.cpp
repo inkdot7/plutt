@@ -31,6 +31,26 @@
 #include <TROOT.h>
 #include <TSystem.h>
 
+class RootGui::Bind: public TNamed
+{
+  public:
+    Bind(std::string const &a_name, PlotWrap *a_plot_wrap):
+      TNamed(a_name.c_str(), a_name.c_str()),
+      m_plot_wrap(a_plot_wrap)
+    {
+    }
+    void Clear(Option_t *) {
+      // This is abuse, this should clear name and title, but whatever.
+      m_plot_wrap->do_clear = true;
+    }
+    void SetDrawOption(Option_t *) {
+      m_plot_wrap->is_log ^= true;
+    }
+
+  public:
+    PlotWrap *m_plot_wrap;
+};
+
 RootGui::PlotWrap::PlotWrap():
   name(),
   plot(),
@@ -49,7 +69,8 @@ RootGui::Page::Page():
 
 RootGui::RootGui(uint16_t a_port):
   m_server(),
-  m_page_vec()
+  m_page_vec(),
+  m_bind_list()
 {
   std::ostringstream oss;
   oss << "http:" << a_port << ";noglobal";
@@ -71,6 +92,9 @@ RootGui::~RootGui()
     delete page->canvas;
     delete page;
   }
+  for (auto it = m_bind_list.begin(); m_bind_list.end() != it; ++it) {
+    delete *it;
+  }
   delete m_server;
 }
 
@@ -80,26 +104,6 @@ void RootGui::AddPage(std::string const &a_name)
   auto page = m_page_vec.back();
   page->name = a_name;
 }
-
-class RootGui::Bind: public TNamed
-{
-  public:
-    Bind(std::string const &a_name, PlotWrap *a_plot_wrap):
-      TNamed(a_name.c_str(), a_name.c_str()),
-      m_plot_wrap(a_plot_wrap)
-    {
-    }
-    void Clear(Option_t *) {
-      // This is abuse, this should clear name and title, but whatever.
-      m_plot_wrap->do_clear = true;
-    }
-    void SetDrawOption(Option_t *) {
-      m_plot_wrap->is_log ^= true;
-    }
-
-  public:
-    PlotWrap *m_plot_wrap;
-};
 
 uint32_t RootGui::AddPlot(std::string const &a_name, Plot *a_plot)
 {
@@ -113,22 +117,21 @@ uint32_t RootGui::AddPlot(std::string const &a_name, Plot *a_plot)
   plot_wrap->name = a_name;
   plot_wrap->plot = a_plot;
   {
-    // TODO: Store to clean up, looks nicer.
-    auto bind_name =
-        std::string("plutt_Bind_") + page->name + "_" + a_name;
-    CleanName(bind_name);
+    auto bind_name = std::string("plutt_Bind_") +
+        CleanName(page->name + "_" + a_name);
     auto clearer = new Bind(bind_name, plot_wrap);
     gROOT->Append(clearer);
+    m_bind_list.push_back(clearer);
 
     {
-      auto cmdname = std::string("Clear_") + page->name + "_" + a_name;
-      CleanName(cmdname);
+      auto cmdname = std::string("/Clear/") +
+          CleanName(page->name + "_" + a_name);
       m_server->RegisterCommand(cmdname.c_str(),
           (bind_name + "->Clear()").c_str());
     }
     {
-      auto cmdname = std::string("LinLog_") + page->name + "_" + a_name;
-      CleanName(cmdname);
+      auto cmdname = std::string("/LinLog/") +
+          CleanName(page->name + "_" + a_name);
       m_server->RegisterCommand(cmdname.c_str(),
           (bind_name + "->SetDrawOption()").c_str());
     }
@@ -136,14 +139,16 @@ uint32_t RootGui::AddPlot(std::string const &a_name, Plot *a_plot)
   return ((uint32_t)m_page_vec.size() - 1) << 16 | ((uint32_t)vec.size() - 1);
 }
 
-void RootGui::CleanName(std::string &a_name)
+std::string RootGui::CleanName(std::string const &a_name)
 {
-  for (auto it = a_name.begin(); a_name.end() != it; ++it) {
+  std::string ret = a_name;
+  for (auto it = ret.begin(); ret.end() != it; ++it) {
     auto c = *it;
     if ('_' != c && !isalnum(c)) {
       *it = '_';
     }
   }
+  return ret;
 }
 
 bool RootGui::DoClear(uint32_t a_id)

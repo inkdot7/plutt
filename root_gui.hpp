@@ -25,6 +25,7 @@
 #if PLUTT_ROOT
 
 #include <gui.hpp>
+#include <list>
 #include <string>
 
 class TCanvas;
@@ -53,7 +54,7 @@ class RootGui: public Gui {
     RootGui(RootGui const &);
     RootGui &operator=(RootGui const &);
 
-    void CleanName(std::string &);
+    std::string CleanName(std::string const &);
 
     class Bind;
 
@@ -81,6 +82,7 @@ class RootGui: public Gui {
     };
     THttpServer *m_server;
     std::vector<Page *> m_page_vec;
+    std::list<Bind *> m_bind_list;
 };
 
 #endif
