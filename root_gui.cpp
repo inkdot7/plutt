@@ -47,7 +47,10 @@ class RootGui::Bind: public TNamed
       m_plot_wrap->is_log ^= true;
     }
 
-  public:
+  private:
+    Bind(Bind const &);
+    Bind &operator=(Bind const &);
+
     PlotWrap *m_plot_wrap;
 };
 
@@ -56,7 +59,9 @@ RootGui::PlotWrap::PlotWrap():
   plot(),
   h1(),
   h2(),
-  do_clear()
+  do_clear(),
+  is_log_set(),
+  is_log()
 {
 }
 
