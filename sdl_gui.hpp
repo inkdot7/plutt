@@ -51,6 +51,7 @@ class SdlGui: public Gui {
       PlotWrap();
       std::string name;
       Plot *plot;
+      bool is_log_set;
       ImPlutt::PlotState plot_state;
       std::vector<uint8_t> pixels;
       private:

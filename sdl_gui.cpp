@@ -29,6 +29,7 @@
 SdlGui::PlotWrap::PlotWrap():
   name(),
   plot(),
+  is_log_set(),
   plot_state(0),
   pixels()
 {
@@ -199,11 +200,15 @@ void SdlGui::DrawHist1(uint32_t a_id, Axis const &a_axis, bool a_is_log_y,
     max_y = std::max(max_y, *it);
   }
 
+  if (!plot_wrap->is_log_set) {
+    plot_wrap->is_log_set = true;
+    plot_wrap->plot_state.is_log.is_on = a_is_log_y;
+  }
   ImPlutt::Plot plot(m_window, &plot_wrap->plot_state,
       plot_wrap->name.c_str(), size,
       ImPlutt::Point(minx, 0.0),
       ImPlutt::Point(maxx, max_y * 1.1),
-      false);
+      a_is_log_y, false);
 
   m_window->PlotHist1(&plot,
       minx, maxx,
@@ -232,11 +237,15 @@ void SdlGui::DrawHist2(uint32_t a_id, Axis const &a_axis_x, Axis const
   auto maxx = a_axis_x.max;
   auto maxy = a_axis_y.max;
 
+  if (!plot_wrap->is_log_set) {
+    plot_wrap->is_log_set = true;
+    plot_wrap->plot_state.is_log.is_on = a_is_log_z;
+  }
   ImPlutt::Plot plot(m_window, &plot_wrap->plot_state,
       plot_wrap->name.c_str(), size,
       ImPlutt::Point(minx, miny),
       ImPlutt::Point(maxx, maxy),
-      true);
+      a_is_log_z, true);
 
   m_window->PlotHist2(&plot, /*m_colormap*/0,
       ImPlutt::Point(minx, miny),

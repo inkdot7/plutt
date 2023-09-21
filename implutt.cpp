@@ -1471,13 +1471,14 @@ namespace ImPlutt {
   Plot::Plot(Window *a_window, PlotState *a_state,
       char const *a_title, Pos const &a_size,
       Point const &a_min_lin, Point const &a_max_lin,
-      bool a_is_2d):
+      bool a_is_log, bool a_is_2d):
     m_window(a_window),
     m_state(a_state),
     m_rect_tot(),
     m_rect_graph(),
     m_min(a_min_lin),
     m_max(a_max_lin),
+    m_is_log(a_is_log),
     m_is_2d(a_is_2d)
   {
 #if 0
@@ -2387,7 +2388,7 @@ namespace ImPlutt {
             state->proj.title.c_str(), size,
             ImPlutt::Point(min_x, 0.0),
             ImPlutt::Point(max_x, max_y * 1.1),
-            false);
+            a_plot->m_state->is_log.is_on, false);
         win->PlotHist1(&plot, min_x, max_x, state->proj.vec,
             state->proj.vec.size());
       }

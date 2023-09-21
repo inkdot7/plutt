@@ -270,7 +270,7 @@ Visual::~Visual()
 }
 
 VisualHist::VisualHist(std::string const &a_title, uint32_t a_xb,
-    LinearTransform const &a_transform, char const *a_fitter, bool a_log_y,
+    LinearTransform const &a_transform, char const *a_fitter, bool a_is_log_y,
     double a_drop_old_s):
   Visual(a_title),
   m_xb(a_xb),
@@ -282,11 +282,8 @@ VisualHist::VisualHist(std::string const &a_title, uint32_t a_xb,
   m_hist(),
   m_axis_copy(),
   m_hist_copy(),
-  m_is_log_y(a_log_y),
+  m_is_log_y(a_is_log_y),
   m_peak_vec()
-#if 0
-  m_plot_state(0)
-#endif
 {
   if (!a_fitter) {
     m_fitter = FITTER_NONE;
@@ -504,7 +501,7 @@ void VisualHist::FitGauss(std::vector<uint32_t> const &a_hist, Gui::Axis const
 
 VisualHist2::VisualHist2(std::string const &a_title, size_t a_colormap,
     uint32_t a_yb, uint32_t a_xb, LinearTransform const &a_ty, LinearTransform
-    const &a_tx, char const *a_fitter, bool a_log_z, double a_drop_old_s):
+    const &a_tx, char const *a_fitter, bool a_is_log_z, double a_drop_old_s):
   Visual(a_title),
   //m_colormap(a_colormap),
   m_xb(a_xb),
@@ -520,10 +517,7 @@ VisualHist2::VisualHist2(std::string const &a_title, size_t a_colormap,
   m_axis_x_copy(),
   m_axis_y_copy(),
   m_hist_copy(),
-  m_is_log_z(a_log_z),
-#if 0
-  m_plot_state(0),
-#endif
+  m_is_log_z(a_is_log_z),
   m_pixels()
 {
 }

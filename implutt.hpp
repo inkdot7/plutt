@@ -179,7 +179,7 @@ namespace ImPlutt {
   class Plot {
     public:
       Plot(Window *, PlotState *, char const *, Pos const &, Point const &,
-          Point const &, bool);
+          Point const &, bool, bool);
       ~Plot();
       void DrawOverlay(PlotState const &);
       double LinFromLinOrLogX(double) const;
@@ -201,6 +201,7 @@ namespace ImPlutt {
       Rect m_rect_graph;
       Point m_min;
       Point m_max;
+      unsigned m_is_log;
       bool m_is_2d;
 
     private:
