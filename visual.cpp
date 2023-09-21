@@ -385,16 +385,13 @@ void VisualHist::Latch()
   // The data thread will keep filling and modifying m_hist while the plotter
   // tries to figure out ranges, so a locked copy is important!
   const std::lock_guard<std::mutex> lock(m_hist_mutex);
-#if 0
-  if (m_plot_state.do_clear) {
+  if (g_gui.DoClear(m_gui_id)) {
     // We should clear.
     // TODO: Clear all, or just histogram contents?
     m_range.Clear();
     m_axis.Clear();
     m_hist.clear();
-    m_plot_state.do_clear = false;
   }
-#endif
   m_axis_copy = m_axis;
   if (m_hist_copy.size() != m_hist.size()) {
     m_hist_copy.resize(m_hist.size());
@@ -598,16 +595,13 @@ void VisualHist2::Fit()
 void VisualHist2::Latch()
 {
   const std::lock_guard<std::mutex> lock(m_hist_mutex);
-#if 0
-  if (m_plot_state.do_clear) {
+  if (g_gui.DoClear(m_gui_id)) {
     m_range_x.Clear();
     m_range_y.Clear();
     m_axis_x.Clear();
     m_axis_y.Clear();
     m_hist.clear();
-    m_plot_state.do_clear = false;
   }
-#endif
   m_axis_x_copy = m_axis_x;
   m_axis_y_copy = m_axis_y;
   if (m_hist_copy.size() != m_hist.size()) {

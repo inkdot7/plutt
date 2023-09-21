@@ -35,6 +35,8 @@ class SdlGui: public Gui {
     void AddPage(std::string const &);
     uint32_t AddPlot(std::string const &, Plot *);
 
+    bool DoClear(uint32_t);
+
     bool Draw(double);
 
     void DrawHist1(uint32_t, Axis const &, bool,

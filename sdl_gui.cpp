@@ -83,6 +83,16 @@ uint32_t SdlGui::AddPlot(std::string const &a_name, Plot *a_plot)
   return ((uint32_t)m_page_vec.size() - 1) << 16 | ((uint32_t)vec.size() - 1);
 }
 
+bool SdlGui::DoClear(uint32_t a_id)
+{
+  auto page = m_page_vec.at(a_id >> 16);
+  auto plot_wrap = page->plot_wrap_vec.at(a_id & 0xffff);
+
+  auto ret = plot_wrap->plot_state.do_clear;
+  plot_wrap->plot_state.do_clear = false;
+  return ret;
+}
+
 bool SdlGui::Draw(double a_event_rate)
 {
   if (m_window->DoClose() || ImPlutt::DoQuit()) {

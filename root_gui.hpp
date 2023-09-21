@@ -40,6 +40,8 @@ class RootGui: public Gui {
     void AddPage(std::string const &);
     uint32_t AddPlot(std::string const &, Plot *);
 
+    bool DoClear(uint32_t);
+
     bool Draw(double);
 
     void DrawHist1(uint32_t, Axis const &, bool,
@@ -51,12 +53,19 @@ class RootGui: public Gui {
     RootGui(RootGui const &);
     RootGui &operator=(RootGui const &);
 
+    void CleanName(std::string &);
+
+    class Bind;
+
     struct PlotWrap {
       PlotWrap();
       std::string name;
       Plot *plot;
       TH1I *h1;
       TH2I *h2;
+      bool do_clear;
+      bool is_log_set;
+      bool is_log;
       private:
         PlotWrap(PlotWrap const &);
         PlotWrap &operator=(PlotWrap const &);

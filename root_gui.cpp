@@ -28,13 +28,15 @@
 #include <TH1I.h>
 #include <TH2I.h>
 #include <THttpServer.h>
+#include <TROOT.h>
 #include <TSystem.h>
 
 RootGui::PlotWrap::PlotWrap():
   name(),
   plot(),
   h1(),
-  h2()
+  h2(),
+  do_clear()
 {
 }
 
@@ -79,6 +81,26 @@ void RootGui::AddPage(std::string const &a_name)
   page->name = a_name;
 }
 
+class RootGui::Bind: public TNamed
+{
+  public:
+    Bind(std::string const &a_name, PlotWrap *a_plot_wrap):
+      TNamed(a_name.c_str(), a_name.c_str()),
+      m_plot_wrap(a_plot_wrap)
+    {
+    }
+    void Clear(Option_t *) {
+      // This is abuse, this should clear name and title, but whatever.
+      m_plot_wrap->do_clear = true;
+    }
+    void SetDrawOption(Option_t *) {
+      m_plot_wrap->is_log ^= true;
+    }
+
+  public:
+    PlotWrap *m_plot_wrap;
+};
+
 uint32_t RootGui::AddPlot(std::string const &a_name, Plot *a_plot)
 {
   if (m_page_vec.empty()) {
@@ -90,12 +112,55 @@ uint32_t RootGui::AddPlot(std::string const &a_name, Plot *a_plot)
   auto plot_wrap = vec.back();
   plot_wrap->name = a_name;
   plot_wrap->plot = a_plot;
+  {
+    // TODO: Store to clean up, looks nicer.
+    auto bind_name =
+        std::string("plutt_Bind_") + page->name + "_" + a_name;
+    CleanName(bind_name);
+    auto clearer = new Bind(bind_name, plot_wrap);
+    gROOT->Append(clearer);
+
+    {
+      auto cmdname = std::string("Clear_") + page->name + "_" + a_name;
+      CleanName(cmdname);
+      m_server->RegisterCommand(cmdname.c_str(),
+          (bind_name + "->Clear()").c_str());
+    }
+    {
+      auto cmdname = std::string("LinLog_") + page->name + "_" + a_name;
+      CleanName(cmdname);
+      m_server->RegisterCommand(cmdname.c_str(),
+          (bind_name + "->SetDrawOption()").c_str());
+    }
+  }
   return ((uint32_t)m_page_vec.size() - 1) << 16 | ((uint32_t)vec.size() - 1);
+}
+
+void RootGui::CleanName(std::string &a_name)
+{
+  for (auto it = a_name.begin(); a_name.end() != it; ++it) {
+    auto c = *it;
+    if ('_' != c && !isalnum(c)) {
+      *it = '_';
+    }
+  }
+}
+
+bool RootGui::DoClear(uint32_t a_id)
+{
+  auto page_i = a_id >> 16;
+  auto plot_i = a_id & 0xffff;
+  auto page = m_page_vec.at(page_i);
+  auto plot = page->plot_wrap_vec.at(plot_i);
+  auto ret = plot->do_clear;
+  plot->do_clear = false;
+  return ret;
 }
 
 bool RootGui::Draw(double a_event_rate)
 {
-  std::cout << "\rEvent-rate: " << a_event_rate << "              ";
+  std::cout << "\rEvent-rate: " << a_event_rate << "              " <<
+      std::flush;
   for (auto it = m_page_vec.begin(); m_page_vec.end() != it; ++it) {
     auto page = *it;
     auto &vec = page->plot_wrap_vec;
@@ -126,7 +191,12 @@ void RootGui::DrawHist1(uint32_t a_id, Axis const &a_axis, bool a_is_log_y,
   if (plot->h2) {
     throw std::runtime_error(__func__);
   }
+  if (!plot->is_log_set) {
+    plot->is_log_set = true;
+    plot->is_log = a_is_log_y;
+  }
   auto pad = page->canvas->cd(1 + (int)plot_i);
+  pad->SetLogy(plot->is_log);
   if (plot->h1) {
     auto axis = plot->h1->GetXaxis();
     if (axis->GetNbins() != (int)a_axis.bins ||
@@ -139,7 +209,6 @@ void RootGui::DrawHist1(uint32_t a_id, Axis const &a_axis, bool a_is_log_y,
   if (!plot->h1) {
     plot->h1 = new TH1I(plot->name.c_str(), plot->name.c_str(),
         (int)a_axis.bins, a_axis.min, a_axis.max);
-    pad->SetLogy(a_is_log_y);
     plot->h1->Draw();
   }
   for (size_t i = 0; i < a_axis.bins; ++i) {
@@ -157,7 +226,12 @@ void RootGui::DrawHist2(uint32_t a_id, Axis const &a_axis_x, Axis const
   if (plot->h1) {
     throw std::runtime_error(__func__);
   }
+  if (!plot->is_log_set) {
+    plot->is_log_set = true;
+    plot->is_log = a_is_log_z;
+  }
   auto pad = page->canvas->cd(1 + (int)plot_i);
+  pad->SetLogz(plot->is_log);
   if (plot->h2) {
     auto axis_x = plot->h2->GetXaxis();
     auto axis_y = plot->h2->GetYaxis();
@@ -175,7 +249,6 @@ void RootGui::DrawHist2(uint32_t a_id, Axis const &a_axis_x, Axis const
     plot->h2 = new TH2I(plot->name.c_str(), plot->name.c_str(),
         (int)a_axis_x.bins, a_axis_x.min, a_axis_x.max,
         (int)a_axis_y.bins, a_axis_y.min, a_axis_y.max);
-    pad->SetLogz(a_is_log_z);
     plot->h2->Draw("colz");
   }
   size_t k = 0;

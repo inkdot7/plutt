@@ -51,6 +51,8 @@ class Gui {
     virtual void AddPage(std::string const &) = 0;
     virtual uint32_t AddPlot(std::string const &, Plot *) = 0;
 
+    virtual bool DoClear(uint32_t) = 0;
+
     virtual bool Draw(double) = 0;
 
     virtual void DrawHist1(uint32_t, Axis const &, bool,
@@ -67,6 +69,8 @@ class GuiCollection {
 
     void AddPage(std::string const &);
     uint32_t AddPlot(std::string const &, Gui::Plot *);
+
+    bool DoClear(uint32_t);
 
     bool Draw(double);
 

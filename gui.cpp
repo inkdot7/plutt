@@ -78,6 +78,18 @@ uint32_t GuiCollection::AddPlot(std::string const &a_name, Gui::Plot *a_plot)
   return (uint32_t)m_plot_vec.size() - 1;
 }
 
+bool GuiCollection::DoClear(uint32_t a_id)
+{
+  bool yes = false;
+  FOR_GUI {
+    auto gui = it->first;
+    auto gui_i = it->second;
+    auto const &pe = m_plot_vec.at(a_id);
+    yes |= gui->DoClear(pe.id_vec.at(gui_i));
+  }
+  return yes;
+}
+
 bool GuiCollection::Draw(double a_event_rate)
 {
   for (auto it = m_plot_vec.begin(); m_plot_vec.end() != it; ++it) {
@@ -97,9 +109,9 @@ void GuiCollection::DrawHist1(Gui *a_gui, uint32_t a_id, Gui::Axis const
 {
   auto it = m_gui_map.find(a_gui);
   assert(m_gui_map.end() != it);
-  auto id = it->second;
+  auto gui_i = it->second;
   auto const &pe = m_plot_vec.at(a_id);
-  a_gui->DrawHist1(pe.id_vec.at(id), a_axis, a_is_log_y, a_v);
+  a_gui->DrawHist1(pe.id_vec.at(gui_i), a_axis, a_is_log_y, a_v);
 }
 
 void GuiCollection::DrawHist2(Gui *a_gui, uint32_t a_id, Gui::Axis const
@@ -108,7 +120,7 @@ void GuiCollection::DrawHist2(Gui *a_gui, uint32_t a_id, Gui::Axis const
 {
   auto it = m_gui_map.find(a_gui);
   assert(m_gui_map.end() != it);
-  auto id = it->second;
+  auto gui_i = it->second;
   auto const &pe = m_plot_vec.at(a_id);
-  a_gui->DrawHist2(pe.id_vec.at(id), a_axis_x, a_axis_y, a_is_log_z, a_v);
+  a_gui->DrawHist2(pe.id_vec.at(gui_i), a_axis_x, a_axis_y, a_is_log_z, a_v);
 }
