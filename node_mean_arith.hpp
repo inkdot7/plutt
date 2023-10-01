@@ -23,7 +23,6 @@
 #define NODE_MEAN_ARITH_HPP
 
 #include <node.hpp>
-#include <value.hpp>
 
 /*
  * Arithmetic mean.

@@ -22,10 +22,6 @@
 #ifndef GUI_HPP
 #define GUI_HPP
 
-#include <map>
-#include <string>
-#include <vector>
-
 /*
  * GUI interface for plots and such.
  */

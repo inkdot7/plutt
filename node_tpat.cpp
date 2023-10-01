@@ -19,8 +19,11 @@
  * MA  02110-1301  USA
  */
 
-#include <node_tpat.hpp>
 #include <cassert>
+#include <iostream>
+#include <map>
+#include <string>
+#include <node_tpat.hpp>
 
 NodeTpat::NodeTpat(std::string const &a_loc, NodeValue *a_tpat, uint32_t
     a_mask):

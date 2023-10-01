@@ -19,6 +19,8 @@
  * MA  02110-1301  USA
  */
 
+#include <map>
+#include <string>
 #include <node.hpp>
 
 Node::ProcessGuard::ProcessGuard(Node *a_node, uint64_t a_evid):

@@ -19,8 +19,12 @@
  * MA  02110-1301  USA
  */
 
+#include <cassert>
+#include <iostream>
+#include <map>
+#include <string>
+#include <util.hpp>
 #include <node_hist2.hpp>
-#include <value.hpp>
 
 NodeHist2::NodeHist2(std::string const &a_loc, char const *a_title, size_t
     a_colormap, NodeValue *a_y, NodeValue *a_x, uint32_t a_yb, uint32_t a_xb,

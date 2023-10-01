@@ -23,7 +23,6 @@
 #define NODE_MAX_HPP
 
 #include <node.hpp>
-#include <value.hpp>
 
 /*
  * Passes the max 'v'.

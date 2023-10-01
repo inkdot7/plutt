@@ -23,7 +23,6 @@
 #define NODE_MEXPR_HPP
 
 #include <node.hpp>
-#include <value.hpp>
 
 /*
  * Simple mathematical expressions of the form f(node, constant).

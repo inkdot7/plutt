@@ -23,7 +23,6 @@
 #define NODE_SUB_MOD_HPP
 
 #include <node.hpp>
-#include <value.hpp>
 
 /*
  * Cyclic subtraction for eg FPGA TDC:s.

@@ -22,11 +22,6 @@
 #ifndef CUT_HPP
 #define CUT_HPP
 
-#include <cstdint>
-#include <map>
-#include <string>
-#include <vector>
-#include <input.hpp>
 #include <value.hpp>
 
 class NodeCut;

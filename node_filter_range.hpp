@@ -23,7 +23,6 @@
 #define NODE_FILTER_RANGE_HPP
 
 #include <node.hpp>
-#include <value.hpp>
 
 /*
  * Filters values with list of ranged conditions.

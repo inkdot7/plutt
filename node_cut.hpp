@@ -22,9 +22,9 @@
 #ifndef NODE_CUT_HPP
 #define NODE_CUT_HPP
 
-#include <cut.hpp>
 #include <node.hpp>
 
+class CutPolygon;
 struct NodeCutValue;
 
 /*

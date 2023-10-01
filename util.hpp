@@ -22,10 +22,6 @@
 #ifndef UTIL_HPP
 #define UTIL_HPP
 
-#include <cstdint>
-#include <string>
-#include <vector>
-
 #define LENGTH(x) (sizeof x / sizeof *x)
 
 class LinearTransform {

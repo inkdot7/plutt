@@ -19,9 +19,12 @@
  * MA  02110-1301  USA
  */
 
-#include <node_tot.hpp>
 #include <cassert>
+#include <iostream>
+#include <map>
+#include <string>
 #include <util.hpp>
+#include <node_tot.hpp>
 
 NodeTot::NodeTot(std::string const &a_loc, NodeValue *a_l, NodeValue *a_t,
     double a_range):

@@ -22,8 +22,6 @@
 #ifndef TEST_HPP
 #define TEST_HPP
 
-#include <iostream>
-
 #define TEST_FAIL_CERR_ ++g_test_fails_; \
     std::cerr << __FILE__ << ':' << __LINE__ << ": "
 

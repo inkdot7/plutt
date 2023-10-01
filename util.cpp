@@ -19,16 +19,13 @@
  * MA  02110-1301  USA
  */
 
-#include <util.hpp>
 #include <sys/select.h>
 #include <dirent.h>
 #include <err.h>
-#include <stdarg.h>
 #include <cassert>
-#include <cmath>
 #include <mutex>
-#include <string>
-#include <thread>
+#include <vector>
+#include <util.hpp>
 
 namespace {
   uint64_t g_time_ms;

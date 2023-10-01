@@ -22,16 +22,14 @@
 #ifndef VISUAL_HPP
 #define VISUAL_HPP
 
+#include <gui.hpp>
+#include <input.hpp>
+
 /*
  * Visual representations of data, eg histograms.
  * Not really visual until they're drawn, just a bunch of numbers, but
  * 'visual' is a nice short word...
  */
-
-#include <mutex>
-#include <gui.hpp>
-#include <input.hpp>
-#include <util.hpp>
 
 /*
  * Tries to guess the kind of data and its range, eg:

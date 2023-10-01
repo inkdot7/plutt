@@ -19,9 +19,11 @@
  * MA  02110-1301  USA
  */
 
-#include <test/test.hpp>
 #include <cmath>
+#include <iostream>
+#include <vector>
 #include <cal.hpp>
+#include <test/test.hpp>
 
 namespace {
 

@@ -21,18 +21,21 @@
 
 #if PLUTT_UCESB
 
-#include <unpacker.hpp>
 #include <sys/stat.h>
-#include <sys/wait.h>
-#include <fcntl.h>
 #include <unistd.h>
 #include <wordexp.h>
-#include <cstring>
 #include <fstream>
+#include <iostream>
+#include <list>
+#include <map>
 #include <sstream>
-#include <stdexcept>
+#include <string>
 #include <vector>
+#include <ext_data_client.h>
+#include <ext_data_struct_info.hh>
+#include <ext_data_clnt.hh>
 #include <config.hpp>
+#include <unpacker.hpp>
 
 #define MATCH_WORD(p, str) (0 == strncmp(p, str, sizeof str - 1) && \
     !isalnum(p[sizeof str - 1]) && '_' != p[sizeof str - 1])

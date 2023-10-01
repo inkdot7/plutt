@@ -19,10 +19,11 @@
  * MA  02110-1301  USA
  */
 
-#include <node_mexpr.hpp>
 #include <cassert>
-#include <cmath>
-#include <util.hpp>
+#include <iostream>
+#include <map>
+#include <string>
+#include <node_mexpr.hpp>
 
 NodeMExpr::NodeMExpr(std::string const &a_loc, NodeValue *a_l, NodeValue *a_r,
     double a_d, Operation a_op):

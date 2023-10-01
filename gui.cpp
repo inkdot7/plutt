@@ -19,8 +19,9 @@
  * MA  02110-1301  USA
  */
 
-#include <gui.hpp>
 #include <cassert>
+#include <map>
+#include <gui.hpp>
 
 void Gui::Axis::Clear()
 {

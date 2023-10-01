@@ -23,7 +23,6 @@
 #define NODE_LENGTH_HPP
 
 #include <node.hpp>
-#include <value.hpp>
 
 /*
  * Returns the length of assigned node.

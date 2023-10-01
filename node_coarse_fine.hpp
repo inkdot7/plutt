@@ -24,7 +24,6 @@
 
 #include <cal.hpp>
 #include <node.hpp>
-#include <value.hpp>
 
 /*
  * On-the-fly fine-time calibration merged with coarse times.

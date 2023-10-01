@@ -21,10 +21,13 @@
 
 #if PLUTT_SDL2
 
-#include <sdl_gui.hpp>
+#include <list>
+#include <map>
 #include <sstream>
+#include <SDL.h>
 #include <implutt.hpp>
 #include <util.hpp>
+#include <sdl_gui.hpp>
 
 SdlGui::PlotWrap::PlotWrap():
   name(),

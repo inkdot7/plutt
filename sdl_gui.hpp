@@ -25,7 +25,6 @@
 #if PLUTT_SDL2
 
 #include <gui.hpp>
-#include <implutt.hpp>
 
 class SdlGui: public Gui {
   public:

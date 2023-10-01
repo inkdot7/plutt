@@ -21,8 +21,6 @@
 
 #if PLUTT_ROOT
 
-#include <TObject.h>
-
 class MyClass: public TObject {
   public:
     MyClass():

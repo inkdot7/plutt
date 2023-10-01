@@ -19,10 +19,13 @@
  * MA  02110-1301  USA
  */
 
-#include <cut.hpp>
 #include <fstream>
+#include <iostream>
+#include <map>
 #include <sstream>
-#include <node_cut.hpp>
+#include <vector>
+#include <node.hpp>
+#include <cut.hpp>
 
 NodeCutValue::NodeCutValue():
   x(),

@@ -22,18 +22,13 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-#include <list>
-#include <map>
-#include <string>
-#include <cut.hpp>
-#include <input.hpp>
 #include <node_mexpr.hpp>
 #include <trig_map.hpp>
-#include <value.hpp>
 
 struct BitfieldArg;
 struct FilterRangeCond;
 struct FilterRangeArg;
+class CutPolygon;
 class Node;
 class NodeAlias;
 class NodeCut;

@@ -19,10 +19,13 @@
  * MA  02110-1301  USA
  */
 
-#include <node_sub_mod.hpp>
 #include <cassert>
-#include <cmath>
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
 #include <util.hpp>
+#include <node_sub_mod.hpp>
 
 NodeSubMod::NodeSubMod(std::string const &a_loc, NodeValue *a_l, NodeValue
     *a_r, double a_range):

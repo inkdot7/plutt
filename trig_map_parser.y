@@ -21,8 +21,8 @@
 
 %{
 #include <cstdint>
-#include <cstdio>
-#include <cstdlib>
+#include <map>
+#include <vector>
 #include <trig_map.hpp>
 #include <trig_map_parser.tab.h>
 TrigMap *yytm_trig_map;

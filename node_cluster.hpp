@@ -23,7 +23,6 @@
 #define NODE_CLUSTER_HPP
 
 #include <node.hpp>
-#include <value.hpp>
 
 /*
  * Clusterizes neighbouring channels.

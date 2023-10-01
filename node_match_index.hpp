@@ -23,7 +23,6 @@
 #define NODE_MATCH_INDEX_HPP
 
 #include <node.hpp>
-#include <value.hpp>
 
 /*
  * Matches the index of both nodes into two new values.

@@ -24,9 +24,6 @@
 #ifndef INPUT_HPP
 #define INPUT_HPP
 
-#include <algorithm>
-#include <cstdint>
-
 /*
  * Input base stuff.
  *

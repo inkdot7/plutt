@@ -24,6 +24,7 @@ struct Node;
 struct NodeValue;
 struct NodeVector;
 #include <config_parser.hpp>
+#include <config_parser.tab.h>
 
 #define YY_USER_ACTION yycplloc_update();
 

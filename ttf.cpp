@@ -23,12 +23,12 @@
 
 #ifdef PLUTT_SDL2
 
-#include <ttf.hpp>
 #include <cassert>
 #include <iostream>
 #include <map>
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include <ttf.hpp>
 
 #define FT_CALL(func, args) do { \
   auto ret_ = func args; \

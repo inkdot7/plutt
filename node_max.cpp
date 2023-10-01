@@ -19,9 +19,11 @@
  * MA  02110-1301  USA
  */
 
-#include <node_max.hpp>
 #include <cassert>
-#include <util.hpp>
+#include <iostream>
+#include <map>
+#include <string>
+#include <node_max.hpp>
 
 NodeMax::NodeMax(std::string const &a_loc, NodeValue *a_child):
   NodeValue(a_loc),

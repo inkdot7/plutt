@@ -23,7 +23,6 @@
 #define NODE_TOT_HPP
 
 #include <node.hpp>
-#include <value.hpp>
 
 /*
  * Time-over-threshold with cyclic times.

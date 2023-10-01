@@ -22,9 +22,6 @@
 #ifndef FIT_HPP
 #define FIT_HPP
 
-#include <cstdint>
-#include <vector>
-
 class FitGauss {
   public:
     /*

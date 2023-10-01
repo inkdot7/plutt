@@ -22,9 +22,7 @@
 #ifndef NODE_SIGNAL_HPP
 #define NODE_SIGNAL_HPP
 
-#include <input.hpp>
 #include <node.hpp>
-#include <value.hpp>
 
 class Config;
 

@@ -19,8 +19,11 @@
  * MA  02110-1301  USA
  */
 
-#include <node_select_index.hpp>
 #include <cassert>
+#include <iostream>
+#include <map>
+#include <string>
+#include <node_select_index.hpp>
 
 NodeSelectIndex::NodeSelectIndex(std::string const &a_loc, NodeValue *a_child,
     uint32_t a_first, uint32_t a_last):

@@ -23,7 +23,6 @@
 #define NODE_MEAN_GEOM_HPP
 
 #include <node.hpp>
-#include <value.hpp>
 
 /*
  * Geometric mean.

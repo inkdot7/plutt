@@ -22,9 +22,7 @@
 #ifndef NODE_BITFIELD_HPP
 #define NODE_BITFIELD_HPP
 
-#include <vector>
 #include <node.hpp>
-#include <value.hpp>
 
 /*
  * Merges integer values of given bit-sizes.

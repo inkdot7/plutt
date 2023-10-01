@@ -26,8 +26,12 @@
 #include <condition_variable>
 #include <csignal>
 #include <iostream>
+#include <list>
+#include <map>
 #include <thread>
 #if PLUTT_SDL2
+# include <SDL_compat.h>
+# include <SDL.h>
 # include <implutt.hpp>
 # include <sdl_gui.hpp>
 #endif
@@ -36,7 +40,11 @@
 # include <root.hpp>
 # include <root_gui.hpp>
 #endif
-#include <unpacker.hpp>
+#if PLUTT_UCESB
+# include <ext_data_struct_info.hh>
+# include <ext_data_clnt.hh>
+# include <unpacker.hpp>
+#endif
 #include <util.hpp>
 
 extern Config *g_config;

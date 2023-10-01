@@ -25,8 +25,6 @@
 #if PLUTT_ROOT
 
 #include <gui.hpp>
-#include <list>
-#include <string>
 
 class TCanvas;
 class TH1I;

@@ -23,7 +23,6 @@
 #define NODE_MEMBER_HPP
 
 #include <node.hpp>
-#include <value.hpp>
 
 /*
  * Transforms I or v into a flat Value, ie all indices = 0.

@@ -22,10 +22,6 @@
 #ifndef VECTOR_HPP
 #define VECTOR_HPP
 
-#include <cstdlib>
-#include <cstring>
-#include <stdexcept>
-
 // Stupid fast vector version that only grows, never shrinks. It's so stupid
 // you shouldn't use it unless you know what you're doing, and maybe not even
 // then.

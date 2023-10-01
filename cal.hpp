@@ -22,10 +22,6 @@
 #ifndef CAL_HPP
 #define CAL_HPP
 
-#include <cstdint>
-#include <cstdlib>
-#include <vector>
-
 /*
  * Rolling on-the-fly fine-time calibrator, gives times in [0,1).
  *

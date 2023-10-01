@@ -23,7 +23,6 @@
 #define NODE_ZERO_SUPPRESS_HPP
 
 #include <node.hpp>
-#include <value.hpp>
 
 /*
  * Zero suppression.

@@ -19,9 +19,11 @@
  * MA  02110-1301  USA
  */
 
-#include <node_coarse_fine.hpp>
 #include <cassert>
-#include <util.hpp>
+#include <iostream>
+#include <map>
+#include <string>
+#include <node_coarse_fine.hpp>
 
 NodeCoarseFine::NodeCoarseFine(std::string const &a_loc, NodeValue *a_coarse,
     NodeValue *a_fine, double a_fine_range):

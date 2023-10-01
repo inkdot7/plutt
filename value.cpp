@@ -19,8 +19,9 @@
  * MA  02110-1301  USA
  */
 
-#include <value.hpp>
+#include <cstring>
 #include <stdexcept>
+#include <value.hpp>
 
 Value::Value():
   m_type(Input::kNone),

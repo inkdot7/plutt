@@ -19,8 +19,11 @@
  * MA  02110-1301  USA
  */
 
-#include <node_match_value.hpp>
 #include <cassert>
+#include <iostream>
+#include <map>
+#include <string>
+#include <node_match_value.hpp>
 
 NodeMatchValue::NodeMatchValue(std::string const &a_loc, NodeValue *a_l,
     NodeValue *a_r, double a_cutoff):

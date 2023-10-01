@@ -20,10 +20,16 @@
  */
 
 %{
+#include <iostream>
+#include <list>
+#include <map>
+#include <config.hpp>
 #include <config_parser.hpp>
+#include <config_parser.tab.h>
+#include <cut.hpp>
+#include <gui.hpp>
 #include <node_bitfield.hpp>
 #include <node_filter_range.hpp>
-#include <gui.hpp>
 #include <util.hpp>
 
 #define LOC_SAVE(arg) g_config->SetLoc(arg.first_line, arg.first_column)
@@ -32,6 +38,9 @@
 	LOC_SAVE(arg); \
 	ret = g_config->AddMExpr(l, r, d, NodeMExpr::op); \
 } while (0)
+
+class Node;
+class NodeValue;
 
 char const *yycppath;
 Config *g_config;

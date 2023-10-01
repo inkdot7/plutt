@@ -19,6 +19,10 @@
  * MA  02110-1301  USA
  */
 
+#include <cassert>
+#include <iostream>
+#include <map>
+#include <string>
 #include <node_cut.hpp>
 
 NodeCut::NodeCut(std::string const &a_loc, CutPolygon *a_poly):

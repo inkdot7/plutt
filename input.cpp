@@ -19,8 +19,8 @@
  * MA  02110-1301  USA
  */
 
-#include <input.hpp>
 #include <stdexcept>
+#include <input.hpp>
 
 double Input::Scalar::GetDouble(Input::Type a_type) const
 {

@@ -19,9 +19,11 @@
  * MA  02110-1301  USA
  */
 
-#include <node_length.hpp>
 #include <cassert>
-#include <cstring>
+#include <iostream>
+#include <map>
+#include <string>
+#include <node_length.hpp>
 
 NodeLength::NodeLength(std::string const &a_loc, NodeValue *a_child):
   NodeValue(a_loc),

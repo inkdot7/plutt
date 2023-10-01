@@ -19,10 +19,11 @@
  * MA  02110-1301  USA
  */
 
-#include <test/test.hpp>
-#include <cmath>
+#include <iostream>
+#include <map>
 #include <node_cluster.hpp>
 #include <test/mock_node.hpp>
+#include <test/test.hpp>
 
 namespace {
 

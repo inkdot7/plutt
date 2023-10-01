@@ -19,10 +19,11 @@
  * MA  02110-1301  USA
  */
 
-#include <trig_map.hpp>
 #include <cstring>
 #include <iostream>
+#include <map>
 #include <trig_map_parser.tab.h>
+#include <trig_map.hpp>
 
 extern int yytmparse();
 extern int yytmlex_destroy();

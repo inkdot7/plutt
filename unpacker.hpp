@@ -24,12 +24,6 @@
 #ifndef UNPACKER_HPP
 #define UNPACKER_HPP
 
-#include <map>
-#include <string>
-#include <vector>
-#include <ext_data_client.h>
-#include <ext_data_struct_info.hh>
-#include <ext_data_clnt.hh>
 #include <input.hpp>
 
 class Config;

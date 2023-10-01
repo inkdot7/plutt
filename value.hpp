@@ -22,7 +22,6 @@
 #ifndef VALUE_HPP
 #define VALUE_HPP
 
-#include <cstdint>
 #include <input.hpp>
 #include <vector.hpp>
 

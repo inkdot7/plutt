@@ -19,10 +19,12 @@
  * MA  02110-1301  USA
  */
 
-#include <node_cluster.hpp>
 #include <cassert>
-#include <cmath>
 #include <set>
+#include <iostream>
+#include <map>
+#include <string>
+#include <node_cluster.hpp>
 
 NodeCluster::NodeCluster(std::string const &a_loc, NodeValue *a_child):
   NodeValue(a_loc),

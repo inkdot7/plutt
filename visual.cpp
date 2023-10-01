@@ -19,14 +19,14 @@
  * MA  02110-1301  USA
  */
 
-#include <visual.hpp>
 #include <cassert>
-#include <cmath>
-#include <cstring>
-#include <iomanip>
 #include <iostream>
-#include <sstream>
+#include <map>
+#include <mutex>
+#include <string>
 #include <fit.hpp>
+#include <util.hpp>
+#include <visual.hpp>
 
 #define LENGTH(x) (sizeof x / sizeof *x)
 

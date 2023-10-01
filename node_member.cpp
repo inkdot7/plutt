@@ -19,9 +19,11 @@
  * MA  02110-1301  USA
  */
 
-#include <node_member.hpp>
 #include <cassert>
-#include <cstring>
+#include <iostream>
+#include <map>
+#include <string>
+#include <node_member.hpp>
 
 NodeMember::NodeMember(std::string const &a_loc, NodeValue *a_child, char
     const *a_suffix):

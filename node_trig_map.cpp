@@ -19,9 +19,12 @@
  * MA  02110-1301  USA
  */
 
-#include <node_trig_map.hpp>
 #include <cassert>
+#include <iostream>
+#include <map>
+#include <string>
 #include <util.hpp>
+#include <node_trig_map.hpp>
 
 NodeTrigMap::NodeTrigMap(std::string const &a_loc, TrigMap::Prefix const
     *a_prefix, NodeValue *a_sig, NodeValue *a_trig, double a_range):

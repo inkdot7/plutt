@@ -19,6 +19,11 @@
  * MA  02110-1301  USA
  */
 
+#include <cassert>
+#include <cstdint>
+#include <iostream>
+#include <map>
+#include <string>
 #include <test/mock_node.hpp>
 #include <test/test.hpp>
 

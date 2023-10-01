@@ -22,9 +22,7 @@
 #ifndef NODE_PEDESTAL_HPP
 #define NODE_PEDESTAL_HPP
 
-#include <vector>
 #include <node.hpp>
-#include <value.hpp>
 
 /*
  * On-the-fly pedestal subtraction.

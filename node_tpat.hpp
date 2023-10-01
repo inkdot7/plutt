@@ -23,7 +23,6 @@
 #define NODE_TPAT_HPP
 
 #include <node.hpp>
-#include <value.hpp>
 
 /*
  * If any requested bit is set, populate value with a u64 1.

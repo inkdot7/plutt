@@ -30,16 +30,6 @@
 #ifndef IMPLUTT_HPP
 #define IMPLUTT_HPP
 
-#include <cstdint>
-#include <cstdlib>
-#include <list>
-#include <map>
-#include <string>
-#include <vector>
-#include <SDL_compat.h>
-#include <SDL.h>
-#include <vector.hpp>
-
 union SDL_Event;
 struct SDL_Renderer;
 struct SDL_Window;

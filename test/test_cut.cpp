@@ -19,8 +19,11 @@
  * MA  02110-1301  USA
  */
 
-#include <test/test.hpp>
+#include <iostream>
+#include <map>
+#include <string>
 #include <cut.hpp>
+#include <test/test.hpp>
 
 namespace {
 

@@ -23,7 +23,6 @@
 
 #if PLUTT_ROOT
 
-#include <root.hpp>
 #include <sys/stat.h>
 #include <TChain.h>
 #include <TTreeReader.h>
@@ -31,6 +30,7 @@
 #include <TTreeReaderValue.h>
 #include <config.hpp>
 #include <util.hpp>
+#include <root.hpp>
 
 class RootImpl {
   public:

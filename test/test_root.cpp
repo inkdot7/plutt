@@ -21,12 +21,15 @@
 
 #if PLUTT_ROOT
 
-#include <test/test.hpp>
+#include <iostream>
+#include <list>
 #include <TFile.h>
 #include <TTree.h>
+#include <trig_map.hpp>
 #include <config.hpp>
 #include <root.hpp>
 #include <test/test_root.hpp>
+#include <test/test.hpp>
 
 namespace {
 

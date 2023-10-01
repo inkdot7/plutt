@@ -19,9 +19,11 @@
  * MA  02110-1301  USA
  */
 
-#include <node_zero_suppress.hpp>
 #include <cassert>
-#include <util.hpp>
+#include <iostream>
+#include <map>
+#include <string>
+#include <node_zero_suppress.hpp>
 
 NodeZeroSuppress::NodeZeroSuppress(std::string const &a_loc, NodeValue
     *a_child, double a_cutoff):

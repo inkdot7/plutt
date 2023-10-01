@@ -24,16 +24,19 @@
 
 #ifdef PLUTT_SDL2
 
-#include <implutt.hpp>
 #include <sys/stat.h>
 #include <cassert>
 #include <fstream>
 #include <iostream>
+#include <list>
 #include <map>
 #include <set>
 #include <sstream>
+#include <string>
+#include <SDL.h>
 #include <ttf.hpp>
 #include <util.hpp>
+#include <implutt.hpp>
 
 //
 // Some notes:

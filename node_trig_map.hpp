@@ -24,7 +24,6 @@
 
 #include <node.hpp>
 #include <trig_map.hpp>
-#include <value.hpp>
 
 /*
  * First loads trigger map from file and gets mapping for prefix.

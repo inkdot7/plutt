@@ -19,10 +19,10 @@
  * MA  02110-1301  USA
  */
 
-#include <test/test.hpp>
-#include <cmath>
+#include <iostream>
 #include <vector>
 #include <fit.hpp>
+#include <test/test.hpp>
 
 #if PLUTT_NLOPT
 

@@ -19,16 +19,24 @@
  * MA  02110-1301  USA
  */
 
-#include <config.hpp>
+#include <cassert>
 #include <iostream>
+#include <list>
+#include <map>
+#include <mutex>
 #include <sstream>
+#include <string>
 #include <err.h>
-#include <config_parser.hpp>
+
+#include <cal.hpp>
+#include <util.hpp>
+#include <visual.hpp>
 #if PLUTT_SDL2
+# include <SDL.h>
 # include <implutt.hpp>
 #endif
-#include <util.hpp>
 
+#include <node.hpp>
 #include <node_alias.hpp>
 #include <node_bitfield.hpp>
 #include <node_cluster.hpp>
@@ -44,6 +52,7 @@
 #include <node_mean_arith.hpp>
 #include <node_mean_geom.hpp>
 #include <node_member.hpp>
+#include <node_mexpr.hpp>
 #include <node_pedestal.hpp>
 #include <node_select_index.hpp>
 #include <node_signal.hpp>
@@ -52,6 +61,10 @@
 #include <node_tpat.hpp>
 #include <node_trig_map.hpp>
 #include <node_zero_suppress.hpp>
+
+#include <config.hpp>
+#include <config_parser.hpp>
+#include <config_parser.tab.h>
 
 #define DEFAULT_UI_RATE 20U
 

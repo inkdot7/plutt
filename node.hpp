@@ -22,12 +22,9 @@
 #ifndef NODE_HPP
 #define NODE_HPP
 
-// TODO: Consider encapsulation over inheritance?
-
-#include <cassert>
-#include <iostream>
-#include <string>
 #include <cut.hpp>
+
+// TODO: Consider encapsulation over inheritance?
 
 // Asserts something, on failure prints location in config file.
 #define NODE_ASSERT(l, op, r) do {\

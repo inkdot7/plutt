@@ -22,10 +22,6 @@
 #ifndef TRIG_MAP_HPP
 #define TRIG_MAP_HPP
 
-#include <map>
-#include <string>
-#include <vector>
-
 /*
  * Loads trigger mapping from files, each file can have any number of
  * prefixes, and each prefix any number of channels. Lookup is O(1).

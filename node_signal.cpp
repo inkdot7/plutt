@@ -21,11 +21,13 @@
  * MA  02110-1301  USA
  */
 
-#include <node_signal.hpp>
-#include <config.hpp>
 #include <cassert>
-#include <cmath>
-#include <sstream>
+#include <iostream>
+#include <list>
+#include <map>
+#include <string>
+#include <config.hpp>
+#include <node_signal.hpp>
 
 NodeSignal::NodeSignal(Config &a_config, char const *a_name):
   NodeValue(a_config.GetLocStr()),

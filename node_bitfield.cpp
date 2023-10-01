@@ -19,9 +19,11 @@
  * MA  02110-1301  USA
  */
 
-#include <node_bitfield.hpp>
 #include <cassert>
-#include <util.hpp>
+#include <iostream>
+#include <map>
+#include <string>
+#include <node_bitfield.hpp>
 
 BitfieldArg::BitfieldArg(std::string const &a_loc, NodeValue *a_node, uint32_t
     a_bits):

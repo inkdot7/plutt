@@ -113,7 +113,6 @@ CPPFLAGS:=$(CPPFLAGS) -MMD \
 CXXFLAGS_UNSAFE:=$(CXXFLAGS) -fPIC -std=c++11
 CXXFLAGS:=$(CXXFLAGS_UNSAFE) -Wall -Wconversion -Weffc++ -Werror -Wshadow
 LDFLAGS:=$(LDFLAGS) -fPIC
-LIBS+=-ldl
 
 MKDIR=[ -d $(@D) ] || mkdir -p $(@D)
 

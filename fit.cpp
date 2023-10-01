@@ -19,13 +19,12 @@
  * MA  02110-1301  USA
  */
 
+#include <vector>
 #include <fit.hpp>
-#include <iostream>
-#include <stdexcept>
 
 #if PLUTT_NLOPT
 
-# include <cmath>
+# include <iostream>
 # include <nlopt.h>
 
 # define BENCHMARK 0

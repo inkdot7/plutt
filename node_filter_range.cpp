@@ -19,10 +19,11 @@
  * MA  02110-1301  USA
  */
 
-#include <node_filter_range.hpp>
 #include <cassert>
-#include <cmath>
-#include <set>
+#include <iostream>
+#include <map>
+#include <string>
+#include <node_filter_range.hpp>
 
 NodeFilterRange::NodeFilterRange(std::string const &a_loc, CondVec const
     &a_cond_vec, std::vector<NodeValue *> const &a_src_vec):

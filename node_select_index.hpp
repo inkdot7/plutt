@@ -23,7 +23,6 @@
 #define NODE_SELECT_INDEX_HPP
 
 #include <node.hpp>
-#include <value.hpp>
 
 /*
  * Passes through 'v' entries with a given index.
