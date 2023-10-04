@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <map>
+#include <vector>
 #include <node_cut.hpp>
 #include <test/mock_node.hpp>
 #include <test/test.hpp>

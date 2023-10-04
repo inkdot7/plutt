@@ -23,6 +23,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 #include <node_bitfield.hpp>
 
 BitfieldArg::BitfieldArg(std::string const &a_loc, NodeValue *a_node, uint32_t

@@ -24,12 +24,14 @@
 #include <iostream>
 #include <list>
 #include <sstream>
+
 #include <TCanvas.h>
 #include <TH1I.h>
 #include <TH2I.h>
 #include <THttpServer.h>
 #include <TROOT.h>
 #include <TSystem.h>
+
 #include <root_gui.hpp>
 
 class RootGui::Bind: public TNamed

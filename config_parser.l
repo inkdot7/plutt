@@ -23,6 +23,7 @@
 struct Node;
 struct NodeValue;
 struct NodeVector;
+#include <cstdint>
 #include <config_parser.hpp>
 #include <config_parser.tab.h>
 

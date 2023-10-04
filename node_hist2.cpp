@@ -22,7 +22,9 @@
 #include <cassert>
 #include <iostream>
 #include <map>
+#include <mutex>
 #include <string>
+#include <vector>
 #include <util.hpp>
 #include <node_hist2.hpp>
 

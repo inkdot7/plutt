@@ -22,6 +22,7 @@
 #include <cstring>
 #include <iostream>
 #include <map>
+#include <vector>
 #include <trig_map_parser.tab.h>
 #include <trig_map.hpp>
 

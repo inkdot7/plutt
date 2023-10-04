@@ -21,6 +21,7 @@
 
 #include <cassert>
 #include <map>
+#include <vector>
 #include <gui.hpp>
 
 void Gui::Axis::Clear()

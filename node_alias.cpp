@@ -23,6 +23,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 #include <node_alias.hpp>
 
 NodeAlias::NodeAlias(std::string const &a_loc, NodeValue *a_source, uint32_t

@@ -20,6 +20,7 @@
  */
 
 %{
+#include <cstdint>
 #include <trig_map_parser.tab.h>
 
 #define YY_USER_ACTION yytmlloc_update();

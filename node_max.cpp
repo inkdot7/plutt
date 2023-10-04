@@ -23,6 +23,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 #include <node_max.hpp>
 
 NodeMax::NodeMax(std::string const &a_loc, NodeValue *a_child):

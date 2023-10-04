@@ -22,8 +22,11 @@
 #if PLUTT_UCESB
 
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <wordexp.h>
+
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <list>
@@ -31,9 +34,11 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
 #include <ext_data_client.h>
 #include <ext_data_struct_info.hh>
 #include <ext_data_clnt.hh>
+
 #include <config.hpp>
 #include <unpacker.hpp>
 

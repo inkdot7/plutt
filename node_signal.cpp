@@ -22,10 +22,12 @@
  */
 
 #include <cassert>
+#include <cmath>
 #include <iostream>
 #include <list>
 #include <map>
 #include <string>
+#include <vector>
 #include <config.hpp>
 #include <node_signal.hpp>
 

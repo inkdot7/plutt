@@ -20,9 +20,11 @@
  */
 
 #include <cassert>
+#include <cmath>
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 #include <node_mean_geom.hpp>
 
 NodeMeanGeom::NodeMeanGeom(std::string const &a_loc, NodeValue *a_l, NodeValue

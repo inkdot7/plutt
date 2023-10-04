@@ -23,6 +23,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 #include <node_select_index.hpp>
 
 NodeSelectIndex::NodeSelectIndex(std::string const &a_loc, NodeValue *a_child,

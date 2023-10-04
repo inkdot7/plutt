@@ -20,9 +20,11 @@
  */
 
 #include <cassert>
+#include <cmath>
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 #include <util.hpp>
 #include <node_tpat.hpp>
 #include <node_pedestal.hpp>

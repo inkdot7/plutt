@@ -24,10 +24,12 @@
 #if PLUTT_ROOT
 
 #include <sys/stat.h>
+
 #include <TChain.h>
 #include <TTreeReader.h>
 #include <TTreeReaderArray.h>
 #include <TTreeReaderValue.h>
+
 #include <config.hpp>
 #include <util.hpp>
 #include <root.hpp>

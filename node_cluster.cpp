@@ -20,10 +20,12 @@
  */
 
 #include <cassert>
+#include <cmath>
 #include <set>
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 #include <node_cluster.hpp>
 
 NodeCluster::NodeCluster(std::string const &a_loc, NodeValue *a_child):

@@ -23,6 +23,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 #include <node_coarse_fine.hpp>
 
 NodeCoarseFine::NodeCoarseFine(std::string const &a_loc, NodeValue *a_coarse,

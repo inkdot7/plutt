@@ -23,6 +23,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 #include <util.hpp>
 #include <node_tot.hpp>
 

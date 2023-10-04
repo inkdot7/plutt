@@ -23,6 +23,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 #include <node_filter_range.hpp>
 
 NodeFilterRange::NodeFilterRange(std::string const &a_loc, CondVec const

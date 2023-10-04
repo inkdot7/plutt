@@ -21,6 +21,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 #include <node.hpp>
 
 Node::ProcessGuard::ProcessGuard(Node *a_node, uint64_t a_evid):

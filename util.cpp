@@ -22,9 +22,13 @@
 #include <sys/select.h>
 #include <dirent.h>
 #include <err.h>
+
+#include <cmath>
 #include <cassert>
+#include <cstdarg>
 #include <mutex>
 #include <vector>
+
 #include <util.hpp>
 
 namespace {

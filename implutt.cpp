@@ -25,6 +25,8 @@
 #ifdef PLUTT_SDL2
 
 #include <sys/stat.h>
+#include <SDL.h>
+
 #include <cassert>
 #include <fstream>
 #include <iostream>
@@ -33,7 +35,8 @@
 #include <set>
 #include <sstream>
 #include <string>
-#include <SDL.h>
+#include <vector>
+
 #include <ttf.hpp>
 #include <util.hpp>
 #include <implutt.hpp>

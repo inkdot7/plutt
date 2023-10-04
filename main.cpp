@@ -23,19 +23,22 @@
 
 #include <getopt.h>
 #include <unistd.h>
+
 #include <condition_variable>
 #include <csignal>
 #include <iostream>
 #include <list>
 #include <map>
 #include <thread>
+#include <vector>
+
+#include <config.hpp>
 #if PLUTT_SDL2
 # include <SDL_compat.h>
 # include <SDL.h>
 # include <implutt.hpp>
 # include <sdl_gui.hpp>
 #endif
-#include <config.hpp>
 #if PLUTT_ROOT
 # include <root.hpp>
 # include <root_gui.hpp>

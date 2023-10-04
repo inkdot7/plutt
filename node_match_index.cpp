@@ -23,6 +23,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 #include <node_match_index.hpp>
 
 NodeMatchIndex::NodeMatchIndex(std::string const &a_loc, NodeValue *a_l,

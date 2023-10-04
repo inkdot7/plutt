@@ -23,6 +23,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 #include <node_tpat.hpp>
 
 NodeTpat::NodeTpat(std::string const &a_loc, NodeValue *a_tpat, uint32_t

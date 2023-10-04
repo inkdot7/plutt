@@ -20,10 +20,14 @@
  */
 
 #include <cassert>
+#include <cmath>
+#include <cstring>
 #include <iostream>
 #include <map>
 #include <mutex>
 #include <string>
+#include <vector>
+
 #include <fit.hpp>
 #include <util.hpp>
 #include <visual.hpp>

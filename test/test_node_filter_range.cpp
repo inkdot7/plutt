@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <map>
+#include <vector>
 #include <node_filter_range.hpp>
 #include <test/mock_node.hpp>
 #include <test/test.hpp>

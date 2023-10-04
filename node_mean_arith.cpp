@@ -23,6 +23,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 #include <node_mean_arith.hpp>
 
 NodeMeanArith::NodeMeanArith(std::string const &a_loc, NodeValue *a_l,

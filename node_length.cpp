@@ -23,6 +23,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 #include <node_length.hpp>
 
 NodeLength::NodeLength(std::string const &a_loc, NodeValue *a_child):

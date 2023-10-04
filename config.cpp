@@ -19,6 +19,8 @@
  * MA  02110-1301  USA
  */
 
+#include <err.h>
+
 #include <cassert>
 #include <iostream>
 #include <list>
@@ -26,7 +28,7 @@
 #include <mutex>
 #include <sstream>
 #include <string>
-#include <err.h>
+#include <vector>
 
 #include <cal.hpp>
 #include <util.hpp>

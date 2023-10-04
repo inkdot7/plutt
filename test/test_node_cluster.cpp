@@ -19,8 +19,10 @@
  * MA  02110-1301  USA
  */
 
+#include <cmath>
 #include <iostream>
 #include <map>
+#include <vector>
 #include <node_cluster.hpp>
 #include <test/mock_node.hpp>
 #include <test/test.hpp>

@@ -23,6 +23,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 #include <node_cut.hpp>
 
 NodeCut::NodeCut(std::string const &a_loc, CutPolygon *a_poly):

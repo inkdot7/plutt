@@ -21,10 +21,13 @@
 
 #if PLUTT_SDL2
 
+#include <SDL.h>
+
 #include <list>
 #include <map>
 #include <sstream>
-#include <SDL.h>
+#include <vector>
+
 #include <implutt.hpp>
 #include <util.hpp>
 #include <sdl_gui.hpp>

@@ -19,6 +19,7 @@
  * MA  02110-1301  USA
  */
 
+#include <cstring>
 #include <iostream>
 #include <vector.hpp>
 #include <test/test.hpp>

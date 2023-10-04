@@ -22,6 +22,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 #include <node_alias.hpp>
 #include <test/mock_node.hpp>
 #include <test/test.hpp>

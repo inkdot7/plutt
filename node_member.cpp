@@ -20,9 +20,11 @@
  */
 
 #include <cassert>
+#include <cstring>
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 #include <node_member.hpp>
 
 NodeMember::NodeMember(std::string const &a_loc, NodeValue *a_child, char

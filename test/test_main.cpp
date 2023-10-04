@@ -20,6 +20,7 @@
  */
 
 #include <iostream>
+#include <vector>
 #include <test/test.hpp>
 
 namespace {

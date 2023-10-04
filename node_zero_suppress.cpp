@@ -23,6 +23,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 #include <node_zero_suppress.hpp>
 
 NodeZeroSuppress::NodeZeroSuppress(std::string const &a_loc, NodeValue
