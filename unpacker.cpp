@@ -302,6 +302,12 @@ void Unpacker::BindSignal(Config &a_config, std::vector<char> const
   // std::cout << full_name << ": " << a_event_buf_i << ' ' << in_type_bytes <<
   //     '*' << arr_n << '\n';
 
+#if EXT_DATA_ITEM_FLAGS_OPTIONAL
+# define FLAG_OPT , 0
+#else
+# define FLAG_OPT
+#endif
+
   // Setup links.
   int ok = 1;
   if (MATCH_WORD(macro, "EXT_STR_ITEM_INFO") ||
@@ -310,7 +316,8 @@ void Unpacker::BindSignal(Config &a_config, std::vector<char> const
 // std::cout << "0: " << a_event_buf_i << ' ' << in_bytes << ' ' <<
 // struct_info_type << ' ' << full_name << '\n';
     ok &= 0 == ext_data_struct_info_item(m_struct_info, a_event_buf_i,
-        in_bytes, struct_info_type, "", -1, full_name.c_str(), "", -1, 0);
+        in_bytes, struct_info_type, "", -1, full_name.c_str(), "", -1
+        FLAG_OPT);
   } else if (MATCH_WORD(macro, "EXT_STR_ITEM_INFO_LIM") ||
       MATCH_WORD(macro, "EXT_STR_ITEM_INFO2_LIM")) {
     // Limited scalar.
@@ -318,14 +325,14 @@ void Unpacker::BindSignal(Config &a_config, std::vector<char> const
 // struct_info_type << ' ' << full_name << ' ' << ret.first->second << '\n';
     ok &= 0 == ext_data_struct_info_item(m_struct_info, a_event_buf_i,
         in_bytes, struct_info_type, "", -1, full_name.c_str(), "",
-        static_cast<int>(ret.first->second), 0);
+        static_cast<int>(ret.first->second) FLAG_OPT);
   } else if (MATCH_WORD(macro, "EXT_STR_ITEM_INFO_ZZP") ||
       MATCH_WORD(macro, "EXT_STR_ITEM_INFO2_ZZP")) {
 // std::cout << "2: " << a_event_buf_i << ' ' << in_bytes << ' ' <<
 // struct_info_type << ' ' << full_name << ' ' << ctrl << '\n';
     ok &= 0 == ext_data_struct_info_item(m_struct_info, a_event_buf_i,
         in_bytes, struct_info_type, "", -1, full_name.c_str(), ctrl.c_str(),
-        -1, 0);
+        -1 FLAG_OPT);
   } else {
     std::cerr << full_name << ": unknown struct-info macro.\n";
     throw std::runtime_error(__func__);
