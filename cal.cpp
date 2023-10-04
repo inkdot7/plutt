@@ -19,6 +19,7 @@
  * MA  02110-1301  USA
  */
 
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 #include <cal.hpp>
