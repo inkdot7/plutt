@@ -22,6 +22,7 @@
 %{
 #include <cstdint>
 #include <map>
+#include <string>
 #include <vector>
 #include <trig_map.hpp>
 #include <trig_map_parser.tab.h>

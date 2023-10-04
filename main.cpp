@@ -33,6 +33,7 @@
 #include <vector>
 
 #include <config.hpp>
+#include <gui.hpp>
 #if PLUTT_SDL2
 # include <SDL_compat.h>
 # include <SDL.h>
@@ -200,6 +201,7 @@ int main(int argc, char **argv)
   // Handle arguments.
   enum InputType input_type = INPUT_NONE;
   unsigned gui_type = GUI_NONE;
+  (void)gui_type;
   int c;
   while ((c = getopt(argc, argv, "hf:g:j:" ROOT_ARGOPT UCESB_ARGOPT)) != -1) {
     switch (c) {

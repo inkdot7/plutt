@@ -20,7 +20,9 @@
  */
 
 #include <cassert>
+#include <cstdint>
 #include <map>
+#include <string>
 #include <vector>
 #include <gui.hpp>
 
