@@ -251,6 +251,10 @@ FitGauss::FitGauss(std::vector<uint32_t> const &a_hist, double a_max_y,
   x[GAUSS_AMP] = a_max_y;
   x[GAUSS_MEAN] = 0.5 * (a_left + a_right);
   x[GAUSS_WIDTH] = 0.5 * (a_right - a_left);
+  /*
+  printf ("   : %.6f %.6f\n",
+	  x[GAUSS_MEAN], x[GAUSS_WIDTH]);
+  */
   // Estimate constant background as minimum bin value.
   double v_min = DBL_MAX;
   for (uint32_t i = r.left; i <= r.right; ++i) {
@@ -265,6 +269,10 @@ FitGauss::FitGauss(std::vector<uint32_t> const &a_hist, double a_max_y,
   double sum = 0, sum_x = 0, sum_x2 = 0;
   for (uint32_t i = r.left; i <= r.right; ++i) {
     auto v_i = r.vec->at(i) - v_min;
+    /*
+    printf ("add: %d : %.6f\n",
+	    i, (double) v_i);
+    */
     sum    += v_i;
     sum_x  += v_i * i;
     sum_x2 += v_i * i * i;
@@ -279,6 +287,11 @@ FitGauss::FitGauss(std::vector<uint32_t> const &a_hist, double a_max_y,
       x[GAUSS_AMP] = sum / sqrt(variance) / sqrt(2 * M_PI);
     }
   }
+  /*
+  printf ("est: %.6f %.6f %.6f (%.1f , %.1f %.1f %.1f , %d %d)\n",
+	  x[GAUSS_AMP], x[GAUSS_MEAN], x[GAUSS_WIDTH],
+	  v_min, sum, sum_x, sum_x2, a_left, a_right);
+  */
   double y;
 #if BENCHMARK
   double t0;
@@ -307,6 +320,10 @@ FitGauss::FitGauss(std::vector<uint32_t> const &a_hist, double a_max_y,
   m_amp = x[GAUSS_AMP];
   m_mean = x[GAUSS_MEAN];
   m_std = sqrt(x[GAUSS_WIDTH] / 2);
+  /*
+  printf ("fit: %.6f %.6f %.6f\n",
+	  x[GAUSS_AMP], x[GAUSS_MEAN], x[GAUSS_WIDTH]);
+  */
 }
 
 #else
