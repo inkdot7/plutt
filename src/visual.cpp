@@ -123,7 +123,7 @@ void Range::Clear()
   m_stat_i = 0;
 }
 
-Gui::Axis Range::GetExtents(uint32_t a_bins) const
+Gui::Axis Range::GetExtents(uint32_t a_bins, double a_min_bin_width) const
 {
   double l, r;
   switch (m_mode) {
@@ -205,6 +205,9 @@ Gui::Axis Range::GetExtents(uint32_t a_bins) const
     }
   } else {
     bins = a_bins > 0 ? a_bins : 200;
+    if (a_min_bin_width > 0.0 &&
+	(r - l) / bins < a_min_bin_width)
+      bins = (uint32_t)ceil((r - l) / a_min_bin_width);
   }
 
   Gui::Axis a;
@@ -426,12 +429,13 @@ void VisualAnnular::Prefill(Input::Type a_type_r, Input::Scalar const &a_r,
   m_range_p.Add(a_type_p, a_p);
 }
 
-VisualHist::VisualHist(std::string const &a_title, uint32_t a_xb,
+VisualHist::VisualHist(std::string const &a_title, uint32_t a_xb, double a_xbw,
     LinearTransform const &a_transform, PeakFitVec const &a_fit_vec, bool
     a_is_log_y, bool a_is_contour, double a_drop_counts_s, unsigned
     a_drop_counts_num, double a_drop_stats_s):
   Visual(a_title),
   m_xb(a_xb),
+  m_xbw(a_xbw),
   m_transform(a_transform),
   m_fit_vec(a_fit_vec),
   m_range(a_drop_stats_s),
@@ -478,7 +482,7 @@ void VisualHist::Fit()
 
   if (m_range.IsAdded() &&
       (m_range.GetMin() < m_axis.min || m_range.GetMax() >= m_axis.max)) {
-    auto axis = m_range.GetExtents(m_xb);
+    auto axis = m_range.GetExtents(m_xb, m_xbw);
     if (m_axis.bins != axis.bins ||
         m_axis.min != axis.min ||
         m_axis.max != axis.max) {

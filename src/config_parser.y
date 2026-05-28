@@ -117,6 +117,7 @@ static struct {
 } g_annular;
 static NodeValue *g_pedestal_tpat;
 static uint32_t g_binsx;
+static double g_binwx;
 static uint32_t g_binsy;
 static char *g_transformx;
 static char *g_transformy;
@@ -133,6 +134,7 @@ static double g_single = -1.0;
 static void ResetDrawArgs() {
 	g_peak_fit_vec.clear();
 	g_binsx = 0;
+	g_binwx = -1.0;
 	g_binsy = 0;
 	free(g_transformx);
 	g_transformx = nullptr;
@@ -188,6 +190,7 @@ static void ResetDrawArgs() {
 %token TK_ATAN2
 %token TK_BINSX
 %token TK_BINSY
+%token TK_MINBINWX
 %token TK_BITFIELD
 %token TK_CLOCK_MATCH
 %token TK_CLUSTER
@@ -789,6 +792,7 @@ hist_opt
 	: ',' hist_arg
 hist_arg
 	: TK_BINSX '=' const { g_binsx = $3.GetI64(); }
+	| TK_MINBINWX '=' const { g_binwx = $3.GetDouble(); }
 	| TK_CONTOURED { g_contour = false; }
 	| TK_FILLED { g_contour = true; }
 	| TK_FIT '(' TK_STRING ',' const ',' const ')' {
@@ -844,7 +848,7 @@ floor
 hist
 	: TK_HIST '(' TK_STRING ',' value hist_opts ')' {
 		LOC_SAVE(@1);
-		g_config->AddHist1($3, $5, g_binsx, g_transformx,
+		g_config->AddHist1($3, $5, g_binsx, g_binwx, g_transformx,
 		    g_peak_fit_vec, g_logy, g_contour, g_drop_counts.time,
 		    g_drop_counts.slice_num, g_drop_stats);
 		ResetDrawArgs();

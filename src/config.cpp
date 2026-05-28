@@ -431,10 +431,10 @@ NodeValue *Config::AddFloor(NodeValue *a_value)
   return node;
 }
 
-void Config::AddHist1(char const *a_title, NodeValue *a_x, uint32_t a_xb, char
-    const *a_transform, PeakFitVec const &a_fit_vec, bool a_log_y, bool
-    a_contour, double a_drop_counts_s, unsigned a_drop_counts_num, double
-    a_drop_stats_s)
+void Config::AddHist1(char const *a_title, NodeValue *a_x, uint32_t a_xb,
+    double a_xbw, char const *a_transform, PeakFitVec const &a_fit_vec,
+    bool a_log_y, bool a_contour, double a_drop_counts_s,
+    unsigned a_drop_counts_num, double a_drop_stats_s)
 {
   double k = 1.0;
   double m = 0.0;
@@ -455,7 +455,7 @@ void Config::AddHist1(char const *a_title, NodeValue *a_x, uint32_t a_xb, char
     throw std::runtime_error(__func__);
   }
 
-  auto node = new NodeHist1(GetLocStr(), a_title, a_x, a_xb,
+  auto node = new NodeHist1(GetLocStr(), a_title, a_x, a_xb, a_xbw,
       LinearTransform(k, m), a_fit_vec, a_log_y, a_contour, a_drop_counts_s,
       a_drop_counts_num, a_drop_stats_s);
   NodeCuttableAdd(node);

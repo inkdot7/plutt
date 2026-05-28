@@ -49,7 +49,7 @@ class Range {
     Range(double);
     void Add(Input::Type, Input::Scalar const &);
     void Clear();
-    Gui::Axis GetExtents(uint32_t) const;
+    Gui::Axis GetExtents(uint32_t, double = -1.0) const;
     double GetMax() const;
     double GetMean() const;
     double GetMin() const;
@@ -123,7 +123,7 @@ class VisualAnnular: public Visual {
 
 class VisualHist: public Visual {
   public:
-    VisualHist(std::string const &, uint32_t, LinearTransform const &,
+    VisualHist(std::string const &, uint32_t, double, LinearTransform const &,
         PeakFitVec const &, bool, bool, double, unsigned, double);
     void Draw(Gui *);
     void Fill(Input::Type, Input::Scalar const &);
@@ -136,6 +136,7 @@ class VisualHist: public Visual {
         const &);
 
     uint32_t m_xb;
+    double m_xbw;
     LinearTransform m_transform;
     PeakFitVec m_fit_vec;
     Range m_range;

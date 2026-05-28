@@ -64,6 +64,7 @@ atan2                  return TK_ATAN2;
 appearance             return TK_APPEARANCE;
 binsx                  return TK_BINSX;
 binsy                  return TK_BINSY;
+minbinwx               return TK_MINBINWX;
 bitfield               return TK_BITFIELD;
 clock_match            return TK_CLOCK_MATCH;
 cluster                return TK_CLUSTER;
