@@ -246,6 +246,8 @@ FitGauss::FitGauss(std::vector<uint32_t> const &a_hist, double a_max_y,
   NLOPT_CALL(nlopt_set_min_objective, (opt, Gauss, &r));
   NLOPT_CALL(nlopt_set_ftol_rel, (opt, 1e-5));
   double x[4];
+  double lb[4];
+  /*double ub[4];*/
   // Default initial parameter estimation.
   x[OFS] = 0.0;
   x[GAUSS_AMP] = a_max_y;
@@ -287,6 +289,14 @@ FitGauss::FitGauss(std::vector<uint32_t> const &a_hist, double a_max_y,
       x[GAUSS_AMP] = sum / sqrt(variance) / sqrt(2 * M_PI);
     }
   }
+
+  lb[OFS]         = 0.0;
+  lb[GAUSS_AMP]   = 0.0;
+  lb[GAUSS_WIDTH] = x[GAUSS_WIDTH] * 0.1;
+  lb[GAUSS_MEAN]  = DBL_MIN;
+
+  NLOPT_CALL(nlopt_set_lower_bounds, (opt, lb));
+
   /*
   printf ("est: %.6f %.6f %.6f (%.1f , %.1f %.1f %.1f , %d %d)\n",
 	  x[GAUSS_AMP], x[GAUSS_MEAN], x[GAUSS_WIDTH],
