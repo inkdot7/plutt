@@ -526,6 +526,16 @@ filter_range
 		g_filter_dst_vec.clear();
 		g_filter_src_vec.clear();
 	}
+	| TK_IDENT '=' TK_FILTER_RANGE '(' filter_range_conds ',' value ')' {
+		LOC_SAVE(@1);
+		g_filter_src_vec.push_back($7);
+		auto node = g_config->AddFilterRange(
+		    g_filter_cond_vec, g_filter_src_vec);
+		// Assign destination.
+		g_config->AddAlias($1, node, 0);
+		g_filter_cond_vec.clear();
+		g_filter_src_vec.clear();
+	}
 
 fit_args
 	: fit_arg

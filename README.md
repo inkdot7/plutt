@@ -583,6 +583,12 @@ filter_range([a <= b < c|a == b|b == c] [, ...], (d = e)...)
 		e:id  = [1, 3]
 		e:end = [1, 3]
 		e:v   = [4, 5, 6]
+
+d = filter_range([a <= b < c|a == b|b == c] [, ...], e)
+
+	Same as the previous, but with only one assignment.
+
+	Note: with the same condition, the previous is more efficient.
 ```
 
 ```
