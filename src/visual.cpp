@@ -133,7 +133,8 @@ Gui::Axis Range::GetExtents(uint32_t a_bins, double a_min_bin_width) const
         r = GetMax();
         if (Input::IsTypeInt(m_type)) {
           // For integers, 'r' is on the right side of max.
-          ++r;
+          l -= 0.5;
+	  r += 0.5;
         }
         auto d = r - l;
         if (std::abs(d) < 1e-10) {
