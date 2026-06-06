@@ -2338,11 +2338,24 @@ namespace ImPlutt {
         size_t i1 = (size_t)(
             (double)a_bins * (a_plot->PointFromPosX(pi + 1) - a_min) /
             (a_max - a_min));
+	if (i0 < 0 || i0 >= a_vec.size() ||
+	    i1 < 0 || i1 >= a_vec.size() || !(i0 <= i1))
+	  {
+	    fprintf (stderr,
+		     "%zd %zd %zd : "
+		     "%zd : %g %g : %g %g\n",
+		     i0, i1, a_vec.size(),
+		     a_bins,
+		     a_plot->PointFromPosX(0),
+		     a_plot->PointFromPosX(pi + 1),
+		     a_min, a_max);
+	    fflush(stderr);
+	  }
+        assert(i0 <= i1);
         assert(0 <= i0);
         assert(i0 <= a_bins);
         assert(0 <= i1);
         assert(i1 <= a_bins);
-        assert(i0 <= i1);
 
         // double sum = 0.;
         double min = 0.;
