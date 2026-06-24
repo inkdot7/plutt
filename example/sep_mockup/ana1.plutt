@@ -1,3 +1,5 @@
+#########################################################################
+# Define variables.
 
 m_sc = SYNC_CHECK_MIDDLE
 l_sc = SYNC_CHECK_LEFT
@@ -26,7 +28,12 @@ r_vtc = signal(RIGHT_VTCMI, RIGHT_VTCME, RIGHT_VTCv)
 
 r_vt  = coarse_fine(r_vtc, r_vtf, vftx2)
 
+#########################################################################
+# Page 1: correlation monitoring.
+
 page("corr", 3)
+
+# Sync check values only make sense for global triggers.
 
 filter_range(TRIGGER == 1, (l_sc_trig1 = l_sc),
                            (m_sc_trig1 = m_sc),
@@ -35,6 +42,8 @@ filter_range(TRIGGER == 1, (l_sc_trig1 = l_sc),
 hist2d("left : middle, SC, trig 1", l_sc_trig1, m_sc_trig1)
 hist2d("left : right, SC, trig 1", l_sc_trig1, r_sc_trig1)
 hist2d("right : middle, SC, trig 1", r_sc_trig1, m_sc_trig1)
+
+# Pick data for VFTX channels 1 and 3 in all crates.
 
 m_vt1  = select_index(m_vt,  1):v
 m_vt3  = select_index(m_vt,  3):v
@@ -45,38 +54,68 @@ l_vt3  = select_index(l_vt,  3):v
 r_vt1  = select_index(r_vt,  1):v
 r_vt3  = select_index(r_vt,  3):v
 
+# VFTX differences.  ch1 vs. ch1 between crates, ch1 vs. ch3 within
+# middle crate.
+
 hist("left - middle, VFTX ch1",  sub_mod(l_vt1, m_vt1, vftx2), fit("gauss"))
 hist("middle VFTX, ch1 - ch3",   sub_mod(m_vt3, m_vt1, vftx2), fit("gauss"))
 hist("right - middle, VFTX ch1", sub_mod(r_vt1, m_vt1, vftx2), fit("gauss"))
+
+# White Rabbit timestamp differences.
 
 hist("lm_wr", sub_mod(l_wr, m_wr, 65536*65536), fit("gauss"), minbinwx = 4)
 hist("lr_wr", sub_mod(l_wr, r_wr, 65536*65536), fit("gauss"), minbinwx = 4)
 hist("rm_wr", sub_mod(r_wr, m_wr, 65536*65536), fit("gauss"), minbinwx = 4)
 
+# Same plots, without minimum bin width hint.
+
 hist("lm_wrl", sub_mod(l_wrl, m_wrl, 65536), fit("gauss"))
 hist("lr_wrl", sub_mod(l_wrl, r_wrl, 65536), fit("gauss"))
 hist("rm_wrl", sub_mod(r_wrl, m_wrl, 65536), fit("gauss"))
 
+#########################################################################
+# Page 2: additional histograms.
+
 page("extra", 3)
+
+# Triggers.
 
 hist("trig", TRIGGER, logy)
 
+# Raw sync check values.
+
 hist("m_sc", l_sc)
 hist("r_sc", r_sc)
+
+# VFTX times vs. channel within each system.
 
 hist2d("left VFTX, t : ch",   l_vt)
 hist2d("middle VFTX, t : ch", m_vt)
 hist2d("right VFTX, t : ch",  r_vt)
 
+# Multiplicity of VFTX hits.
+
 hist("middle VFTX, mult", length(m_vt))
+
+# Fine times (all ch) in middle VFTX.
+
 hist("middle VFTX, fine (all ch)", m_vtf)
+
+# Fine times in middle VFTX vs. ch.
 
 hist2d("middle VFTX, fine : ch", m_vtf:v, m_vtf:id)
 
+# Coarse times (all ch) in middle VFTX.
+
 hist("middle VFTX, coarse (all ch)", m_vtc)
 
+# Coarse times in middle VFTX vs. ch.
+
 hist2d("middle VFTX, coarse : cf", m_vtc:v, m_vtc:id)
+
+# Middle VFTX times, ch 1 and 3.
 
 hist("middle VFTX, ch1", m_vt1)
 hist("middle VFTX, ch3", m_vt3)
 
+#########################################################################
