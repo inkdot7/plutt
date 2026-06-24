@@ -1,0 +1,50 @@
+SEP mockup tests
+================
+
+For details: https://wiki.gsi.de/NustarDAQ/SEPMockupTests
+
+Run example with:
+
+ ./sep_mockup.bash
+
+Setup
+-----
+
+3 crates, syncronised with White Rabbit timestamps.  Each with:
+
+- MVLC    (Controller)
+- TRLO II (Rrigger logic)
+- VETAR   (White rabbit time)
+- VFTX    (high-precision TDCs)
+
+Middle crate makes trigger decision, left and right crate take triggers.
+
+Plots page 1 (corr)
+-------------------
+
+Monitoring plots.
+
+- SC : sync check values:
+  Varying master start length distributed to all systems.
+
+- VFTX : high-precision TDC, driven by 200 MHz clock from WR (VETARs)
+
+- WR : white rabbit timestamps.
+  lm = left-middle, lr = left-right, rm = right-middle
+
+  Third and fourth row are same.  Third row has minimum bin width hint.
+
+Plots page 2 (extra)
+--------------------
+
+Additional plots.
+
+- Triggers taken.
+
+- Sync check values for middle and right system.
+
+- VFTX times, full time vs. channel.
+
+- VFTX multiplicity, middle system.
+
+- Several more VFTX plots...
