@@ -133,7 +133,7 @@ BISON_PREFIX_YYCP:=--name-prefix=yycp
 BISON_PREFIX_YYTM:=--name-prefix=yytm
 endif
 
-BUILD_MODE=debug
+BUILD_MODE=release
 ifeq (debug,$(BUILD_MODE))
 CXXFLAGS+=-ggdb
 endif

@@ -13,18 +13,21 @@ m_wr = TIMESTAMP_MIDDLE_WR_T1 + 65536 * TIMESTAMP_MIDDLE_WR_T2
 l_wr = TIMESTAMP_LEFT_WR_T1   + 65536 * TIMESTAMP_LEFT_WR_T2
 r_wr = TIMESTAMP_RIGHT_WR_T1  + 65536 * TIMESTAMP_RIGHT_WR_T2
 
-m_vtf = signal(MIDDLE_VTFMI, MIDDLE_VTFME, MIDDLE_VTFv)
-m_vtc = signal(MIDDLE_VTCMI, MIDDLE_VTCME, MIDDLE_VTCv)
+# These explicit definitions work with .root, but not unpacker input.
+# m_vtf = signal(MIDDLE_VTFMI, MIDDLE_VTFME, MIDDLE_VTFv)
+# m_vtc = signal(MIDDLE_VTCMI, MIDDLE_VTCME, MIDDLE_VTCv)
+m_vtf = MIDDLE_VTF
+m_vtc = MIDDLE_VTC
 
 m_vt  = coarse_fine(m_vtc, m_vtf, vftx2)
 
-l_vtf = signal(LEFT_VTFMI, LEFT_VTFME, LEFT_VTFv)
-l_vtc = signal(LEFT_VTCMI, LEFT_VTCME, LEFT_VTCv)
+l_vtf = LEFT_VTF
+l_vtc = LEFT_VTC
 
 l_vt  = coarse_fine(l_vtc, l_vtf, vftx2)
 
-r_vtf = signal(RIGHT_VTFMI, RIGHT_VTFME, RIGHT_VTFv)
-r_vtc = signal(RIGHT_VTCMI, RIGHT_VTCME, RIGHT_VTCv)
+r_vtf = RIGHT_VTF
+r_vtc = RIGHT_VTC
 
 r_vt  = coarse_fine(r_vtc, r_vtf, vftx2)
 
